@@ -4,23 +4,22 @@ import commonjs from '@rollup/plugin-commonjs';
 import livereload from 'rollup-plugin-livereload';
 import { terser } from 'rollup-plugin-terser';
 import css from 'rollup-plugin-css-only';
-import { mainModule } from 'process';
 
 const inputs = [
 	{
 		input: 'src/main.js',
-		output: { file: 'main.js', name: 'main' },
-		css: 'public/build/main.css',
+		output: { file: 'public/build/main.js', name: 'main' },
+		css: 'main.css',
 	},
 	{
 		input: 'src/second.js',
-		output: { file: 'second.js', name: 'second' },
-		css: 'public/build/second.css',
+		output: { file: 'public/build/second.js', name: 'second' },
+		css: 'second.css',
 	}, //object for setting more specific values for input and output of roolup configuration
 	{
 		input: 'src/document.js',
-		output: { file: 'document.js', name: 'document' },
-		css: 'public/build/document.css',
+		output: { file: 'public/build/document.js', name: 'document' },
+		css: 'document.css',
 	}, //object for setting more specific values for input and output of roolup configuration
 ];
 const production = !process.env.ROLLUP_WATCH;
