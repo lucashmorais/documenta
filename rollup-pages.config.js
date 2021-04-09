@@ -4,17 +4,22 @@ import commonjs from '@rollup/plugin-commonjs';
 import livereload from 'rollup-plugin-livereload';
 import { terser } from 'rollup-plugin-terser';
 import css from 'rollup-plugin-css-only';
+import { mainModule } from 'process';
 
 const inputs = [
-	'main', //string defaults to input: src/[name].js and output: public/build/[name].js
+	{
+		input: 'src/main.js',
+		output: { file: 'main.js', name: 'main' },
+		css: 'public/build/main.css',
+	},
 	{
 		input: 'src/second.js',
-		output: { file: 'public/build/second.js', name: 'second' },
+		output: { file: 'second.js', name: 'second' },
 		css: 'public/build/second.css',
 	}, //object for setting more specific values for input and output of roolup configuration
 	{
 		input: 'src/document.js',
-		output: { file: 'public/build/document.js', name: 'document' },
+		output: { file: 'document.js', name: 'document' },
 		css: 'public/build/document.css',
 	}, //object for setting more specific values for input and output of roolup configuration
 ];
@@ -80,7 +85,7 @@ function createPageRollupExport(inp) {
 
 			// In dev mode, call `npm run start` once
 			// the bundle has been generated
-			!production && serve(),
+			// !production && serve(),
 
 			// Watch the `public` directory and refresh the
 			// browser on changes when not in production
