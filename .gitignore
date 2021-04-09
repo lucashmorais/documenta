@@ -1,0 +1,5 @@
+/node_modules/
+/public/build/
+/old_src/
+
+.DS_Store
