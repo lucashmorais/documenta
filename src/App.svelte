@@ -8,6 +8,7 @@
 
 	let headers=[{ key: 'assunto', value: 'Assunto' }, { key: 'centro', value: 'Centro' }, { key: 'tipo', value: 'Tipo' }, { key: 'pend', value: 'Pendência Atual' }]
 	let rows=[{ id: 'a', assunto: 'Assunto 0', centro: 'cs', tipo: 3000, pend: 'Revisão do defensor' }, { id: 'b', assunto: 'Assunto 1', centro: 'brs', tipo: 443, pend: 'Revisão inicial do Secretário' }, { id: 'c', assunto: 'Assunto 2', centro: 'cur', tipo: 80, pend: 'Geração de protocolo' }, { id: 'd', assunto: 'Assunto 6', centro: 'rib', tipo: 3000, pend: 'Round robin' }, { id: 'e', assunto: 'Assunto 4', centro: 'for', tipo: 443, pend: 'Discussão Geral' }, { id: 'f', assunto: 'Assunto 5', centro: 'bh', tipo: 80, pend: 'Encaminhamento final para o ctr' }]
+	let rowsShort=[{ id: 'f', assunto: 'Assunto 5', centro: 'bh', tipo: 80, pend: 'Encaminhamento final para o ctr' }]
 </script>
 
 <style>
@@ -36,6 +37,13 @@
 <h1>Documenta</h1>
 
 <div class="content1">
+	<h2>Processos esperando ação do usuário</h2>
+		<div class="content2">
+			<DataTable
+				headers={headers}
+				rows={rowsShort}
+			/>
+		</div>
 	<h2>Processos em andamento</h2>
 		<div class="content2">
 			<DataTable

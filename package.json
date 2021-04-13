@@ -19,6 +19,7 @@
     "svelte": "^3.37.0"
   },
   "dependencies": {
+    "@carbon/icons": "^10.29.0",
     "@fortawesome/fontawesome-free": "^5.15.3",
     "autoprefixer": "^10.2.5",
     "carbon-icons-svelte": "^10.28.0",
