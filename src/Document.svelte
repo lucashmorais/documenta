@@ -1,5 +1,6 @@
 <script>
 	import InfoLine from './InfoLine.svelte'
+	import CommentArea from './CommentArea.svelte'
   import {
     Header,
     HeaderNav,
@@ -183,6 +184,9 @@
 			</Tile>
 			<Tile>Niterói</Tile>
 		</div>
+
+		<h2>Intervenções</h2>
+		<CommentArea/>
 
 		<h2>Nova intervenção</h2>
 		<TextArea
