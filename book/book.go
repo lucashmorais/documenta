@@ -3,7 +3,7 @@ package book
 import (
 	"github.com/gofiber/fiber/v2"
 	"github.com/jinzhu/gorm"
-	"github.com/lucashmorais/go_fiber/database"
+	"github.com/lucashmorais/documenta/database"
 )
 
 type Book struct {

@@ -1,4 +1,4 @@
-module github.com/lucashmorais/go_fiber
+module github.com/lucashmorais/documenta
 
 go 1.14
 

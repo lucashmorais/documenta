@@ -2,53 +2,64 @@ package main
 
 import (
 	"fmt"
+	"time"
+
+	"github.com/lucashmorais/documenta/controllers"
+	"github.com/lucashmorais/documenta/database"
 
 	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/fiber/v2/middleware/cors"
+	"github.com/gofiber/fiber/v2/middleware/logger"
 	"github.com/jinzhu/gorm"
-	"github.com/lucashmorais/go_fiber/book"
-	"github.com/lucashmorais/go_fiber/database"
-	"github.com/lucashmorais/go_fiber/products"
 )
 
 func helloWorld(c *fiber.Ctx) error {
-	return c.SendString("Hello, World!")
+	// return c.SendString("Hello, World!")
+	return c.SendString(fmt.Sprintf("%d", time.Now().Unix()))
 }
 
 func initDatabase() {
 	var err error
-	database.DBConn, err = gorm.Open("sqlite3", "books.db")
+	database.DBConn, err = gorm.Open("sqlite3", "info.db")
 	if err != nil {
 		panic("Failed to connect to the Database")
 	}
 
 	fmt.Println("Database connection successfully established")
 
-	database.DBConn.AutoMigrate(&book.Book{})
-	database.DBConn.AutoMigrate(&products.Product{})
+	database.DBConn.AutoMigrate(&controllers.Process{})
+	database.DBConn.AutoMigrate(&controllers.Comment{})
+	// database.DBConn.AutoMigrate(&controllers.User{})
+	database.DBConn.AutoMigrate(&controllers.UserFile{})
 	fmt.Println("DB auto-migration was set up")
 }
 
 func setupRouter(app *fiber.App) {
-	app.Get("/api/v1/book", book.GetBooks)
-	app.Get("/api/v1/book/:id", book.GetBook)
-	app.Post("/api/v1/book/:id", book.NewBook)
-	app.Delete("/api/v1/book/:id", book.DeleteBook)
-	app.Get("/api/v1/products", products.GetProducts)
-	app.Get("/api/v1/products/:id", products.GetProduct)
-	app.Post("/api/v1/products/:id", products.NewProduct)
-	app.Delete("/api/v1/products/:id", products.DeleteProduct)
-	app.Put("/api/v1/products/:id/quantity/increase", products.IncreaseQuantity)
-	app.Put("/api/v1/products/:id/quantity/decrease", products.DecreaseQuantity)
-	// app.Get("/", helloWorld)
+	app.Get("/api/v1/", helloWorld)
+	app.Post("/api/v1/process", controllers.NewProcess)
+
+	app.Post("/api/v1/comment", controllers.NewComment)
+	app.Put("/api/v1/comment/:id", controllers.UpdateComment)
+	app.Delete("/api/v1/comment/:id", controllers.DeleteComment)
+	app.Get("/api/v1/comment/:id", controllers.GetComment)
+	app.Get("/api/v1/comments", controllers.GetComments)
+	app.Get("/api/v1/comments/process/:id", controllers.GetCommentsByProcessID)
+
+	app.Post("/api/v1/files", controllers.NewFormFiles)
+	app.Get("/api/v1/files", controllers.GetFilesWithoutBlob)
 }
 
 func main() {
 	app := fiber.New(fiber.Config{
 		Prefork:       true,
 		CaseSensitive: true,
+		BodyLimit:     1024 * 1024 * 1024,
 		// StrictRouting: true,
 		// ServerHeader:  "Fiber",
 	})
+
+	app.Use(logger.New())
+	app.Use(cors.New())
 
 	initDatabase()
 
