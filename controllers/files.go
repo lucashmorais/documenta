@@ -60,7 +60,7 @@ func NewFormFiles(c *fiber.Ctx) error {
 		uuid := uuid.New().String()
 		fmt.Println("[NewFormFiles]: ", file.Filename, file.Size, file.Header["Content-Type"][0])
 
-		err := c.SaveFile(file, fmt.Sprintf("./user_data/%s", file.Filename))
+		err := c.SaveFile(file, fmt.Sprintf("./user_data/.%s", uuid))
 
 		if err != nil {
 			return err
