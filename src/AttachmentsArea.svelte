@@ -7,39 +7,26 @@
 	let files = [{name: "Nota relevante"}, {name: "Estudo similar"}, {name: "Consulta relativa"}]
 	let fileUploader
 
-	function uploadFile() {
+	async function coreSubmit(file) {
+		// https://javascript.info/formdata
+		let formData = new FormData();
+		formData.append("documents", file, file.name);
+
+		const response = await fetch('http://localhost:3123/api/v1/files', {
+			method: 'POST',
+			body: formData
+		});
+
+		let result = await response.json();
+		return result.status != "success"
+	}
+
+	async function uploadFile() {
 		console.log(fileUploader)
 		console.log(fileUploader.files)
-		// fileUploader.files[0].arrayBuffer().then((buffer) => console.log(JSON.stringify(buffer)))
-
-		let file = fileUploader.files[0]
-
-		var success = async function ( content ) {
-			try {     
-					console.log("Starting to send data to server")
-					const response = await fetch('http://localhost:3123/api/v1/files', {
-							method: 'post',
-
-							body: JSON.stringify({
-								fileContents: content,
-								name: file.name
-							}),
-
-							headers: {
-								'Content-type': 'application/json'
-							}
-					});
-					console.log(response)
-			} catch(err) {
-				console.error(`Error: ${err}`);
-				return;
-			}
+		for (const file of fileUploader.files) {
+			coreSubmit(file)
 		}
-
-		var fileReader = new FileReader( );
-		fileReader.onload = function ( evt ) { success( evt.target.result ) };
-		// fileReader.readAsBinaryString( file );
-		fileReader.readAsBinaryString( file );
 	}
 </script>
 
@@ -67,5 +54,5 @@
 		</div>
 	{/each}
 	<!-- <Button kind="secondary">Novo anexo</Button> -->
-	<FileUploaderButton disableLabelChanges={true} labelText="Adicionar arquivo" bind:ref={fileUploader} on:change={uploadFile}>Novo anexo</FileUploaderButton>
+	<FileUploaderButton multiple disableLabelChanges={true} labelText="Adicionar arquivo" bind:ref={fileUploader} on:change={uploadFile}>Novo anexo</FileUploaderButton>
 </div>

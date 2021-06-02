@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/gofiber/fiber/v2"
+	"github.com/google/uuid"
 	"github.com/jinzhu/gorm"
 	"github.com/lucashmorais/documenta/database"
 )
@@ -14,8 +15,9 @@ type FileBlob struct {
 
 type UserFile struct {
 	gorm.Model
-	Name         string `json: name`
-	FileContents string `json: fileContents`
+	Name        string `json: name`
+	UUID        string `json: uuid`
+	ContentType string `json: content-type`
 	// FileBlob     FileBlob
 	// FileBlobID   int
 	Description string
@@ -44,31 +46,32 @@ func NewFile(c *fiber.Ctx) error {
 }
 
 func NewFormFiles(c *fiber.Ctx) error {
-	// Parse the multipart form:
+	db := database.DBConn
+	var dbFile UserFile
+
 	form, err := c.MultipartForm()
 	if err != nil {
 		return err
 	}
-	// => *multipart.Form
 
-	// Get all files from "documents" key:
 	files := form.File["documents"]
-	// => []*multipart.FileHeader
 
-	// Loop through files:
 	for _, file := range files {
-		fmt.Println(file.Filename, file.Size, file.Header["Content-Type"][0])
-		// => "tutorial.pdf" 360641 "application/pdf"
+		uuid := uuid.New().String()
+		fmt.Println("[NewFormFiles]: ", file.Filename, file.Size, file.Header["Content-Type"][0])
 
-		// Save the files to disk:
-		err := c.SaveFile(file, fmt.Sprintf("./%s", file.Filename))
+		err := c.SaveFile(file, fmt.Sprintf("./user_data/%s", file.Filename))
 
-		// Check for errors
 		if err != nil {
 			return err
 		}
+
+		dbFile.Name = file.Filename
+		dbFile.UUID = uuid
+		dbFile.ContentType = file.Header["Content-Type"][0]
+		db.Create(&dbFile)
 	}
-	return nil
+	return c.JSON(map[string]string{"status": "success"})
 }
 
 func GetFilesWithoutBlob(c *fiber.Ctx) error {
