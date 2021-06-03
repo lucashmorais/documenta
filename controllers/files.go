@@ -82,3 +82,12 @@ func GetFilesWithoutBlob(c *fiber.Ctx) error {
 
 	return c.JSON(files)
 }
+
+func GetFile(c *fiber.Ctx) error {
+	db := database.DBConn
+	var file UserFile
+	id := c.Params("id")
+	db.Find(&file, id)
+
+	return c.Download("./user_data/."+file.UUID, file.Name)
+}
