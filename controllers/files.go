@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"fmt"
+	"os"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/google/uuid"
@@ -89,5 +90,25 @@ func GetFile(c *fiber.Ctx) error {
 	id := c.Params("id")
 	db.Find(&file, id)
 
-	return c.Download("./user_data/."+file.UUID, file.Name)
+	// return c.Download("./user_data/."+file.UUID, file.Name)
+	return c.SendFile("./user_data/." + file.UUID)
+}
+
+func DeleteFile(c *fiber.Ctx) error {
+	id := c.Params("id")
+	db := database.DBConn
+	var file UserFile
+	db.First(&file, id)
+
+	uuid := file.UUID
+	name := file.Name
+
+	if uuid == "" {
+		return c.Status(500).SendString("File was not found")
+	}
+
+	os.Remove("./user_data/." + uuid)
+	db.Delete(&file)
+
+	return c.SendString("The file " + name + " was successfully deleted")
 }

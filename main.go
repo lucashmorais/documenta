@@ -48,6 +48,7 @@ func setupRouter(app *fiber.App) {
 	app.Post("/api/v1/files", controllers.NewFormFiles)
 	app.Get("/api/v1/files", controllers.GetFilesWithoutBlob)
 	app.Get("/api/v1/file/:id", controllers.GetFile)
+	app.Delete("/api/v1/file/:id", controllers.DeleteFile)
 }
 
 func main() {
