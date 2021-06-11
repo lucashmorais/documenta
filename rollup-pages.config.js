@@ -21,10 +21,15 @@ const inputs = [
 		output: { file: 'public/build/document.js', name: 'document' },
 		css: 'document.css',
 	}, //object for setting more specific values for input and output of roolup configuration
+	// {
+	// 	input: 'src/visTest.js',
+	// 	output: { file: 'public/build/visTest.js', name: 'visTest' },
+	// 	css: 'visTest.css',
+	// }, //object for setting more specific values for input and output of roolup configuration
 	{
-		input: 'src/visTest.js',
-		output: { file: 'public/build/visTest.js', name: 'visTest' },
-		css: 'visTest.css',
+		input: 'src/PDFVisualizer.js',
+		output: { file: 'public/build/PDFVisualizer.js', name: 'PDFVisualizer' },
+		css: 'PDFVisualizer.css',
 	}, //object for setting more specific values for input and output of roolup configuration
 ];
 const production = !process.env.ROLLUP_WATCH;

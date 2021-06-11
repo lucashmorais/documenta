@@ -48,7 +48,7 @@
 					then(function (attachments) {
 						files = attachments
 						for (const a of attachments) {
-							// console.log(a)
+							console.log(a)
 							// console.log(a.Name) 
 							// console.log(a.UUID) 
 							// console.log(a.ProcessID) 
@@ -62,15 +62,32 @@
 		})
 	}
 	
-	function popModal(idx) {
+	function popModal(idx, type = "image/jpeg") {
 		console.log("derp1")
-		return function() {
+
+		let imageFunction = function() {
 			console.log("derp2")
 			setTimeout(() => {
 				console.log("derp3")
 				console.log(files[idx].src)
 				open(files, idx);
 			}, 0);
+		}
+
+		let pdfFunction = function() {
+			// window.open(files[idx].src, '_blank').focus();
+			window.open('http://localhost:3123/PDFVisualizer.html?id=' + String(files[idx].ID), '_blank').focus();
+		}
+
+		switch(type) {
+			case "image/jpeg":
+				return imageFunction;
+			case "image/jpg":
+				return imageFunction;
+			case "application/pdf":
+				return pdfFunction;
+			default:
+				return downloadFunction;
 		}
 	}
 
@@ -122,7 +139,8 @@
 		{#each files as file, i}
 			<div class="fileTile">
 				<!-- <a href={"http://localhost:3123/api/v1/file/" + file.ID} style="text-decoration: none !important;"> -->
-					<ClickableTile on:click={popModal(i)}>
+
+					<ClickableTile on:click={popModal(i, file.ContentType)}>
 						<div style="display: flex; align-items: center; height: 2.5em;">
 							<DocumentDownload24 />
 							<p class="fileName">{file.Name}</p>
