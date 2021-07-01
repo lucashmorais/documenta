@@ -106,6 +106,9 @@ function createPageRollupExport(inp) {
 		],
 		watch: {
 			clearScreen: false,
+			chokidar: {
+				usePolling: true,
+			},
 		},
 	};
 

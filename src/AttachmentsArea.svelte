@@ -9,6 +9,7 @@
 	let fileUploader
 	let attachmentsPromise;
 	let files;
+	let images;
 
 	async function coreSubmit(file) {
 		// https://javascript.info/formdata
@@ -47,13 +48,21 @@
 				then((response)=>response.json().
 					then(function (attachments) {
 						files = attachments
-						for (const a of attachments) {
+						images = []
+						let imgCounter = 0
+						for (let i = 0; i < attachments.length; i++) {
+							let a = attachments[i]
 							console.log(a)
 							// console.log(a.Name) 
 							// console.log(a.UUID) 
 							// console.log(a.ProcessID) 
 							a.src = "http://localhost:3123/api/v1/file/" + a.ID;
 							console.log(a.src);
+							if (a.ContentType.startsWith("image")) {
+								a.imgID = imgCounter
+								imgCounter++
+								images.push(a)
+							}
 						}
 						resolve(attachments)
 					}
@@ -73,17 +82,29 @@
 				open(files, idx);
 			}, 0);
 		}
+		
+		function getOnlyImages(fileArray) {
+			return fileArray.filter(f => f.ContentType.startsWith('image'))
+		}
+
+		imageFunction = function() {
+			console.log("derp2")
+			setTimeout(() => {
+				console.log("derp3")
+				console.log(files[idx].src)
+				open(images, files[idx].imgID);
+			}, 0);
+		}
 
 		let pdfFunction = function() {
 			// window.open(files[idx].src, '_blank').focus();
 			window.open('http://localhost:3123/PDFVisualizer.html?id=' + String(files[idx].ID), '_blank').focus();
 		}
+		
+		if (type.startsWith("image"))
+			return imageFunction;
 
 		switch(type) {
-			case "image/jpeg":
-				return imageFunction;
-			case "image/jpg":
-				return imageFunction;
 			case "application/pdf":
 				return pdfFunction;
 			default:

@@ -1,6 +1,7 @@
 <script>
 	import { Router, Link, Route } from "svelte-navigator";
 	import Home from "./Home.svelte";
+	import Login from "./Login.svelte";
 	import Document from "./Document.svelte";
 	// import About from "./routes/About.svelte";
 	// import Blog from "./routes/Blog.svelte";
@@ -16,6 +17,9 @@
 	<!-- </nav> -->
 	<!-- <div> -->
 		<Route path="/">
+			<Login />
+		</Route>
+		<Route path="/home/">
 			<Home />
 		</Route>
 		<Route path="/document/">

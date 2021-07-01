@@ -10,8 +10,25 @@ import (
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/cors"
 	"github.com/gofiber/fiber/v2/middleware/logger"
+	jwtware "github.com/gofiber/jwt/v2"
 	"github.com/jinzhu/gorm"
 )
+
+const jwtSecret = "asecret"
+
+func errorHandler(ctx *fiber.Ctx, err error) error {
+	println(ctx.Cookies("username"))
+	return ctx.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
+		"error": "JWT Unauthorized",
+	})
+}
+
+func authRequired() func(ctx *fiber.Ctx) error {
+	return jwtware.New(jwtware.Config{
+		ErrorHandler: errorHandler,
+		SigningKey:   []byte(jwtSecret),
+	})
+}
 
 func helloWorld(c *fiber.Ctx) error {
 	// return c.SendString("Hello, World!")
@@ -36,19 +53,32 @@ func initDatabase() {
 
 func setupRouter(app *fiber.App) {
 	app.Get("/api/v1/", helloWorld)
-	app.Post("/api/v1/process", controllers.NewProcess)
+	app.Get("/api/v1/login", controllers.Login)
 
-	app.Post("/api/v1/comment", controllers.NewComment)
-	app.Put("/api/v1/comment/:id", controllers.UpdateComment)
-	app.Delete("/api/v1/comment/:id", controllers.DeleteComment)
-	app.Get("/api/v1/comment/:id", controllers.GetComment)
-	app.Get("/api/v1/comments", controllers.GetComments)
-	app.Get("/api/v1/comments/process/:id", controllers.GetCommentsByProcessID)
+	protected := app.Group("/api/v1", authRequired())
+	protected.Post("process", controllers.NewProcess)
 
-	app.Post("/api/v1/files", controllers.NewFormFiles)
-	app.Get("/api/v1/files", controllers.GetFilesWithoutBlob)
-	app.Get("/api/v1/file/:id", controllers.GetFile)
-	app.Delete("/api/v1/file/:id", controllers.DeleteFile)
+	protected.Post("comment", controllers.NewComment)
+	protected.Put("comment/:id", controllers.UpdateComment)
+	protected.Delete("comment/:id", controllers.DeleteComment)
+	protected.Get("comment/:id", controllers.GetComment)
+	protected.Get("comments", controllers.GetComments)
+	protected.Get("comments/process/:id", controllers.GetCommentsByProcessID)
+
+	protected.Post("files", controllers.NewFormFiles)
+	protected.Get("files", controllers.GetFilesWithoutBlob)
+	protected.Get("file/:id", controllers.GetFile)
+	protected.Delete("file/:id", controllers.DeleteFile)
+}
+
+func addAuthRequestHeader(ctx *fiber.Ctx) error {
+	token := "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOiIyMDIxLTA2LTIzVDE4OjE2OjQ5LjcxMDU1Mzg3Ny0wMzowMCIsInN1YiI6IjEifQ.T7CADK7tFePIi_d8lcw4PS5RMLFIBu51j_rmdoHaDd8"
+	// token := "derp"
+	// ctx.Context().Request.Header.Add("Authorization", "Bearer "+token)
+	ctx.Context().Request.Header.Add("Authorization", "Bearer "+token)
+	// println(string(ctx.Context().Request.Header.Header()))
+	ctx.Next()
+	return nil
 }
 
 func main() {
@@ -62,6 +92,10 @@ func main() {
 
 	app.Use(logger.New())
 	app.Use(cors.New())
+	app.Use(addAuthRequestHeader)
+	// app.Use("document.html", authRequired())
+	// app.Use("index.html", authRequired())
+	app.Use("/", authRequired())
 
 	initDatabase()
 

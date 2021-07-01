@@ -5,10 +5,10 @@ import livereload from 'rollup-plugin-livereload';
 import { terser } from 'rollup-plugin-terser';
 import css from 'rollup-plugin-css-only';
 
-import cssbundle from 'rollup-plugin-css-bundle';
-import postcss from 'postcss';
-import autoprefixer from 'autoprefixer';
-import scss from 'rollup-plugin-scss';
+// import cssbundle from 'rollup-plugin-css-bundle';
+// import postcss from 'postcss';
+// import autoprefixer from 'autoprefixer';
+// import scss from 'rollup-plugin-scss';
 
 const production = !process.env.ROLLUP_WATCH;
 
@@ -86,5 +86,8 @@ export default {
 	],
 	watch: {
 		clearScreen: false,
+		chokidar: {
+			usePolling: true,
+		},
 	},
 };
