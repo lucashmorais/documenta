@@ -3,6 +3,7 @@
 	  FluidForm,
 	  TextInput,
 	  PasswordInput,
+	  Button,
 	} from "carbon-components-svelte";
 </script>
       
@@ -34,6 +35,10 @@ h1:focus-visible {
 .form {
 	width: 90%;	
 }
+
+.button-holder {
+	margin-top: 1em;
+}
 </style>
 
 <div class="centered-content">
@@ -51,5 +56,9 @@ h1:focus-visible {
 			  hidePasswordLabel="Ocultar senha"
 			/>
 		</FluidForm>
+
+		<div class="button-holder">
+			<Button>Entrar</Button>
+		</div>
 	</div>
 </div>
