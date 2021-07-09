@@ -68,7 +68,8 @@ func initDatabase() {
 
 func setupRouter(app *fiber.App) {
 	app.Get("/api/v1/", helloWorld)
-	app.Get("/api/v1/login", controllers.Login)
+	// app.Get("/api/v1/login", controllers.Login)
+	app.Post("/api/v1/login", controllers.Login)
 
 	protected := app.Group("/api/v1", authRequired())
 	protected.Post("process", controllers.NewProcess)

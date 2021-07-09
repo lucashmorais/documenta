@@ -21,9 +21,9 @@ func Login(ctx *fiber.Ctx) error {
 	body.Email = "bob@gmail.com"
 	body.Password = "password123"
 
-	// err := ctx.BodyParser(&body)
+	err := ctx.BodyParser(&body)
 
-	var err error = nil
+	// var err error = nil
 	if err != nil {
 		ctx.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"error": "cannot parse json",
