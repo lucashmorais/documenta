@@ -12,6 +12,11 @@ const inputs = [
 		css: 'main.css',
 	},
 	{
+		input: 'src/home.js',
+		output: { file: 'public/build/home.js', name: 'main' },
+		css: 'home.css',
+	},
+	{
 		input: 'src/second.js',
 		output: { file: 'public/build/second.js', name: 'second' },
 		css: 'second.css',

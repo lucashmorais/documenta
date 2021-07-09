@@ -58,7 +58,7 @@ h1:focus-visible {
 		</FluidForm>
 
 		<div class="button-holder">
-			<Button>Entrar</Button>
+			<a href="/home.html"><Button>Entrar</Button></a>
 		</div>
 	</div>
 </div>

@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/golang-jwt/jwt"
 	"github.com/lucashmorais/documenta/controllers"
 	"github.com/lucashmorais/documenta/database"
 
@@ -15,6 +16,8 @@ import (
 )
 
 const jwtSecret = "asecret"
+
+// const jwtSecret = "secret"
 
 func errorHandler(ctx *fiber.Ctx, err error) error {
 	println(ctx.Cookies("username"))
@@ -28,6 +31,18 @@ func authRequired() func(ctx *fiber.Ctx) error {
 		ErrorHandler: errorHandler,
 		SigningKey:   []byte(jwtSecret),
 	})
+}
+
+func logJWTInformation(ctx *fiber.Ctx) error {
+	user_token := ctx.Locals("user").(*jwt.Token)
+	// user_token := ctx.Locals("user")
+	// fmt.Printf("%T\n", user_token)
+	// println(user_token)
+	token_claims := user_token.Claims.(jwt.MapClaims)
+	id_from_claims := token_claims["sub"].(string)
+	expiration := token_claims["exp"].(string)
+	fmt.Printf("Interaction from JWT-authorized user with id %s is allowed up to %s\n", id_from_claims, expiration)
+	return ctx.Next()
 }
 
 func helloWorld(c *fiber.Ctx) error {
@@ -73,6 +88,7 @@ func setupRouter(app *fiber.App) {
 
 func addAuthRequestHeader(ctx *fiber.Ctx) error {
 	token := "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOiIyMDIxLTA2LTIzVDE4OjE2OjQ5LjcxMDU1Mzg3Ny0wMzowMCIsInN1YiI6IjEifQ.T7CADK7tFePIi_d8lcw4PS5RMLFIBu51j_rmdoHaDd8"
+	// token := "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE0NjE5NTcxMzZ9.RB3arc4-OyzASAaUhC2W3ReWaXAt_z2Fd3BN4aWTgEY"
 	// token := "derp"
 	// ctx.Context().Request.Header.Add("Authorization", "Bearer "+token)
 	ctx.Context().Request.Header.Add("Authorization", "Bearer "+token)
@@ -96,6 +112,7 @@ func main() {
 	// app.Use("document.html", authRequired())
 	// app.Use("index.html", authRequired())
 	app.Use("/", authRequired())
+	app.Use("/", logJWTInformation)
 
 	initDatabase()
 
