@@ -5,6 +5,51 @@
 	  PasswordInput,
 	  Button,
 	} from "carbon-components-svelte";
+	
+	let passwordValue = ""
+	let userValue = ""
+	
+	async function submitForm() {
+		console.log("User: " + userValue)
+		console.log("Password: " + passwordValue)
+
+		try {     
+			const response = await fetch('http://localhost:3123/api/v1/login', {
+					method: 'post',
+
+					body: JSON.stringify({
+						Email: userValue,
+						Password: passwordValue
+					}),
+
+					headers: {
+						'Content-type': 'application/json; charset=UTF-8'
+					}
+				}
+			);
+			
+			if (response.status == 200) {
+				console.log('[Login]: Successfully logged in with valid credentials.');
+			} else {
+				console.log('[Login]: Got valid response from server but login has failed.')
+			}
+
+			response.text().then((text) => {
+				console.log(text);
+			});
+
+		} catch(err) {
+			console.error(`Error: ${err}`);
+			return;
+		}
+	}
+	
+	document.addEventListener("keyup", function(event) {
+		if (event.key === 'Enter') {
+			console.log('Enter is pressed!');
+			submitForm();
+		}
+	});
 </script>
       
 <style>
@@ -46,9 +91,10 @@ h1:focus-visible {
 
 	<div class="form">
 		<FluidForm>
-			<TextInput labelText="Usuário" placeholder="Insira o usuário" required />
+			<TextInput bind:value={userValue} labelText="Usuário" placeholder="Insira o usuário" required />
 			<PasswordInput
 			  required
+			  bind:value={passwordValue}
 			  type="password"
 			  labelText="Senha"
 			  placeholder="Insira a senha"
@@ -58,7 +104,8 @@ h1:focus-visible {
 		</FluidForm>
 
 		<div class="button-holder">
-			<a href="/home.html"><Button>Entrar</Button></a>
+			<!-- <a href="/home.html"><Button>Entrar</Button></a> -->
+			<Button on:click={submitForm}>Entrar</Button>
 		</div>
 	</div>
 </div>

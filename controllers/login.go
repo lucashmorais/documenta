@@ -15,11 +15,9 @@ func Login(ctx *fiber.Ctx) error {
 		Password string `json:"password"`
 	}
 
-	ctx.JSON(fiber.Map{"derp": "derp"})
-
 	var body request
-	body.Email = "bob@gmail.com"
-	body.Password = "password123"
+	// body.Email = "bob@gmail.com"
+	// body.Password = "password123"
 
 	err := ctx.BodyParser(&body)
 
