@@ -5,6 +5,11 @@
 	  PasswordInput,
 	  Button,
 	} from "carbon-components-svelte";
+	import Cookie from "js-cookie";
+	
+	if (Cookie.get("documentaLoginToken")) {
+		window.location.href = "/home.html";
+	}
 	
 	let passwordValue = ""
 	let userValue = ""
@@ -30,13 +35,14 @@
 			
 			if (response.status == 200) {
 				console.log('[Login]: Successfully logged in with valid credentials.');
+
+				response.text().then((text) => {
+					console.log(text);
+					window.location.href = "/home.html"
+				});
 			} else {
 				console.log('[Login]: Got valid response from server but login has failed.')
 			}
-
-			response.text().then((text) => {
-				console.log(text);
-			});
 
 		} catch(err) {
 			console.error(`Error: ${err}`);

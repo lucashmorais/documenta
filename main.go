@@ -20,16 +20,18 @@ const jwtSecret = "asecret"
 // const jwtSecret = "secret"
 
 func errorHandler(ctx *fiber.Ctx, err error) error {
-	println(ctx.Cookies("username"))
-	return ctx.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
-		"error": "JWT Unauthorized",
-	})
+	return ctx.Redirect("/")
+}
+
+func authorizationFilter(ctx *fiber.Ctx) bool {
+	return ctx.Path() == "/"
 }
 
 func authRequired() func(ctx *fiber.Ctx) error {
 	return jwtware.New(jwtware.Config{
 		ErrorHandler: errorHandler,
 		SigningKey:   []byte(jwtSecret),
+		Filter:       authorizationFilter,
 	})
 }
 
@@ -88,9 +90,8 @@ func setupRouter(app *fiber.App) {
 }
 
 func addAuthRequestHeader(ctx *fiber.Ctx) error {
-	token := "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOiIyMDIxLTA2LTIzVDE4OjE2OjQ5LjcxMDU1Mzg3Ny0wMzowMCIsInN1YiI6IjEifQ.T7CADK7tFePIi_d8lcw4PS5RMLFIBu51j_rmdoHaDd8"
-	// token := "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE0NjE5NTcxMzZ9.RB3arc4-OyzASAaUhC2W3ReWaXAt_z2Fd3BN4aWTgEY"
-	// token := "derp"
+	// token := "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOiIyMDIxLTA2LTIzVDE4OjE2OjQ5LjcxMDU1Mzg3Ny0wMzowMCIsInN1YiI6IjEifQ.T7CADK7tFePIi_d8lcw4PS5RMLFIBu51j_rmdoHaDd8"
+	token := ctx.Cookies("documentaLoginToken")
 	// ctx.Context().Request.Header.Add("Authorization", "Bearer "+token)
 	ctx.Context().Request.Header.Add("Authorization", "Bearer "+token)
 	// println(string(ctx.Context().Request.Header.Header()))
@@ -112,8 +113,9 @@ func main() {
 	app.Use(addAuthRequestHeader)
 	// app.Use("document.html", authRequired())
 	// app.Use("index.html", authRequired())
-	app.Use("/", authRequired())
-	app.Use("/", logJWTInformation)
+	app.Use("/document.html", authRequired())
+	app.Use("/home.html", authRequired())
+	// app.Use("/", logJWTInformation)
 
 	initDatabase()
 

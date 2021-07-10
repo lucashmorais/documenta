@@ -38,18 +38,25 @@ func Login(ctx *fiber.Ctx) error {
 
 	token := jwt.New(jwt.SigningMethodHS256)
 	claims := token.Claims.(jwt.MapClaims)
+	expiration := time.Now().Add(time.Hour * 24 * 7) // a week
 
 	// Subject stands for "subject", and is basically a user identifier.
 	// If emails are unique across the whole system, they could be used
 	// as valid subject claims.
 	claims["sub"] = "1"
-	claims["exp"] = time.Now().Add(time.Hour * 24 * 7) // a week
+	claims["exp"] = expiration
 
 	s, err := token.SignedString([]byte(jwtSecret))
 	if err != nil {
 		ctx.SendStatus(fiber.StatusInternalServerError)
 		return err
 	}
+
+	ctx.Cookie(&fiber.Cookie{
+		Name:    "documentaLoginToken",
+		Value:   s,
+		Expires: expiration,
+	})
 
 	ctx.Status(fiber.StatusOK).JSON(fiber.Map{
 		"token": s,
