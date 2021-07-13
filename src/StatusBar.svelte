@@ -1,45 +1,86 @@
 <script>
-	let event = new Date()
-	const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
-	$: dateString = event.toLocaleDateString(undefined, options)
+	import Login20 from "carbon-icons-svelte/lib/Login20";
+	import UserMultiple20 from "carbon-icons-svelte/lib/UserMultiple20";
+	import Cookie from "js-cookie";
+	import {
+	Header,
+	HeaderNav,
+	HeaderNavItem,
+	HeaderNavMenu,
+	HeaderUtilities,
+	HeaderGlobalAction,
+	SideNav,
+	SideNavItems,
+	SideNavMenu,
+	SideNavMenuItem,
+	SideNavLink,
+	SideNavDivider,
+	SkipToContent,
+	Content,
+	Grid,
+	Row,
+	Column,
+	Tile,
+	TextArea,
+	ButtonSet,
+	Button,
+	Accordion,
+	AccordionItem,
+	Dropdown
+	} from "carbon-components-svelte";
 
-	let userName = "Aristotle da Silva"
+	let isSideNavOpen = false;
 
-	import "@fortawesome/fontawesome-free/js/all.js";
-</script>
+	var coreRefreshComments;
+
+	function refreshComments() {
+		coreRefreshComments();
+	}
 	
-
-<style>
-	.line {
-		margin: 0 1em;
-		display: flex;
-		justify-content: space-between;
-		font-size: 2.4vh;
-		/* height: 5em; */
+	function logout() {
+		Cookie.remove("documentaLoginToken")
+		window.location.href = "/";
 	}
+</script>
 
-	.container {
-		padding: 1em 0;
-		background-color: black;
-		color: white;
-	}
+<Header company="CR" platformName="Documenta" bind:isSideNavOpen expandedByDefault=false persistentHamburgerMenu=true>
+  <div slot="skip-to-content">
+    <SkipToContent />
+  </div>
+  <HeaderUtilities>
+	<!-- <HeaderGlobalAction aria-label="Settings" icon={Login20} /> -->
+	<HeaderGlobalAction aria-label="Change user" icon={UserMultiple20} on:click={logout}/>
+	<!-- <HeaderGlobalAction aria-label="Settings" /> -->
+</HeaderUtilities>
 
-	.userInfoAndButton {
-		display: flex
-	}
+  <!--
+  <HeaderNav>
+    <HeaderNavItem href="/" text="Link 1" />
+    <HeaderNavItem href="/" text="Link 2" />
+    <HeaderNavItem href="/" text="Link 3" />
+    <HeaderNavMenu text="Menu">
+      <HeaderNavItem href="/" text="Link 1" />
+      <HeaderNavItem href="/" text="Link 2" />
+      <HeaderNavItem href="/" text="Link 3" />
+    </HeaderNavMenu>
+    <HeaderNavItem href="/" text="Link 4" />
+  </HeaderNav>
+-->
+</Header>
 
-	.userInfoAndButton * {
-		margin-left: 1em;
-	}
-</style>
-
-<div class="container">
-	<div class="line">
-		
-		<i class="fas fa-bars"></i> <!-- uses solid style -->
-		<div class="userInfoAndButton">
-			<div>{userName}</div>
-			<i class="fas fa-sign-in-alt"></i> <!-- uses solid style -->
-		</div>
-	</div>
-</div>
+<SideNav bind:isOpen={isSideNavOpen}>
+  <SideNavItems>
+    <SideNavLink text="Link 1" />
+    <SideNavLink text="Link 2" />
+    <SideNavLink text="Link 3" />
+	<!--
+    <SideNavMenu text="Menu">
+      <SideNavMenuItem href="/" text="Link 1" />
+      <SideNavMenuItem href="/" text="Link 2" />
+      <SideNavMenuItem href="/" text="Link 3" />
+    </SideNavMenu>
+    <SideNavDivider />
+	-->
+    <SideNavLink text="Link 4" />
+  </SideNavItems>
+</SideNav>

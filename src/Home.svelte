@@ -14,7 +14,7 @@
 <style>
 	h1 {
 		text-align: center;
-		margin: 1em 0;
+		margin: 2em 0 1em 0;
 	}
 
 	h1:focus-visible {

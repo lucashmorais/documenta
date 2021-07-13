@@ -2,6 +2,7 @@
 	import InfoLine from './InfoLine.svelte'
 	import CommentArea from './CommentArea.svelte'
 	import Minutes from './Minutes.svelte'
+	import StatusBar from './StatusBar.svelte'
 	import AttachmentsArea from './AttachmentsArea.svelte'
 	import InterventionForm from './InterventionForm.svelte'
 	import Login20 from "carbon-icons-svelte/lib/Login20";
@@ -77,47 +78,7 @@
 	}
 </style>
 
-<Header company="CR" platformName="Documenta" bind:isSideNavOpen expandedByDefault=false persistentHamburgerMenu=true>
-  <div slot="skip-to-content">
-    <SkipToContent />
-  </div>
-  <HeaderUtilities>
-	<!-- <HeaderGlobalAction aria-label="Settings" icon={Login20} /> -->
-	<HeaderGlobalAction aria-label="Change user" icon={UserMultiple20} on:click={logout}/>
-	<!-- <HeaderGlobalAction aria-label="Settings" /> -->
-</HeaderUtilities>
-
-  <!--
-  <HeaderNav>
-    <HeaderNavItem href="/" text="Link 1" />
-    <HeaderNavItem href="/" text="Link 2" />
-    <HeaderNavItem href="/" text="Link 3" />
-    <HeaderNavMenu text="Menu">
-      <HeaderNavItem href="/" text="Link 1" />
-      <HeaderNavItem href="/" text="Link 2" />
-      <HeaderNavItem href="/" text="Link 3" />
-    </HeaderNavMenu>
-    <HeaderNavItem href="/" text="Link 4" />
-  </HeaderNav>
--->
-</Header>
-
-<SideNav bind:isOpen={isSideNavOpen}>
-  <SideNavItems>
-    <SideNavLink text="Link 1" />
-    <SideNavLink text="Link 2" />
-    <SideNavLink text="Link 3" />
-	<!--
-    <SideNavMenu text="Menu">
-      <SideNavMenuItem href="/" text="Link 1" />
-      <SideNavMenuItem href="/" text="Link 2" />
-      <SideNavMenuItem href="/" text="Link 3" />
-    </SideNavMenu>
-    <SideNavDivider />
-	-->
-    <SideNavLink text="Link 4" />
-  </SideNavItems>
-</SideNav>
+<StatusBar />
 
 <Content>
 	<div class="contents">
