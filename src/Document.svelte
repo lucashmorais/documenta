@@ -4,13 +4,16 @@
 	import Minutes from './Minutes.svelte'
 	import AttachmentsArea from './AttachmentsArea.svelte'
 	import InterventionForm from './InterventionForm.svelte'
-	import { getAttributes, toSVG } from '@carbon/icon-helpers';
-	import addIcon from '@carbon/icons/es/add/16';
+	import Login20 from "carbon-icons-svelte/lib/Login20";
+	import UserMultiple20 from "carbon-icons-svelte/lib/UserMultiple20";
+	import Cookie from "js-cookie";
 	import {
 	Header,
 	HeaderNav,
 	HeaderNavItem,
 	HeaderNavMenu,
+	HeaderUtilities,
+	HeaderGlobalAction,
 	SideNav,
 	SideNavItems,
 	SideNavMenu,
@@ -37,6 +40,11 @@
 
 	function refreshComments() {
 		coreRefreshComments();
+	}
+	
+	function logout() {
+		Cookie.remove("documentaLoginToken")
+		window.location.href = "/";
 	}
 </script>
 
@@ -73,6 +81,11 @@
   <div slot="skip-to-content">
     <SkipToContent />
   </div>
+  <HeaderUtilities>
+	<!-- <HeaderGlobalAction aria-label="Settings" icon={Login20} /> -->
+	<HeaderGlobalAction aria-label="Change user" icon={UserMultiple20} on:click={logout}/>
+	<!-- <HeaderGlobalAction aria-label="Settings" /> -->
+</HeaderUtilities>
 
   <!--
   <HeaderNav>
