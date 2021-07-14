@@ -17,8 +17,6 @@ import (
 
 const jwtSecret = "asecret"
 
-// const jwtSecret = "secret"
-
 func errorHandler(ctx *fiber.Ctx, err error) error {
 	return ctx.Redirect("/")
 }
@@ -63,7 +61,7 @@ func initDatabase() {
 
 	database.DBConn.AutoMigrate(&controllers.Process{})
 	database.DBConn.AutoMigrate(&controllers.Comment{})
-	// database.DBConn.AutoMigrate(&controllers.User{})
+	database.DBConn.AutoMigrate(&controllers.User{})
 	database.DBConn.AutoMigrate(&controllers.UserFile{})
 	fmt.Println("DB auto-migration was set up")
 }
@@ -72,6 +70,7 @@ func setupRouter(app *fiber.App) {
 	app.Get("/api/v1/", helloWorld)
 	// app.Get("/api/v1/login", controllers.Login)
 	app.Post("/api/v1/login", controllers.Login)
+	app.Get("/api/v1/user/", controllers.GetUser)
 
 	protected := app.Group("/api/v1", authRequired())
 	protected.Post("process", controllers.NewProcess)

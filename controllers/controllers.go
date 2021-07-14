@@ -41,14 +41,20 @@ type Comment struct {
 type User struct {
 	gorm.Model
 	// ID       int
-	Name     string
-	Initials string
-	Segment  Segment
+	Name        string `json: "name"`
+	FirstName   string `json: "firstName"`
+	LastName    string `json: "lastName"`
+	Title       string `json: "title"`
+	Initials    string `json: "initials"`
+	Email       string `json: "email"`
+	PHash       string `json: "phash"`
+	Permissions []Permission
+	Role        Role
 }
 
-type Segment struct {
-	Name string
-	//Add any number of permissions
+type Role struct {
+	Name        string
+	Permissions []Permission
 }
 
 type Permission struct {
@@ -156,4 +162,16 @@ func GetComments(c *fiber.Ctx) error {
 	db.Preload("User").Preload("Process").Find(&comments)
 
 	return c.JSON(comments)
+}
+
+func GetUser(c *fiber.Ctx) error {
+	// email := c.Params("email")
+	// password := c.Params("password")
+
+	db := database.DBConn
+	var user User
+	db.Where("email = ?", "bob@gmail.com").Where("p_hash = ?", "password123").Find(&user)
+	// db.Where("Name = ?", "Albert Billford").Find(&user)
+
+	return c.JSON(user)
 }

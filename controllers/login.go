@@ -1,10 +1,13 @@
 package controllers
 
 import (
+	"fmt"
 	"time"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/golang-jwt/jwt"
+	"github.com/lucashmorais/documenta/database"
+	"gopkg.in/hlandau/passlib.v1"
 )
 
 const jwtSecret = "asecret"
@@ -16,12 +19,9 @@ func Login(ctx *fiber.Ctx) error {
 	}
 
 	var body request
-	// body.Email = "bob@gmail.com"
-	// body.Password = "password123"
 
 	err := ctx.BodyParser(&body)
 
-	// var err error = nil
 	if err != nil {
 		ctx.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"error": "cannot parse json",
@@ -29,7 +29,24 @@ func Login(ctx *fiber.Ctx) error {
 		return fiber.ErrBadRequest
 	}
 
-	if body.Email != "bob@gmail.com" || body.Password != "password123" {
+	db := database.DBConn
+	var user User
+
+	hash, err := passlib.Hash(body.Password)
+
+	if err != nil {
+		ctx.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"error": "cannot hash password",
+		})
+		return fiber.ErrBadRequest
+	}
+
+	fmt.Printf("[hash from user-provided password]: %s", hash)
+
+	db.Where("email = ?", body.Email).Find(&user)
+	_, err = passlib.Verify(body.Password, user.PHash)
+
+	if err != nil {
 		ctx.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
 			"error": "Bad Credentials",
 		})
