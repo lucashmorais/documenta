@@ -17,14 +17,23 @@
 	async function submitForm() {
 		console.log("User: " + userValue)
 		console.log("Password: " + passwordValue)
+		
+		if (passwordValue != passwordValue2) {
+			console.log("Passwords don't match")
+			return
+		}
 
 		try {     
-			const response = await fetch('http://localhost:3123/api/v1/login', {
+			const response = await fetch('http://localhost:3123/api/v1/user', {
 					method: 'post',
 
 					body: JSON.stringify({
-						Email: userValue,
-						Password: passwordValue
+						"phash": passwordValue,
+						"email": userValue,
+						"firstName": firstName,
+						"lastName": lastName,
+						"initials": initials,
+						"title": title,
 					}),
 
 					headers: {
@@ -34,14 +43,14 @@
 			);
 			
 			if (response.status == 200) {
-				console.log('[Login]: Successfully logged in with valid credentials.');
+				console.log('[Register]: Successfully registered user');
 
-				response.text().then((text) => {
-					console.log(text);
-					window.location.href = "/home.html"
-				});
+				// response.text().then((text) => {
+				// 	console.log(text);
+				// 	window.location.href = "/home.html"
+				// });
 			} else {
-				console.log('[Login]: Got valid response from server but login has failed.')
+				console.log('[Register]: Got valid response from server but user registering has failed.')
 			}
 
 		} catch(err) {
@@ -123,7 +132,7 @@ type User struct {
 
 	<div class="form">
 		<FluidForm>
-			<TextInput bind:value={userValue} labelText="Usuário" placeholder="Insira o usuário" required />
+			<TextInput bind:value={userValue} labelText="Endereço de email" placeholder="abc@gmail.com" required />
 			<PasswordInput
 			  required
 			  bind:value={passwordValue}
@@ -142,8 +151,8 @@ type User struct {
 			  showPasswordLabel="Exibir senha"
 			  hidePasswordLabel="Ocultar senha"
 			/>
-			<TextInput bind:value={firstName} labelText="Primeiro nome" placeholder="Insira o usuário" required />
-			<TextInput bind:value={lastName} labelText="Último nome" placeholder="Insira o usuário" required />
+			<TextInput bind:value={firstName} labelText="Primeiro nome" placeholder="Alberto" required />
+			<TextInput bind:value={lastName} labelText="Último nome" placeholder="Carvalho" required />
 			<TextInput bind:value={initials} labelText="Iniciais" placeholder="ABC" required />
 			<TextInput bind:value={title} labelText="Título" placeholder="Pe., Fr., etc" />
 		</FluidForm>
