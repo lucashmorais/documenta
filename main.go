@@ -70,7 +70,7 @@ func setupRouter(app *fiber.App) {
 	app.Get("/api/v1/", helloWorld)
 	// app.Get("/api/v1/login", controllers.Login)
 	app.Post("/api/v1/login", controllers.Login)
-	app.Get("/api/v1/user/", controllers.GetUser)
+	app.Get("/api/v1/users", controllers.GetUsers)
 
 	protected := app.Group("/api/v1", authRequired())
 	protected.Post("process", controllers.NewProcess)
@@ -86,11 +86,14 @@ func setupRouter(app *fiber.App) {
 	protected.Get("files", controllers.GetFilesWithoutBlob)
 	protected.Get("file/:id", controllers.GetFile)
 	protected.Delete("file/:id", controllers.DeleteFile)
+
+	protected.Post("user", controllers.PostUser)
 }
 
 func addAuthRequestHeader(ctx *fiber.Ctx) error {
 	// token := "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOiIyMDIxLTA2LTIzVDE4OjE2OjQ5LjcxMDU1Mzg3Ny0wMzowMCIsInN1YiI6IjEifQ.T7CADK7tFePIi_d8lcw4PS5RMLFIBu51j_rmdoHaDd8"
 	token := ctx.Cookies("documentaLoginToken")
+	println(token)
 	// ctx.Context().Request.Header.Add("Authorization", "Bearer "+token)
 	ctx.Context().Request.Header.Add("Authorization", "Bearer "+token)
 	// println(string(ctx.Context().Request.Header.Header()))
@@ -114,6 +117,7 @@ func main() {
 	// app.Use("index.html", authRequired())
 	app.Use("/document.html", authRequired())
 	app.Use("/home.html", authRequired())
+	app.Use("/register.html", authRequired())
 	// app.Use("/", logJWTInformation)
 
 	initDatabase()

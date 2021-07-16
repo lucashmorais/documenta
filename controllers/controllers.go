@@ -163,15 +163,3 @@ func GetComments(c *fiber.Ctx) error {
 
 	return c.JSON(comments)
 }
-
-func GetUser(c *fiber.Ctx) error {
-	// email := c.Params("email")
-	// password := c.Params("password")
-
-	db := database.DBConn
-	var user User
-	db.Where("email = ?", "bob@gmail.com").Where("p_hash = ?", "password123").Find(&user)
-	// db.Where("Name = ?", "Albert Billford").Find(&user)
-
-	return c.JSON(user)
-}
