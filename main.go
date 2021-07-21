@@ -26,11 +26,20 @@ func authorizationFilter(ctx *fiber.Ctx) bool {
 }
 
 func authRequired() func(ctx *fiber.Ctx) error {
-	return jwtware.New(jwtware.Config{
+	new_auth_function := jwtware.New(jwtware.Config{
 		ErrorHandler: errorHandler,
 		SigningKey:   []byte(jwtSecret),
 		Filter:       authorizationFilter,
 	})
+
+	final_function := func(ctx *fiber.Ctx) error {
+		ctx.Set("Cache-Control", "no-store, must-revalidate")
+		ctx.Set("Pragma", "no-cache")
+		ctx.Set("Expires", "0")
+		return new_auth_function(ctx)
+	}
+
+	return final_function
 }
 
 func logJWTInformation(ctx *fiber.Ctx) error {
