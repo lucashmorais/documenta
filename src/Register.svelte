@@ -9,6 +9,8 @@
 	} from "carbon-components-svelte";
 	import StatusBar from './StatusBar.svelte';
 	import { writable } from 'svelte/store';
+	import isEmail from 'validator/es/lib/isEmail';
+	import isStrongPassword from 'validator/es/lib/isStrongPassword';
 	
 	let formState = {}
 	
@@ -22,15 +24,63 @@
 	
 	let failedLastTime = false
 
-	let userInvalid = false
-	let passwordInvalid = false
-	let password2Invalid = false
-	// let formState.firstNameInvalid = false
-	$: firstNameInvalid = failedLastTime && formState.firstName == ""
-	$: lastNameInvalid = failedLastTime && formState.lastName == ""
-	let initialsInvalid = false
-	let titleInvalid = false
-	// $: titleInvalid = formState.title == ""
+	let passwordOptions = {
+		minLength: 8,
+		minLowercase: 0,
+		minUppercase: 0,
+		minNumbers: 0,
+		minSymbols: 0,
+		returnScore: false,
+		pointsPerUnique: 1,
+		pointsPerRepeat: 10,
+		pointsForContainingLower: 100,
+		pointsForContainingUpper: 1000,
+		pointsForContainingNumber: 10000,
+		pointsForContainingSymbol: 100000
+	}
+	
+	let emailCheckIsEnabled = false;
+	let passwordCheckIsEnabled = false;
+	let password2CheckIsEnabled = false;
+	let firstNameCheckIsEnabled = false;
+	let lastNameCheckIsEnabled = false;
+	let initialsCheckIsEnabled = false;
+	
+	function enableValidation() {
+		emailCheckIsEnabled = true;
+		passwordCheckIsEnabled = true;
+		password2CheckIsEnabled = true;
+		firstNameCheckIsEnabled = true;
+		lastNameCheckIsEnabled = true;
+		initialsCheckIsEnabled = true;
+	}
+	
+	function disableValidation() {
+		emailCheckIsEnabled = false;
+		passwordCheckIsEnabled = false;
+		password2CheckIsEnabled = false;
+		firstNameCheckIsEnabled = false;
+		lastNameCheckIsEnabled = false;
+		initialsCheckIsEnabled = false;
+	}
+	
+	$: coreUserInvalid = !isEmail(formState.userValue)
+	$: corePasswordInvalid = !isStrongPassword(formState.passwordValue, passwordOptions)
+	$: corePassword2Invalid = formState.passwordValue != formState.passwordValue2
+	$: coreFirstNameInvalid = formState.firstName == ""
+	$: coreLastNameInvalid = formState.lastName == ""
+	$: coreInitialsInvalid = formState.initials == ""
+
+	$: userInvalid = emailCheckIsEnabled && coreUserInvalid
+	$: passwordInvalid = passwordCheckIsEnabled && corePasswordInvalid
+	$: password2Invalid = password2CheckIsEnabled && corePassword2Invalid
+	$: firstNameInvalid = firstNameCheckIsEnabled && coreFirstNameInvalid
+	$: lastNameInvalid = lastNameCheckIsEnabled && coreLastNameInvalid
+	$: initialsInvalid = initialsCheckIsEnabled && coreInitialsInvalid
+
+	$: weakPasswordMessage = "A senha escolhida deve ter pelo menos 8 caracteres."
+
+	$: someInputIsInvalid = coreUserInvalid || corePasswordInvalid || corePassword2Invalid || coreFirstNameInvalid || coreLastNameInvalid || coreInitialsInvalid
 	
 	const invalidEntryMessage = "Entrada inválida"
 	let invalidPasswordMessage = "Senha inválida"
@@ -66,10 +116,16 @@
 		console.log("User: " + formState.userValue)
 		console.log("Password: " + formState.passwordValue)
 		
-		if (formState.passwordValue != formState.passwordValue2) {
-			console.log("Passwords don't match")
+		if (someInputIsInvalid) {
+			enableValidation()
 			return
 		}
+		disableValidation()
+		
+		// if (formState.passwordValue != formState.passwordValue2) {
+		// 	console.log("Passwords don't match")
+		// 	return
+		// }
 
 		try {     
 			const response = await fetch('http://localhost:3123/api/v1/user', {
@@ -129,6 +185,7 @@
 					caption: s,
 					iconDescription: "Fechar notificação"
 				}
+				clearForm();
 			break;
 			case "email_was_taken":
 				$notifications[l] = {
@@ -232,9 +289,9 @@ type User struct {
 
 	<div class="form">
 		<FluidForm>
-			<TextInput bind:value={formState.userValue} invalid={userInvalid} labelText="Endereço de email" placeholder="abc@gmail.com" required />
+			<TextInput bind:value={formState.userValue} invalidText="Endereço inválido" invalid={userInvalid} labelText="Endereço de email" placeholder="abc@gmail.com" required />
 			<PasswordInput
-			invalidText={invalidPasswordMessage} 
+			  invalidText={weakPasswordMessage}
 			  required
 			  bind:value={formState.passwordValue}
 			  invalid={passwordInvalid}
@@ -255,10 +312,10 @@ type User struct {
 			  showPasswordLabel="Exibir senha"
 			  hidePasswordLabel="Ocultar senha"
 			/>
-			<TextInput bind:value={formState.firstName} invalid={firstNameInvalid} invalidText={invalidEntryMessage} labelText="Primeiro nome" placeholder="Alberto" required />
-			<TextInput bind:value={formState.lastName} invalid={lastNameInvalid} invalidText={invalidEntryMessage} labelText="Último nome" placeholder="Carvalho" required />
-			<TextInput bind:value={formState.initials} invalid={initialsInvalid} invalidText={invalidEntryMessage} labelText="Iniciais" placeholder="ABC" required />
-			<TextInput bind:value={formState.title} invalid={titleInvalid} invalidText={invalidEntryMessage} labelText="Título" placeholder="Pe., Fr., etc" />
+			<TextInput bind:value={formState.firstName} invalid={firstNameInvalid} invalidText={invalidEntryMessage} labelText="Primeiro nome" placeholder="Rufus" required />
+			<TextInput bind:value={formState.lastName} invalid={lastNameInvalid} invalidText={invalidEntryMessage} labelText="Último nome" placeholder="Silvius" required />
+			<TextInput bind:value={formState.initials} invalid={initialsInvalid} invalidText={invalidEntryMessage} labelText="Iniciais" placeholder="RS" required />
+			<!-- <TextInput bind:value={formState.title} invalid={titleInvalid} invalidText={invalidEntryMessage} labelText="Título" placeholder="Pe., Fr., etc" /> -->
 		</FluidForm>
 
 		<div class="button-holder">
