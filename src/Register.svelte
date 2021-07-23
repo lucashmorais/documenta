@@ -4,35 +4,38 @@
 	  TextInput,
 	  PasswordInput,
 	  Button,
+	  ButtonSet,
 	  ToastNotification,
 	} from "carbon-components-svelte";
 	import StatusBar from './StatusBar.svelte';
 	import { writable } from 'svelte/store';
 	
-	let passwordValue = ""
-	let passwordValue2 = ""
-	let userValue = ""
-	let firstName = ""
-	let lastName = ""
-	let initials = ""
-	let title = ""
+	let formState = {}
+	
+	formState.passwordValue = ""
+	formState.passwordValue2 = ""
+	formState.userValue = ""
+	formState.firstName = ""
+	formState.lastName = ""
+	formState.initials = ""
+	formState.title = ""
 	
 	let failedLastTime = false
 
 	let userInvalid = false
 	let passwordInvalid = false
 	let password2Invalid = false
-	// let firstNameInvalid = false
-	$: firstNameInvalid = failedLastTime && firstName == ""
-	$: lastNameInvalid = failedLastTime && lastName == ""
+	// let formState.firstNameInvalid = false
+	$: firstNameInvalid = failedLastTime && formState.firstName == ""
+	$: lastNameInvalid = failedLastTime && formState.lastName == ""
 	let initialsInvalid = false
 	let titleInvalid = false
-	// $: titleInvalid = title == ""
+	// $: titleInvalid = formState.title == ""
 	
 	const invalidEntryMessage = "Entrada inválida"
 	let invalidPasswordMessage = "Senha inválida"
 	
-	$: invalidPasswordMessage = evaluatePasswords(passwordValue, passwordValue2)
+	$: invalidPasswordMessage = evaluatePasswords(formState.passwordValue, formState.passwordValue2)
 	
 	function evaluatePasswords(value1, value2) {
 		if (value1 != value2) {
@@ -46,6 +49,13 @@
 		}
 	}
 	
+	function clearForm() {
+		const keys = Object.keys(formState)
+		for (const key of keys) {
+			formState[key] = ""
+		}
+	}
+
 	async function buildErrorToastFromResponse(response) {
 		response.json().then((json_response) => {
 			fireToastNotification(json_response.cause);
@@ -53,10 +63,10 @@
 	}
 	
 	async function submitForm() {
-		console.log("User: " + userValue)
-		console.log("Password: " + passwordValue)
+		console.log("User: " + formState.userValue)
+		console.log("Password: " + formState.passwordValue)
 		
-		if (passwordValue != passwordValue2) {
+		if (formState.passwordValue != formState.passwordValue2) {
 			console.log("Passwords don't match")
 			return
 		}
@@ -66,12 +76,12 @@
 					method: 'post',
 
 					body: JSON.stringify({
-						"phash": passwordValue,
-						"email": userValue,
-						"firstName": firstName,
-						"lastName": lastName,
-						"initials": initials,
-						"title": title,
+						"phash": formState.passwordValue,
+						"email": formState.userValue,
+						"firstName": formState.firstName,
+						"lastName": formState.lastName,
+						"initials": formState.initials,
+						"title": formState.title,
 					}),
 
 					headers: {
@@ -83,7 +93,7 @@
 			if (response.status == 200) {
 				console.log('[Register]: Successfully registered user');
 				failedLastTime = false;
-				fireToastNotification("success", {email: userValue});
+				fireToastNotification("success", {email: formState.userValue});
 			} else {
 				console.log('[Register]: Got valid response from server but user registering has failed.')
 				failedLastTime = true;
@@ -124,7 +134,7 @@
 				$notifications[l] = {
 					kind: "error",
 					title: "Erro",
-					subtitle: "Já existe um usuário com o email indicado. Um novo usuário não pôde ser criado.",
+					subtitle: "Já existe um usuário com o email indicado.",
 					caption: s,
 					iconDescription: "Fechar notificação"
 				}
@@ -222,11 +232,11 @@ type User struct {
 
 	<div class="form">
 		<FluidForm>
-			<TextInput bind:value={userValue} invalid={userInvalid} labelText="Endereço de email" placeholder="abc@gmail.com" required />
+			<TextInput bind:value={formState.userValue} invalid={userInvalid} labelText="Endereço de email" placeholder="abc@gmail.com" required />
 			<PasswordInput
 			invalidText={invalidPasswordMessage} 
 			  required
-			  bind:value={passwordValue}
+			  bind:value={formState.passwordValue}
 			  invalid={passwordInvalid}
 			  type="password"
 			  labelText="Senha"
@@ -237,7 +247,7 @@ type User struct {
 			<PasswordInput
 			invalidText={invalidPasswordMessage} 
 			  required
-			  bind:value={passwordValue2}
+			  bind:value={formState.passwordValue2}
 			  invalid={password2Invalid}
 			  type="password"
 			  labelText="Confirmação da senha"
@@ -245,15 +255,18 @@ type User struct {
 			  showPasswordLabel="Exibir senha"
 			  hidePasswordLabel="Ocultar senha"
 			/>
-			<TextInput bind:value={firstName} invalid={firstNameInvalid} invalidText={invalidEntryMessage} labelText="Primeiro nome" placeholder="Alberto" required />
-			<TextInput bind:value={lastName} invalid={lastNameInvalid} invalidText={invalidEntryMessage} labelText="Último nome" placeholder="Carvalho" required />
-			<TextInput bind:value={initials} invalid={initialsInvalid} invalidText={invalidEntryMessage} labelText="Iniciais" placeholder="ABC" required />
-			<TextInput bind:value={title} invalid={titleInvalid} invalidText={invalidEntryMessage} labelText="Título" placeholder="Pe., Fr., etc" />
+			<TextInput bind:value={formState.firstName} invalid={firstNameInvalid} invalidText={invalidEntryMessage} labelText="Primeiro nome" placeholder="Alberto" required />
+			<TextInput bind:value={formState.lastName} invalid={lastNameInvalid} invalidText={invalidEntryMessage} labelText="Último nome" placeholder="Carvalho" required />
+			<TextInput bind:value={formState.initials} invalid={initialsInvalid} invalidText={invalidEntryMessage} labelText="Iniciais" placeholder="ABC" required />
+			<TextInput bind:value={formState.title} invalid={titleInvalid} invalidText={invalidEntryMessage} labelText="Título" placeholder="Pe., Fr., etc" />
 		</FluidForm>
 
 		<div class="button-holder">
-			<!-- <a href="/home.html"><Button>Entrar</Button></a> -->
-			<Button on:click={submitForm}>Registrar usuário</Button>
+			<ButtonSet>
+				<!-- <a href="/home.html"><Button>Entrar</Button></a> -->
+				<Button on:click={submitForm}>Registrar usuário</Button>
+				<Button on:click={clearForm} kind="secondary">Limpar</Button>
+			</ButtonSet>
 		</div>
 	</div>
 </div>
