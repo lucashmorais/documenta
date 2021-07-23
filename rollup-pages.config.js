@@ -20,17 +20,22 @@ const inputs = [
 		input: 'src/second.js',
 		output: { file: 'public/build/second.js', name: 'second' },
 		css: 'second.css',
-	}, //object for setting more specific values for input and output of roolup configuration
+	},
 	{
 		input: 'src/document.js',
 		output: { file: 'public/build/document.js', name: 'document' },
 		css: 'document.css',
-	}, //object for setting more specific values for input and output of roolup configuration
+	},
 	{
 		input: 'src/register.js',
 		output: { file: 'public/build/register.js', name: 'register' },
 		css: 'register.css',
-	}, //object for setting more specific values for input and output of roolup configuration
+	},
+	{
+		input: 'src/users.js',
+		output: { file: 'public/build/users.js', name: 'users' },
+		css: 'users.css',
+	},
 	// {
 	// 	input: 'src/visTest.js',
 	// 	output: { file: 'public/build/visTest.js', name: 'visTest' },
