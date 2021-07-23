@@ -4,7 +4,10 @@
 	  TextInput,
 	  PasswordInput,
 	  Button,
+	  ToastNotification,
 	} from "carbon-components-svelte";
+	import StatusBar from './StatusBar.svelte';
+	import { writable } from 'svelte/store';
 	
 	let passwordValue = ""
 	let passwordValue2 = ""
@@ -13,6 +16,41 @@
 	let lastName = ""
 	let initials = ""
 	let title = ""
+	
+	let failedLastTime = false
+
+	let userInvalid = false
+	let passwordInvalid = false
+	let password2Invalid = false
+	// let firstNameInvalid = false
+	$: firstNameInvalid = failedLastTime && firstName == ""
+	$: lastNameInvalid = failedLastTime && lastName == ""
+	let initialsInvalid = false
+	let titleInvalid = false
+	// $: titleInvalid = title == ""
+	
+	const invalidEntryMessage = "Entrada inválida"
+	let invalidPasswordMessage = "Senha inválida"
+	
+	$: invalidPasswordMessage = evaluatePasswords(passwordValue, passwordValue2)
+	
+	function evaluatePasswords(value1, value2) {
+		if (value1 != value2) {
+			// passwordInvalid = true;
+			// password2Invalid = true;
+			return "Senhas fornecidas não coincidem"
+		} else {
+			// passwordInvalid = false;
+			// password2Invalid = false;
+			return ""
+		}
+	}
+	
+	async function buildErrorToastFromResponse(response) {
+		response.json().then((json_response) => {
+			fireToastNotification(json_response.cause);
+		})
+	}
 	
 	async function submitForm() {
 		console.log("User: " + userValue)
@@ -44,13 +82,12 @@
 			
 			if (response.status == 200) {
 				console.log('[Register]: Successfully registered user');
-
-				// response.text().then((text) => {
-				// 	console.log(text);
-				// 	window.location.href = "/home.html"
-				// });
+				failedLastTime = false;
+				fireToastNotification("success", {email: userValue});
 			} else {
 				console.log('[Register]: Got valid response from server but user registering has failed.')
+				failedLastTime = true;
+				buildErrorToastFromResponse(response)
 			}
 
 		} catch(err) {
@@ -64,7 +101,48 @@
 			console.log('Enter is pressed!');
 			submitForm();
 		}
-	});
+	})
+	
+	let notifications = writable({});
+	$notifications = [];
+	
+	function fireToastNotification(kind, extras = null) {
+		const s = new Date().toLocaleString()
+		const l = $notifications.length;	// get our current items list count
+
+		switch(kind) {
+			case "success":
+				$notifications[l] = {
+					kind: "success",
+					title: "Sucesso",
+					subtitle: "O usuário com e-mail " + extras.email + " foi criado com sucesso.",
+					caption: s,
+					iconDescription: "Fechar notificação"
+				}
+			break;
+			case "email_was_taken":
+				$notifications[l] = {
+					kind: "error",
+					title: "Erro",
+					subtitle: "Já existe um usuário com o email indicado. Um novo usuário não pôde ser criado.",
+					caption: s,
+					iconDescription: "Fechar notificação"
+				}
+			break;
+			default:
+				$notifications[l] = {
+					kind: "error",
+					title: "Erro",
+					subtitle: "O usuário não pôde ser criado. Verifique os dados fornecidos ou consulte o administrador do sistema.",
+					caption: s,
+					iconDescription: "Fechar notificação"
+				}
+		}
+	}
+	
+	// setInterval(() => {
+	// 	fireToastNotification("error")
+	// }, 1000)
 </script>
       
 <style>
@@ -84,7 +162,7 @@
 }
 
 h1 {
-	margin-top: 5vh;
+	margin-top: calc(5vh + 3rem);
 	margin-bottom: 5vh;
 }
 
@@ -109,9 +187,21 @@ h2 {
 
 .button-holder {
 	margin-top: 1em;
+	margin-bottom: 2em;
+}
+
+.absoluteToastWrapper {
+	position: absolute;
+	bottom: 1em;	
+	right: 1em;
+}
+
+.stickyToast {
+	position: sticky;
 }
 </style>
 
+<StatusBar />
 <div class="centered-content">
 	<h1>Documenta</h1>
 	<h2>Novo usuário</h2>
@@ -132,10 +222,12 @@ type User struct {
 
 	<div class="form">
 		<FluidForm>
-			<TextInput bind:value={userValue} labelText="Endereço de email" placeholder="abc@gmail.com" required />
+			<TextInput bind:value={userValue} invalid={userInvalid} labelText="Endereço de email" placeholder="abc@gmail.com" required />
 			<PasswordInput
+			invalidText={invalidPasswordMessage} 
 			  required
 			  bind:value={passwordValue}
+			  invalid={passwordInvalid}
 			  type="password"
 			  labelText="Senha"
 			  placeholder="Insira a senha"
@@ -143,23 +235,64 @@ type User struct {
 			  hidePasswordLabel="Ocultar senha"
 			/>
 			<PasswordInput
+			invalidText={invalidPasswordMessage} 
 			  required
 			  bind:value={passwordValue2}
+			  invalid={password2Invalid}
 			  type="password"
 			  labelText="Confirmação da senha"
 			  placeholder="Insira a senha outra vez"
 			  showPasswordLabel="Exibir senha"
 			  hidePasswordLabel="Ocultar senha"
 			/>
-			<TextInput bind:value={firstName} labelText="Primeiro nome" placeholder="Alberto" required />
-			<TextInput bind:value={lastName} labelText="Último nome" placeholder="Carvalho" required />
-			<TextInput bind:value={initials} labelText="Iniciais" placeholder="ABC" required />
-			<TextInput bind:value={title} labelText="Título" placeholder="Pe., Fr., etc" />
+			<TextInput bind:value={firstName} invalid={firstNameInvalid} invalidText={invalidEntryMessage} labelText="Primeiro nome" placeholder="Alberto" required />
+			<TextInput bind:value={lastName} invalid={lastNameInvalid} invalidText={invalidEntryMessage} labelText="Último nome" placeholder="Carvalho" required />
+			<TextInput bind:value={initials} invalid={initialsInvalid} invalidText={invalidEntryMessage} labelText="Iniciais" placeholder="ABC" required />
+			<TextInput bind:value={title} invalid={titleInvalid} invalidText={invalidEntryMessage} labelText="Título" placeholder="Pe., Fr., etc" />
 		</FluidForm>
 
 		<div class="button-holder">
 			<!-- <a href="/home.html"><Button>Entrar</Button></a> -->
-			<Button on:click={submitForm}>Entrar</Button>
+			<Button on:click={submitForm}>Registrar usuário</Button>
 		</div>
+	</div>
+</div>
+
+<div class="absoluteToastWrapper">
+	<div class="stickyToast">
+	      {#each $notifications as toast}
+	      		<svelte:component this={ToastNotification} {...toast}/>
+	      {/each}
+	      <!-- <ToastNotification
+		kind="error"
+		title="Erro"
+		subtitle="Um erro interno impediu a criação do usuário."
+		iconDescription="Fechar notificação"
+		caption={new Date().toLocaleString()}
+	      /> -->
+	      <!-- <ToastNotification
+		kind="info"
+		title="New updates"
+		subtitle="Restart to get the latest updates."
+		caption={new Date().toLocaleString()}
+	      />
+	      <ToastNotification
+		kind="info-square"
+		title="New updates"
+		subtitle="Restart to get the latest updates."
+		caption={new Date().toLocaleString()}
+	      /> -->
+	      <!-- <ToastNotification
+		kind="warning"
+		title="Scheduled maintenance"
+		subtitle="Maintenance will last 2-4 hours."
+		caption={new Date().toLocaleString()}
+	      />
+	      <ToastNotification
+		kind="warning-alt"
+		title="Scheduled maintenance"
+		subtitle="Maintenance will last 2-4 hours."
+		caption={new Date().toLocaleString()}
+	      /> -->
 	</div>
 </div>
