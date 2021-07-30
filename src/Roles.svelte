@@ -112,6 +112,43 @@
 	
 	let rows=[];
 	let selectedRowIds=[];
+	
+	async function submitBatchDeletion() {
+		console.log("selectedRowIds", selectedRowIds)
+
+		try {     
+			let requestBody = JSON.stringify({
+						"ids": selectedRowIds,
+					});
+
+			console.log("[submitForm:requestBody]: ", requestBody);
+
+			const response = await fetch('http://localhost:3123/api/v1/roles', {
+					method: 'delete',
+
+					body: requestBody,
+					headers: {
+						'Content-type': 'application/json; charset=UTF-8'
+					}
+				}
+			);
+			
+			if (response.status == 200) {
+				console.log('[Add role]: Successfully registered role');
+				failedLastTime = false;
+				// fireToastNotification("success", {email: formState.userValue});
+			} else {
+				console.log('[Add role]: Got valid response from server but role registration has failed.')
+				failedLastTime = true;
+				console.log(response)
+				// buildErrorToastFromResponse(response)
+			}
+
+		} catch(err) {
+			console.error(`Error: ${err}`);
+			return;
+		}
+	}
 
 	var usersPromise;
 	export function updateUsers() {
@@ -337,7 +374,7 @@
 			<Toolbar>
 				<ToolbarBatchActions>
 				  <!-- <Button icon={Save16}>Eliminar</Button> -->
-				  <Button icon={TrashCan16}>Eliminar</Button>
+				  <Button on:click={submitBatchDeletion} icon={TrashCan16}>Eliminar</Button>
 				  <!-- <Button icon={Edit16}>Modificar</Button> -->
 				</ToolbarBatchActions>
 				<ToolbarContent>

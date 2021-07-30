@@ -49,3 +49,26 @@ func PostRole(c *fiber.Ctx) error {
 	db.Create(&dbRole)
 	return c.JSON(role)
 }
+
+func DeleteRoles(c *fiber.Ctx) error {
+	db := database.DBConn
+	idsToDelete := struct {
+		gorm.Model
+		Ids []int `json: "ids"`
+	}{}
+
+	err := c.BodyParser(&idsToDelete)
+
+	if err != nil {
+		return c.Status(400).JSON(&fiber.Map{
+			"success": false,
+			"cause":   "form_decode_error",
+		})
+	}
+
+	fmt.Println("[idsToDelete]", idsToDelete)
+	fmt.Println("[idsToDelete.Ids]", idsToDelete.Ids)
+	db.Delete(&Role{}, idsToDelete.Ids)
+
+	return c.SendStatus(200)
+}
