@@ -251,6 +251,7 @@
 				console.log('[Add role]: Successfully registered role');
 				failedLastTime = false;
 				open = false;
+				clearForm();
 				// fireToastNotification("success", {email: formState.userValue});
 			} else {
 				console.log('[Add role]: Got valid response from server but role registration has failed.')
