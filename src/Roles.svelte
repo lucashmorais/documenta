@@ -44,21 +44,6 @@
 	formState.title = ""
 	
 	let failedLastTime = false
-
-	let passwordOptions = {
-		minLength: 8,
-		minLowercase: 0,
-		minUppercase: 0,
-		minNumbers: 0,
-		minSymbols: 0,
-		returnScore: false,
-		pointsPerUnique: 1,
-		pointsPerRepeat: 10,
-		pointsForContainingLower: 100,
-		pointsForContainingUpper: 1000,
-		pointsForContainingNumber: 10000,
-		pointsForContainingSymbol: 100000
-	}
 	
 	let emailCheckIsEnabled = false;
 	let passwordCheckIsEnabled = false;
@@ -134,11 +119,11 @@
 			);
 			
 			if (response.status == 200) {
-				console.log('[Add role]: Successfully registered role');
+				console.log('[Add role]: Successfully deleted roles');
 				failedLastTime = false;
 				// fireToastNotification("success", {email: formState.userValue});
 			} else {
-				console.log('[Add role]: Got valid response from server but role registration has failed.')
+				console.log('[Add role]: Got valid response from server but role deletion has failed.')
 				failedLastTime = true;
 				console.log(response)
 				// buildErrorToastFromResponse(response)
@@ -265,6 +250,7 @@
 			if (response.status == 200) {
 				console.log('[Add role]: Successfully registered role');
 				failedLastTime = false;
+				open = false;
 				// fireToastNotification("success", {email: formState.userValue});
 			} else {
 				console.log('[Add role]: Got valid response from server but role registration has failed.')
