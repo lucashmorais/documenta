@@ -121,6 +121,8 @@
 			if (response.status == 200) {
 				console.log('[Add role]: Successfully deleted roles');
 				failedLastTime = false;
+				selectedRowIds = [];
+				updateRolesTable();
 				// fireToastNotification("success", {email: formState.userValue});
 			} else {
 				console.log('[Add role]: Got valid response from server but role deletion has failed.')
@@ -136,23 +138,21 @@
 	}
 
 	var usersPromise;
-	export function updateUsers() {
+	export function updateRolesTable() {
 		usersPromise = new Promise((resolve, reject) => {
 			fetch("http://localhost:3123/api/v1/roles").
 				then((response)=>response.json().
-					then(function (users) {
+					then(function (roles) {
 						rows = []
-						let userObj = {}
-						for (const u of users) {
-							userObj = {}
-							// console.log(u)
-							userObj.id = u.ID
-							userObj.name = u.Name
-							userObj.description = u.Description
-							rows.push(userObj)
-							// {"Name":"","Permissions":null}},{"ID":18,"CreatedAt":"2021-07-16T16:29:48.508153567-03:00","UpdatedAt":"2021-07-16T16:29:48.508153567-03:00","DeletedAt":null,"Name":"","FirstName":"","LastName":"","Title":"","Initials":"","Email":"bob5@gmail.com","PHash":"$s2$16384$8$1$Y6/11yOsr8lGANCNCgYjqgQt$j4cqxYraVArl+tIN0y7WZu7/YARYhkcQVbXpOIwNrFo=",
+						let roleObj = {}
+						for (const r of roles) {
+							roleObj = {}
+							roleObj.id = r.ID
+							roleObj.name = r.Name
+							roleObj.description = r.Description
+							rows.push(roleObj)
 						}
-						resolve(users)
+						resolve(roles)
 					}
 				)
 			)
@@ -252,6 +252,7 @@
 				failedLastTime = false;
 				open = false;
 				clearForm();
+				updateRolesTable();
 				// fireToastNotification("success", {email: formState.userValue});
 			} else {
 				console.log('[Add role]: Got valid response from server but role registration has failed.')
@@ -266,7 +267,7 @@
 		}
 	}
 
-	updateUsers();
+	updateRolesTable();
 	let splitPermissionsPromise = getSplitPermissions(3);
 	splitPermissionsPromise.then(value => console.log(value))
 	
