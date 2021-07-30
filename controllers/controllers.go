@@ -8,13 +8,6 @@ import (
 	"github.com/lucashmorais/documenta/database"
 )
 
-type Book struct {
-	gorm.Model
-	Title  string `json: "title"`
-	Author string `json: "author"`
-	Rating int    `json: "rating"`
-}
-
 type Process struct {
 	gorm.Model
 	Title     string `json: "title"`
@@ -41,25 +34,28 @@ type Comment struct {
 type User struct {
 	gorm.Model
 	// ID       int
-	Name        string `json: "name"`
-	FirstName   string `json: "firstName"`
-	LastName    string `json: "lastName"`
-	Title       string `json: "title"`
-	Initials    string `json: "initials"`
-	Email       string `json: "email"`
-	PHash       string `json: "phash"`
-	Permissions []Permission
-	Role        Role
+	Name      string `json: "name"`
+	FirstName string `json: "firstName"`
+	LastName  string `json: "lastName"`
+	Title     string `json: "title"`
+	Initials  string `json: "initials"`
+	Email     string `json: "email"`
+	PHash     string `json: "phash"`
+	Roles     []Role
 }
 
 type Role struct {
+	gorm.Model
 	Name        string
-	Permissions []Permission
+	Description string
+	Permissions []Permission `gorm:"many2many:role_permissions"`
 }
 
 type Permission struct {
-	Name        string
+	gorm.Model
+	Summary     string
 	Description string
+	// Roles       []Role `gorm:"many2many:role_permissions"`
 }
 
 type Center struct {
@@ -72,27 +68,6 @@ type Type struct {
 	gorm.Model
 	ID          int
 	Description string
-}
-
-// It seems that Go will only automatically export symbols starting with a capital letter
-func NewProcess(c *fiber.Ctx) error {
-	db := database.DBConn
-	var book Book
-
-	// book.Author = "George Orwell"
-	// book.Title = "1984"
-	// book.Rating = 4
-
-	// This does not ensure that all Book fields are received nor that
-	// requests containing extraneous information is discarded
-	if err := c.BodyParser(&book); err != nil {
-		return c.Status(400).SendString("Request did not include information about the new book")
-	}
-
-	db.Create(&book)
-	return c.JSON(book)
-
-	// return c.SendString("Adds a new book")
 }
 
 func NewComment(c *fiber.Ctx) error {
@@ -116,19 +91,6 @@ func NewComment(c *fiber.Ctx) error {
 
 	db.Create(&comment)
 	return c.JSON(comment)
-}
-
-func DeleteBook(c *fiber.Ctx) error {
-	id := c.Params("id")
-	db := database.DBConn
-	var book Book
-	db.First(&book, id)
-	if book.Title == "" {
-		return c.Status(500).SendString("Book was not found")
-	}
-	title := book.Title
-	db.Delete(&book)
-	return c.SendString("The book " + title + " was successfully deleted")
 }
 
 func UpdateComment(c *fiber.Ctx) error {

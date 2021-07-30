@@ -36,6 +36,11 @@ const inputs = [
 		output: { file: 'public/build/users.js', name: 'users' },
 		css: 'users.css',
 	},
+	{
+		input: 'src/roles.js',
+		output: { file: 'public/build/roles.js', name: 'roles' },
+		css: 'roles.css',
+	},
 	// {
 	// 	input: 'src/visTest.js',
 	// 	output: { file: 'public/build/visTest.js', name: 'visTest' },

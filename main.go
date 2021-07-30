@@ -71,6 +71,8 @@ func initDatabase() {
 	database.DBConn.AutoMigrate(&controllers.Process{})
 	database.DBConn.AutoMigrate(&controllers.Comment{})
 	database.DBConn.AutoMigrate(&controllers.User{})
+	database.DBConn.AutoMigrate(&controllers.Role{})
+	database.DBConn.AutoMigrate(&controllers.Permission{})
 	database.DBConn.AutoMigrate(&controllers.UserFile{})
 	fmt.Println("DB auto-migration was set up")
 }
@@ -82,7 +84,7 @@ func setupRouter(app *fiber.App) {
 	app.Get("/api/v1/users", controllers.GetUsers)
 
 	protected := app.Group("/api/v1", authRequired())
-	protected.Post("process", controllers.NewProcess)
+	// protected.Post("process", controllers.NewProcess)
 
 	protected.Post("comment", controllers.NewComment)
 	protected.Put("comment/:id", controllers.UpdateComment)
@@ -97,6 +99,11 @@ func setupRouter(app *fiber.App) {
 	protected.Delete("file/:id", controllers.DeleteFile)
 
 	protected.Post("user", controllers.PostUser)
+
+	protected.Get("roles", controllers.GetRoles)
+	protected.Post("role", controllers.PostRole)
+
+	protected.Get("permissions", controllers.GetPermissions)
 }
 
 func addAuthRequestHeader(ctx *fiber.Ctx) error {
