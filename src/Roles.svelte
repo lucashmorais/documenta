@@ -206,6 +206,10 @@
 	function getSelectedPermissionIds() {
 		return getSelectedPermissions().map(p => p.id)
 	}
+	
+	function unselectAllPermissions() {
+		available_permissions.map(p => p.selected = false)
+	}
 
 	function togglePermissionSelection(permission) {
 		permission.selected = !permission.selected
@@ -219,6 +223,9 @@
 			formState[key] = ""
 		}
 		disableValidation()
+		unselectAllPermissions()
+		setTimeout(() => splitPermissionsPromise = getSplitPermissions(3), 700)
+		// splitPermissionsPromise = null
 	}
 	
 	async function submitForm() {
