@@ -30,6 +30,7 @@
 	let headers=[
 		{ key: 'name', value: 'Nome' },
 		{ key: 'description', value: 'Descrição' },
+		{ key: 'permissions', value: 'Permissões' },
 	];
 									
 	let open = false;
@@ -146,10 +147,13 @@
 						rows = []
 						let roleObj = {}
 						for (const r of roles) {
+							console.log("[updateRolesTable]: Printing a role object obtained from the backend")
+							console.log(r)
 							roleObj = {}
 							roleObj.id = r.ID
 							roleObj.name = r.Name
 							roleObj.description = r.Description
+							roleObj.permissions = r.Permissions.map((p) => p.Summary)
 							rows.push(roleObj)
 						}
 						resolve(roles)

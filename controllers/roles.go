@@ -14,7 +14,7 @@ func GetRoles(c *fiber.Ctx) error {
 
 	db := database.DBConn
 	var role []Role
-	db.Find(&role)
+	db.Preload("Permissions").Find(&role)
 	// db.Where("Name = ?", "Albert Billford").Find(&role)
 
 	return c.JSON(role)
