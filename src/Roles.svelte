@@ -19,11 +19,14 @@
 		Grid,
 		Row,
 		Column,
+		Tag,
+		Link,
 		Modal
 	} from "carbon-components-svelte";
 	// import Save16 from "carbon-icons-svelte/lib/Save16";
 	import TrashCan16 from "carbon-icons-svelte/lib/TrashCan16";
 	import Edit16 from "carbon-icons-svelte/lib/Edit16";
+	import Launch16 from "carbon-icons-svelte/lib/Launch16";
 	import isEmail from 'validator/es/lib/isEmail';
 	import isStrongPassword from 'validator/es/lib/isStrongPassword';
 
@@ -138,9 +141,9 @@
 		}
 	}
 
-	var usersPromise;
+	var rolesPromise;
 	export function updateRolesTable() {
-		usersPromise = new Promise((resolve, reject) => {
+		rolesPromise = new Promise((resolve, reject) => {
 			fetch("http://localhost:3123/api/v1/roles").
 				then((response)=>response.json().
 					then(function (roles) {
@@ -388,6 +391,17 @@
 				  <Button on:click={goToRegisterPage}>Nova função</Button>
 				</ToolbarContent>
 		      </Toolbar>
+				<span slot="cell" let:row let:cell>
+					{#if cell.key === 'permissions'}
+						{#each cell.value as v}
+							  <Tag>
+							    {v}
+							  </Tag>
+						{/each}
+					{:else}
+						{cell.value}
+					{/if}
+			      </span>
 			</DataTable>
 		</div>
 </div>
