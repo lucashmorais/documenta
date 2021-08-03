@@ -37,6 +37,7 @@
 	];
 									
 	let open = false;
+	let deleteConfirmationOpen = false;
 	let formState = {}
 	
 	formState.passwordValue = ""
@@ -103,6 +104,7 @@
 	let selectedRowIds=[];
 	
 	async function submitBatchDeletion() {
+		deleteConfirmationOpen = false;
 		console.log("selectedRowIds", selectedRowIds)
 
 		try {     
@@ -356,14 +358,23 @@
 			      </Grid>
 			{/await}
 		</FluidForm>
+	      </Modal>
 
-		<!-- <div class="button-holder"> -->
-			<!-- <ButtonSet> -->
-				<!-- <a href="/home.html"><Button>Entrar</Button></a> -->
-				<!-- <Button on:click={submitForm}>Registrar usuário</Button> -->
-				<!-- <Button on:click={clearForm} kind="secondary">Limpar</Button> -->
-			<!-- </ButtonSet> -->
-		<!-- </div> -->
+	      <Modal
+		bind:open={deleteConfirmationOpen}
+		modalHeading="Atenção!"
+		primaryButtonText="Confirmar"
+		secondaryButtonText="Cancelar"
+		on:click:button--secondary={() => (deleteConfirmationOpen = false)}
+		on:open
+		on:close
+		on:submit={submitBatchDeletion}
+	      >
+	      	{#if selectedRowIds.length > 1}
+			Você tem certeza que gostaria de remover {selectedRowIds.length} funções?
+		{:else}
+			Você tem certeza que gostaria de deletar a função selecionada?
+		{/if}
 	      </Modal>
 	      
 		<div class="content2">
@@ -376,7 +387,7 @@
 			<Toolbar>
 				<ToolbarBatchActions>
 				  <!-- <Button icon={Save16}>Eliminar</Button> -->
-				  <Button on:click={submitBatchDeletion} icon={TrashCan16}>Eliminar</Button>
+				  <Button on:click={() => deleteConfirmationOpen = true} icon={TrashCan16}>Eliminar</Button>
 				  <!-- <Button icon={Edit16}>Modificar</Button> -->
 				</ToolbarBatchActions>
 				<ToolbarContent>
