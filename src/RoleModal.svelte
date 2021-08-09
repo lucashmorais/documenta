@@ -21,7 +21,7 @@
 	export let open = false;
 	let formState = {}
 	
-	let failedLastTime = false
+	let validationIsEnabled = false
 
 	$: coreNameInvalid = formState.name == ""
 	$: coreDescriptionInvalid = formState.description == ""
@@ -56,9 +56,11 @@
 	}
 	
 	function enableValidation() {
+		validationIsEnabled = true;
 	}
 	
 	function disableValidation() {
+		validationIsEnabled = false;
 	}
 	
 	// TODO: ENSURE THIS WORKS FOR ALL POSSIBLE REMAINDER VALUES
@@ -133,7 +135,6 @@
 			
 			if (response.status == 200) {
 				console.log('[Add role]: Successfully registered role');
-				failedLastTime = false;
 				open = false;
 				clearForm();
 				// updateRolesTable();
@@ -141,7 +142,6 @@
 				// fireToastNotification("success", {email: formState.userValue});
 			} else {
 				console.log('[Add role]: Got valid response from server but role registration has failed.')
-				failedLastTime = true;
 				console.log(response)
 				// buildErrorToastFromResponse(response)
 			}
@@ -164,8 +164,8 @@
 	on:submit={() => submitForm()}
 >
 	<FluidForm>
-		<TextInput bind:value={formState.name} invalidText="Título inválido" invalid={coreNameInvalid} labelText="Nome" required />
-		<TextArea bind:value={formState.description} invalid={coreDescriptionInvalid} invalidText="Descrição inválida" placeholder="Uma breve descrição da função" required />
+		<TextInput bind:value={formState.name} invalidText="Título inválido" invalid={coreNameInvalid && validationIsEnabled} labelText="Nome" required />
+		<TextArea bind:value={formState.description} invalid={coreDescriptionInvalid && validationIsEnabled} invalidText="Descrição inválida" placeholder="Uma breve descrição da função" required />
 		<h4 style="padding-top: 1em">Permissões</h4>
 		{#await splitPermissionsPromise}
 		derp
