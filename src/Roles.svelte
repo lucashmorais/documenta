@@ -84,13 +84,11 @@
 			
 			if (response.status == 200) {
 				console.log('[Add role]: Successfully deleted roles');
-				failedLastTime = false;
 				selectedRowIds = [];
 				updateRolesTable();
 				// fireToastNotification("success", {email: formState.userValue});
 			} else {
 				console.log('[Add role]: Got valid response from server but role deletion has failed.')
-				failedLastTime = true;
 				console.log(response)
 				// buildErrorToastFromResponse(response)
 			}
