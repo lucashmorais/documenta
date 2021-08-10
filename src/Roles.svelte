@@ -38,6 +38,7 @@
 	];
 									
 	let open = false;
+	let modalPurpose = false;
 	let deleteConfirmationOpen = false;
 	let formState = {}
 	
@@ -60,6 +61,17 @@
 	
 	let rows=[];
 	let selectedRowIds=[];
+	
+	function getSelectedRole(selectedRowIds) {
+		if (selectedRowIds.length == 1) {
+			return rows.filter((row) => row.id == selectedRowIds[0])[0]
+		}
+		else
+			return null	
+	}
+
+	let selectedRole = {}
+	$: selectedRole = getSelectedRole(selectedRowIds)
 	
 	async function submitBatchDeletion() {
 		deleteConfirmationOpen = false;
@@ -126,8 +138,14 @@
 
 	updateRolesTable();
 	
-	function goToRegisterPage() {
+	function openRegistrationModal() {
 		// window.open("/register.html", '_blank').focus();
+		modalPurpose = 'registering'
+		open = true;
+	}
+	
+	function openEditModal() {
+		modalPurpose = 'editing'
 		open = true;
 	}
 	
@@ -170,6 +188,8 @@
 	
 		<RoleModal
 			bind:open={open}
+			bind:purpose={modalPurpose}
+			bind:selectedRole={selectedRole}
 			on:backendModification={updateRolesTable}
 		/>
 
@@ -202,7 +222,7 @@
 				  <!-- <Button icon={Save16}>Eliminar</Button> -->
 				  <Button on:click={() => deleteConfirmationOpen = true} icon={TrashCan16}>Remover</Button>
 				  {#if selectedRowIds.length < 2}
-					  <Button on:click={() => console.log("derp")} icon={Edit16}>Editar</Button>
+					  <Button on:click={() => openEditModal()} icon={Edit16}>Editar</Button>
 				  {/if}
 				  <!-- <Button icon={Edit16}>Modificar</Button> -->
 				</ToolbarBatchActions>
@@ -215,7 +235,7 @@
 				    </ToolbarMenuItem>
 				    <ToolbarMenuItem danger>Stop all</ToolbarMenuItem>
 				  </ToolbarMenu> -->
-				  <Button on:click={goToRegisterPage}>Nova função</Button>
+				  <Button on:click={openRegistrationModal}>Nova função</Button>
 				</ToolbarContent>
 		      </Toolbar>
 				<span slot="cell" let:row let:cell>

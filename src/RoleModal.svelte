@@ -19,6 +19,9 @@
 	}
 	
 	export let open = false;
+	export let purpose = 'registering';
+	export let selectedRole = {};
+
 	let formState = {}
 	
 	let validationIsEnabled = false
@@ -26,6 +29,13 @@
 	$: coreNameInvalid = formState.name == ""
 	$: coreDescriptionInvalid = formState.description == ""
 	$: someInputIsInvalid = coreNameInvalid || coreDescriptionInvalid
+	
+	$: console.log("[RoleModal::selectedRole]: ", selectedRole)
+	
+	$: if (selectedRole != null) {
+		formState.name = selectedRole.name
+		formState.description = selectedRole.description
+	}
 
 	let available_permissions = []
 	let splitPermissionsPromise = getSplitPermissions(3);
