@@ -50,6 +50,37 @@ func PostRole(c *fiber.Ctx) error {
 	return c.JSON(role)
 }
 
+func PutRole(c *fiber.Ctx) error {
+	db := database.DBConn
+	role := struct {
+		gorm.Model
+		Name        string `json: "name"`
+		Description string `json: "description"`
+		Permissions []int  `json: "permissions"`
+	}{}
+
+	err := c.BodyParser(&role)
+
+	if err != nil {
+		return c.Status(400).JSON(&fiber.Map{
+			"success": false,
+			"cause":   "form_decode_error",
+		})
+	}
+
+	dbRole := Role{}
+
+	var permissionSlice []Permission
+
+	db.Where("id = ?", role.ID).First(&dbRole)
+
+	db.Find(&permissionSlice, role.Permissions)
+
+	db.Model(&dbRole).Update(role)
+	db.Model(&dbRole).Association("Permissions").Replace(permissionSlice)
+	return c.JSON(role)
+}
+
 func DeleteRoles(c *fiber.Ctx) error {
 	db := database.DBConn
 	idsToDelete := struct {

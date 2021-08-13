@@ -102,6 +102,7 @@ func setupRouter(app *fiber.App) {
 
 	protected.Get("roles", controllers.GetRoles)
 	protected.Post("role", controllers.PostRole)
+	protected.Put("role", controllers.PutRole)
 	protected.Delete("roles", controllers.DeleteRoles)
 
 	protected.Get("permissions", controllers.GetPermissions)
@@ -110,7 +111,7 @@ func setupRouter(app *fiber.App) {
 func addAuthRequestHeader(ctx *fiber.Ctx) error {
 	// token := "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOiIyMDIxLTA2LTIzVDE4OjE2OjQ5LjcxMDU1Mzg3Ny0wMzowMCIsInN1YiI6IjEifQ.T7CADK7tFePIi_d8lcw4PS5RMLFIBu51j_rmdoHaDd8"
 	token := ctx.Cookies("documentaLoginToken")
-	println(token)
+	// println(token)
 	// ctx.Context().Request.Header.Add("Authorization", "Bearer "+token)
 	ctx.Context().Request.Header.Add("Authorization", "Bearer "+token)
 	// println(string(ctx.Context().Request.Header.Header()))
