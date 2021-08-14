@@ -20,22 +20,51 @@
 	
 	export let open = false;
 	export let purpose = 'registering';
-	export let selectedRole = {};
+	export let selectedRole = null;
 
-	let formState = {}
+	let formState = {name: "", description: ""}
 	
 	let validationIsEnabled = false
 
-	$: coreNameInvalid = formState.name == ""
-	$: coreDescriptionInvalid = formState.description == ""
-	$: someInputIsInvalid = coreNameInvalid || coreDescriptionInvalid
+	// $: nameInvalid = coreNameInvalid && validationIsEnabled
+	// $: descriptionInvalid = coreDescriptionInvalid && validationIsEnabled
+	// $: console.log("[nameInvalid, descriptionInvalid, formState.name, formState.description]: ", nameInvalid, descriptionInvalid, formState.name, formState.description)
 	
 	$: console.log("[RoleModal::selectedRole]: ", selectedRole)
 	
-	$: if (selectedRole != null) {
-		formState.name = selectedRole.name
-		formState.description = selectedRole.description
+	function coreNameInvalid() {
+		return formState.name == ""
 	}
+	
+	function nameInvalid() {
+		return coreNameInvalid() && validationIsEnabled
+	}
+	
+	function coreDescriptionInvalid() {
+		return formState.description == ""
+	}
+	
+	function descriptionInvalid() {
+		return coreDescriptionInvalid() && validationIsEnabled
+	}
+
+	function someInputIsInvalid() {
+		return coreNameInvalid() || coreDescriptionInvalid()
+	}
+	
+	function updateFormBasedOnPurpose(actionPurpose, selectedRole) {
+		console.log("[RoleModal::purpose]: ", actionPurpose)
+		if (selectedRole != null) {
+			console.log("[RoleModal::updateFormBasedOnPurpose]: Updating formState")
+			formState.name = selectedRole.name
+			formState.description = selectedRole.description
+			formState = formState
+			console.log("[RoleModal::updateFormBasedOnPurpose]: Updated formState: ", formState)
+		}
+		splitPermissionsPromise = getSplitPermissions(3);
+	}
+	
+	$: updateFormBasedOnPurpose(purpose, selectedRole)
 
 	let available_permissions = []
 	let splitPermissionsPromise = getSplitPermissions(3);
@@ -106,60 +135,96 @@
 		console.log(getSelectedPermissionIds())
 	}
 	
+	function permissionIsActive(permission) {
+		console.log("[RoleModal::permissionIsActive::selectedRole]: ", selectedRole)
+		const isActive = selectedRole != null && selectedRole.permissions.filter((p) => p == permission.summary).length > 0
+		if (isActive) {
+			togglePermissionSelection(permission)
+		}
+		return isActive;
+	}
+	
 	function clearForm() {
 		const keys = Object.keys(formState)
 		for (const key of keys) {
 			formState[key] = ""
 		}
+		formState = formState
 		disableValidation()
 		unselectAllPermissions()
-		setTimeout(() => splitPermissionsPromise = getSplitPermissions(3), 700)
+		setTimeout(() => purpose = null, splitPermissionsPromise = getSplitPermissions(3), 700)
 		// splitPermissionsPromise = null
 	}
 	
 	async function submitForm() {
-		if (someInputIsInvalid) {
-			enableValidation()
-			return
-		}
-		disableValidation()
-
-		try {     
-			let requestBody = JSON.stringify({
-						"name": formState.name,
-						"description": formState.description,
-						"permissions": getSelectedPermissionIds(),
-					});
-
-			console.log("[submitForm:requestBody]: ", requestBody);
-
-			const response = await fetch('http://localhost:3123/api/v1/role', {
-					method: 'post',
-
-					body: requestBody,
-					headers: {
-						'Content-type': 'application/json; charset=UTF-8'
-					}
-				}
-			);
-			
-			if (response.status == 200) {
-				console.log('[Add role]: Successfully registered role');
-				open = false;
-				clearForm();
-				// updateRolesTable();
-				signalBackendModification();
-				// fireToastNotification("success", {email: formState.userValue});
-			} else {
-				console.log('[Add role]: Got valid response from server but role registration has failed.')
-				console.log(response)
-				// buildErrorToastFromResponse(response)
+			if (someInputIsInvalid()) {
+				console.log("[submitForm:someInputIsInvalid:formState]: ", formState)
+				enableValidation()
+				return
 			}
+			disableValidation()
 
-		} catch(err) {
-			console.error(`Error: ${err}`);
-			return;
-		}
+			try {     
+				let requestBody;
+				let response;
+				if (purpose == "registering") {
+					requestBody = JSON.stringify({
+								"name": formState.name,
+								"description": formState.description,
+								"permissions": getSelectedPermissionIds(),
+							});
+
+					console.log("[submitForm:registering:requestBody]: ", requestBody);
+
+					response = await fetch('http://localhost:3123/api/v1/role', {
+							method: 'post',
+
+							body: requestBody,
+							headers: {
+								'Content-type': 'application/json; charset=UTF-8'
+							}
+						}
+					);
+				} else if (purpose == "editing") {
+					requestBody = JSON.stringify({
+								"id": selectedRole.id,
+								"name": formState.name,
+								"description": formState.description,
+								"permissions": getSelectedPermissionIds(),
+							});
+
+					console.log("[submitForm:editing:requestBody]: ", requestBody);
+
+					response = await fetch('http://localhost:3123/api/v1/role', {
+							method: 'put',
+
+							body: requestBody,
+							headers: {
+								'Content-type': 'application/json; charset=UTF-8'
+							}
+						}
+					);
+				} else {
+					return;
+				}
+				
+				if (response.status == 200) {
+					console.log('[Add role]: Successfully registered role');
+					open = false;
+					clearForm();
+					// updateRolesTable();
+					signalBackendModification();
+					// fireToastNotification("success", {email: formState.userValue});
+				} else {
+					console.log('[Add role]: Got valid response from server but role registration has failed.')
+					console.log(response)
+					// buildErrorToastFromResponse(response)
+				}
+
+			} catch(err) {
+				console.error(`Error: ${err}`);
+				return;
+			}
 	}
 </script>
 
@@ -169,23 +234,27 @@
 	primaryButtonText="Confirmar"
 	secondaryButtonText="Cancelar"
 	on:click:button--secondary={() => (open = false)}
-	on:open
+	on:open={() => clearForm()}
 	on:close={() => clearForm()}
 	on:submit={() => submitForm()}
 >
 	<FluidForm>
-		<TextInput bind:value={formState.name} invalidText="Título inválido" invalid={coreNameInvalid && validationIsEnabled} labelText="Nome" required />
-		<TextArea bind:value={formState.description} invalid={coreDescriptionInvalid && validationIsEnabled} invalidText="Descrição inválida" placeholder="Uma breve descrição da função" required />
+		<TextInput bind:value={formState.name} invalidText="Título inválido" invalid={nameInvalid()} labelText="Nome" required />
+		<TextArea bind:value={formState.description} invalid={descriptionInvalid()} invalidText="Descrição inválida" placeholder="Uma breve descrição da função" required />
 		<h4 style="padding-top: 1em">Permissões</h4>
 		{#await splitPermissionsPromise}
-		derp
+		...
 		{:then splitPermissions}
 			<Grid narrow padding>
 				<Row>
 					{#each splitPermissions.reverse() as splitGroup}
 						<Column>
 							{#each splitGroup as permission}
-								<Checkbox on:check={() => togglePermissionSelection(permission)} labelText={permission.summary}/>
+								{#if permissionIsActive(permission)}
+									<Checkbox checked on:check={() => togglePermissionSelection(permission)} labelText={permission.summary}/>
+								{:else}
+									<Checkbox on:check={() => togglePermissionSelection(permission)} labelText={permission.summary}/>
+								{/if}
 							{/each}
 						</Column>
 					{/each}

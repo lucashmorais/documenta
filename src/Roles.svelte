@@ -71,7 +71,7 @@
 	}
 
 	let selectedRole = {}
-	$: selectedRole = getSelectedRole(selectedRowIds)
+	$: selectedRole = getSelectedRole(selectedRowIds, modalPurpose)
 	
 	async function submitBatchDeletion() {
 		deleteConfirmationOpen = false;
@@ -141,12 +141,12 @@
 	function openRegistrationModal() {
 		// window.open("/register.html", '_blank').focus();
 		modalPurpose = 'registering'
-		open = true;
+		setTimeout(() => open = true, 100)
 	}
 	
 	function openEditModal() {
 		modalPurpose = 'editing'
-		open = true;
+		setTimeout(() => open = true, 100)
 	}
 	
 	// setInterval(() => console.log(selectedRowIds), 500)
