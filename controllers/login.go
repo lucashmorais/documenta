@@ -1,7 +1,6 @@
 package controllers
 
 import (
-	"fmt"
 	"time"
 
 	"github.com/gofiber/fiber/v2"
@@ -76,66 +75,4 @@ func Login(ctx *fiber.Ctx) error {
 	})
 
 	return nil
-}
-
-func GetUser(c *fiber.Ctx) error {
-	// email := c.Params("email")
-	// password := c.Params("password")
-
-	db := database.DBConn
-	var user User
-	db.Where("email = ?", "bob@gmail.com").Where("p_hash = ?", "password123").Find(&user)
-	// db.Where("Name = ?", "Albert Billford").Find(&user)
-
-	return c.JSON(user)
-}
-
-func GetUsers(c *fiber.Ctx) error {
-	// email := c.Params("email")
-	// password := c.Params("password")
-
-	db := database.DBConn
-	var user []User
-	db.Find(&user)
-	// db.Where("Name = ?", "Albert Billford").Find(&user)
-
-	return c.JSON(user)
-}
-
-func PostUser(c *fiber.Ctx) error {
-	db := database.DBConn
-	var user, oldUser User
-	err := c.BodyParser(&user)
-
-	if err != nil {
-		return c.Status(400).JSON(&fiber.Map{
-			"success": false,
-			"cause":   "form_decode_error",
-		})
-	}
-
-	db.Where("email = ?", user.Email).Find(&oldUser)
-
-	if oldUser.Email != "" {
-		return c.Status(400).JSON(&fiber.Map{
-			"success": false,
-			"cause":   "email_was_taken",
-		})
-	}
-
-	hash, err := passlib.Hash(user.PHash)
-
-	if err != nil {
-		return c.Status(400).JSON(&fiber.Map{
-			"success": false,
-			"cause":   "cannot_hash_password",
-		})
-	}
-
-	fmt.Printf("[hash from user-provided password]: %s", hash)
-
-	user.PHash = hash
-
-	db.Create(&user)
-	return c.JSON(user)
 }
