@@ -23,6 +23,7 @@
 	
 	let rows=[];
 	let selectedRowIds=[];
+	$: console.log("selectedRowIds: ", selectedRowIds)
 
 	// let rows=[
 	// 	{ id: 'a', assunto: 'Assunto 0', centro: 'cs', tipo: 3000, pend: 'Revisão do defensor' },
@@ -108,9 +109,10 @@
 			>
 			<Toolbar>
 				<ToolbarBatchActions>
-				  <!-- <Button icon={Save16}>Eliminar</Button> -->
 				  <Button icon={TrashCan16}>Eliminar</Button>
-				  <!-- <Button icon={Edit16}>Modificar</Button> -->
+				  {#if selectedRowIds.length < 2}
+					  <Button on:click={() => console.log("Showing edit button")} icon={Edit16}>Editar</Button>
+				  {/if}
 				</ToolbarBatchActions>
 				<ToolbarContent>
 				  <ToolbarSearch />
