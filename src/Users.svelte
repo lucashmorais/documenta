@@ -24,7 +24,19 @@
 	
 	let rows=[];
 	let selectedRowIds=[];
-	$: console.log("selectedRowIds: ", selectedRowIds)
+	let selectedRow = null;
+	
+	function updateSelectedRow(ignored_param) {
+		if (selectedRowIds.length == 1) {
+			selectedRow = rows.filter((row) => row.id == selectedRowIds[0])[0]
+		} else {
+			selectedRow = null;
+		}
+		
+		console.log("[updateSelectedRow]: selectedRow: ", selectedRow)
+	}
+
+	$: updateSelectedRow(selectedRowIds)
 
 	// let rows=[
 	// 	{ id: 'a', assunto: 'Assunto 0', centro: 'cs', tipo: 3000, pend: 'Revisão do defensor' },
@@ -97,7 +109,10 @@
 
 </style>
 
-<UserModal bind:open={modalIsOpen}/>
+<UserModal 
+	bind:open={modalIsOpen}
+	bind:userInfo={selectedRow}
+/>
 
 <StatusBar />
 <h1>Documenta</h1>
