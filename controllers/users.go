@@ -91,12 +91,11 @@ func PutUser(c *fiber.Ctx) error {
 		})
 	}
 
-	dbUser := Role{}
+	dbUser := User{}
 
 	var roleSlice []Role
 
 	db.Where("id = ?", user.ID).First(&dbUser)
-
 	db.Find(&roleSlice, user.Roles)
 
 	db.Model(&dbUser).Update(user)

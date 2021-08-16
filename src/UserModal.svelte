@@ -53,6 +53,11 @@
 		validationIsEnabled = false;
 	}
 	
+	function someInputIsInvalid() {
+		//TODO: ACTUALLY IMPLEMENT THIS
+		return false;
+	}
+	
 	let available_roles = []
 	let splitRolesPromise = getSplitRoles(3);
 	splitRolesPromise.then(value => console.log(value))
@@ -166,6 +171,7 @@
 				);
 			} else if (purpose == "editing") {
 				requestBody = JSON.stringify({
+							"id": userInfo.id,
 							"email": formState.email,
 							"firstName": formState.firstName,
 							"lastName": formState.lastName,
@@ -189,7 +195,7 @@
 			}
 			
 			if (response.status == 200) {
-				console.log('[Add role]: Successfully registered role');
+				console.log('[UserModal::submitForm]: Successfully performed action: ', purpose);
 				open = false;
 				clearForm();
 				// updateRolesTable();
