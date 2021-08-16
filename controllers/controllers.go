@@ -41,7 +41,7 @@ type User struct {
 	Initials  string `json: "initials"`
 	Email     string `json: "email"`
 	PHash     string `json: "phash"`
-	Roles     []Role
+	Roles     []Role `gorm:"many2many:user_roles"`
 }
 
 type Role struct {
