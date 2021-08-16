@@ -20,12 +20,30 @@
 	}
 	
 	let validationIsEnabled = false;
-	let nameIsInvalid = false;
-	let descriptionIsInvalid = false;
+	let emailIsInvalid = false;
+	let firstNameIsInvalid = false;
+	let lastNameIsInvalid = false;
+	let initiaisAreInvalid = false;
+	
+	let purpose = "editing"
 
 	export let userInfo = null;
 	
+	function updateFormState(userInfo) {
+		if (userInfo != null) {
+			//TODO: REMOVE THE FOLLOWING ONCE WE START RETRIEVING SUCH INFORMATION FROM THE DB!
+			userInfo.roles = []
+
+			formState.email = userInfo.email;
+			formState.firstName = userInfo.firstName;
+			formState.lastName = userInfo.lastName;
+			formState.initials = userInfo.initials;
+			formState.roles = userInfo.initials;
+		}
+	}
+	
 	$: console.log("[UserModal::userInfo]: ", userInfo)
+	$: updateFormState(userInfo)
 	
 	function enableValidation() {
 		validationIsEnabled = true;
@@ -54,7 +72,6 @@
 							roleObj.selected = false
 							console.log(roleObj)
 							available_roles.push(roleObj)
-							// {"Name":"","Roles":null}},{"ID":18,"CreatedAt":"2021-07-16T16:29:48.508153567-03:00","UpdatedAt":"2021-07-16T16:29:48.508153567-03:00","DeletedAt":null,"Name":"","FirstName":"","LastName":"","Title":"","Initials":"","Email":"bob5@gmail.com","PHash":"$s2$16384$8$1$Y6/11yOsr8lGANCNCgYjqgQt$j4cqxYraVArl+tIN0y7WZu7/YARYhkcQVbXpOIwNrFo=",
 						}
 						resolve(roles)
 					}
@@ -115,6 +132,81 @@
 		setTimeout(() => splitRolesPromise = getSplitRoles(3), 700)
 		// splitRolesPromise = null
 	}
+
+	async function submitForm() {
+		if (someInputIsInvalid()) {
+			console.log("[submitForm:someInputIsInvalid:formState]: ", formState)
+			enableValidation()
+			return
+		}
+		disableValidation()
+
+		try {     
+			let requestBody;
+			let response;
+			if (purpose == "registering") {
+				requestBody = JSON.stringify({
+							"email": formState.email,
+							"firstName": formState.firstName,
+							"lastName": formState.lastName,
+							"initials": formState.initials,
+							"roles": getSelectedRoleIds(),
+						});
+
+				console.log("[submitForm:registering:requestBody]: ", requestBody);
+
+				response = await fetch('http://localhost:3123/api/v1/role', {
+						method: 'post',
+
+						body: requestBody,
+						headers: {
+							'Content-type': 'application/json; charset=UTF-8'
+						}
+					}
+				);
+			} else if (purpose == "editing") {
+				requestBody = JSON.stringify({
+							"email": formState.email,
+							"firstName": formState.firstName,
+							"lastName": formState.lastName,
+							"initials": formState.initials,
+							"roles": getSelectedRoleIds(),
+						});
+
+				console.log("[submitForm:editing:requestBody]: ", requestBody);
+
+				response = await fetch('http://localhost:3123/api/v1/user', {
+						method: 'put',
+
+						body: requestBody,
+						headers: {
+							'Content-type': 'application/json; charset=UTF-8'
+						}
+					}
+				);
+			} else {
+				return;
+			}
+			
+			if (response.status == 200) {
+				console.log('[Add role]: Successfully registered role');
+				open = false;
+				clearForm();
+				// updateRolesTable();
+				//TODO: RE-ENABLE THE FOLLOWING PIECE OF CODE
+				// signalBackendModification();
+				// fireToastNotification("success", {email: formState.userValue});
+			} else {
+				console.log('[Add role]: Got valid response from server but role registration has failed.')
+				console.log(response)
+				// buildErrorToastFromResponse(response)
+			}
+
+		} catch(err) {
+			console.error(`Error: ${err}`);
+			return;
+		}
+	}
 </script>
 
 
@@ -125,14 +217,19 @@
 	secondaryButtonText="Cancelar"
 	on:click:button--secondary={() => (open = false)}
 	on:open={() => {}}
-	on:close={() => {}}
-	on:submit={() => {}}
+	on:close={() => {
+		clearForm()
+	}}
+	on:submit={() => {
+		submitForm()
+		clearForm();
+	}}
 >
 	<FluidForm>
-		<TextInput bind:value={formState.email} invalidText="Título inválido" invalid={nameIsInvalid} labelText="E-mail" required />
-		<TextInput bind:value={formState.first_name} invalidText="Entrada inválida" invalid={nameIsInvalid} labelText="Primeiro nome" required />
-		<TextInput bind:value={formState.last_name} invalidText="Entrada inválida" invalid={nameIsInvalid} labelText="Último nome" required />
-		<TextInput bind:value={formState.initials} invalidText="Iniciais inválidas" invalid={nameIsInvalid} labelText="Iniciais" required />
+		<TextInput bind:value={formState.email} invalidText="Título inválido" invalid={emailIsInvalid} labelText="E-mail" required />
+		<TextInput bind:value={formState.firstName} invalidText="Entrada inválida" invalid={firstNameIsInvalid} labelText="Primeiro nome" required />
+		<TextInput bind:value={formState.lastName} invalidText="Entrada inválida" invalid={lastNameIsInvalid} labelText="Último nome" required />
+		<TextInput bind:value={formState.initials} invalidText="Iniciais inválidas" invalid={initiaisAreInvalid} labelText="Iniciais" required />
 		<h4 style="padding-top: 1em">Funções</h4>
 		{#await splitRolesPromise}
 		...
