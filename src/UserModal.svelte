@@ -35,28 +35,28 @@
 		validationIsEnabled = false;
 	}
 	
-	let available_permissions = []
-	let splitPermissionsPromise = getSplitPermissions(3);
-	splitPermissionsPromise.then(value => console.log(value))
+	let available_roles = []
+	let splitRolesPromise = getSplitRoles(3);
+	splitRolesPromise.then(value => console.log(value))
 	
-	export function updatePermissions() {
+	export function updateRoles() {
 		return new Promise((resolve, reject) => {
-			fetch("http://localhost:3123/api/v1/permissions").
+			fetch("http://localhost:3123/api/v1/roles").
 				then((response)=>response.json().
-					then(function (permissions) {
-						available_permissions = []
-						let permissionObj = {}
-						for (const u of permissions) {
-							permissionObj = {}
+					then(function (roles) {
+						available_roles = []
+						let roleObj = {}
+						for (const u of roles) {
+							roleObj = {}
 							// console.log(u)
-							permissionObj.id = u.ID
-							permissionObj.summary= u.Summary
-							permissionObj.selected = false
-							console.log(permissionObj)
-							available_permissions.push(permissionObj)
-							// {"Name":"","Permissions":null}},{"ID":18,"CreatedAt":"2021-07-16T16:29:48.508153567-03:00","UpdatedAt":"2021-07-16T16:29:48.508153567-03:00","DeletedAt":null,"Name":"","FirstName":"","LastName":"","Title":"","Initials":"","Email":"bob5@gmail.com","PHash":"$s2$16384$8$1$Y6/11yOsr8lGANCNCgYjqgQt$j4cqxYraVArl+tIN0y7WZu7/YARYhkcQVbXpOIwNrFo=",
+							roleObj.id = u.ID
+							roleObj.summary= u.Name
+							roleObj.selected = false
+							console.log(roleObj)
+							available_roles.push(roleObj)
+							// {"Name":"","Roles":null}},{"ID":18,"CreatedAt":"2021-07-16T16:29:48.508153567-03:00","UpdatedAt":"2021-07-16T16:29:48.508153567-03:00","DeletedAt":null,"Name":"","FirstName":"","LastName":"","Title":"","Initials":"","Email":"bob5@gmail.com","PHash":"$s2$16384$8$1$Y6/11yOsr8lGANCNCgYjqgQt$j4cqxYraVArl+tIN0y7WZu7/YARYhkcQVbXpOIwNrFo=",
 						}
-						resolve(permissions)
+						resolve(roles)
 					}
 				)
 			)
@@ -64,42 +64,42 @@
 	}
 	
 	// TODO: ENSURE THIS WORKS FOR ALL POSSIBLE REMAINDER VALUES
-	function getSplitPermissions(numBlocks) {
+	function getSplitRoles(numBlocks) {
 		return new Promise(async function(resolve) {
-			await updatePermissions()
-			let numPermissions = available_permissions.length
-			let numPerBlock = numPermissions / numBlocks
+			await updateRoles()
+			let numRoles = available_roles.length
+			let numPerBlock = numRoles / numBlocks
 			
-			let splitPermissions = []
-			for (let i = 0; i < numPermissions; i += numPerBlock) {
-				splitPermissions.push(available_permissions.slice(i, i + numPerBlock))
+			let splitRoles = []
+			for (let i = 0; i < numRoles; i += numPerBlock) {
+				splitRoles.push(available_roles.slice(i, i + numPerBlock))
 			}
-			resolve(splitPermissions)
+			resolve(splitRoles)
 		});
 	}
 	
-	function getSelectedPermissions() {
-		return available_permissions.filter(p => p.selected)
+	function getSelectedRoles() {
+		return available_roles.filter(p => p.selected)
 	}
 	
-	function getSelectedPermissionIds() {
-		return getSelectedPermissions().map(p => p.id)
+	function getSelectedRoleIds() {
+		return getSelectedRoles().map(p => p.id)
 	}
 	
-	function unselectAllPermissions() {
-		available_permissions.map(p => p.selected = false)
+	function unselectAllRoles() {
+		available_roles.map(p => p.selected = false)
 	}
 
-	function togglePermissionSelection(permission) {
-		permission.selected = !permission.selected
-		console.log(getSelectedPermissions())
-		console.log(getSelectedPermissionIds())
+	function toggleRoleSelection(role) {
+		role.selected = !role.selected
+		console.log(getSelectedRoles())
+		console.log(getSelectedRoleIds())
 	}
 	
-	function permissionIsActive(permission) {
-		const isActive = userInfo != null && userInfo.permissions.filter((p) => p == permission.summary).length > 0
+	function roleIsActive(role) {
+		const isActive = userInfo != null && userInfo.roles.filter((p) => p == role.summary).length > 0
 		if (isActive) {
-			togglePermissionSelection(permission)
+			toggleRoleSelection(role)
 		}
 		return isActive;
 	}
@@ -111,9 +111,9 @@
 		}
 		formState = formState
 		disableValidation()
-		unselectAllPermissions()
-		setTimeout(() => splitPermissionsPromise = getSplitPermissions(3), 700)
-		// splitPermissionsPromise = null
+		unselectAllRoles()
+		setTimeout(() => splitRolesPromise = getSplitRoles(3), 700)
+		// splitRolesPromise = null
 	}
 </script>
 
@@ -134,18 +134,18 @@
 		<TextInput bind:value={formState.last_name} invalidText="Entrada inválida" invalid={nameIsInvalid} labelText="Último nome" required />
 		<TextInput bind:value={formState.initials} invalidText="Iniciais inválidas" invalid={nameIsInvalid} labelText="Iniciais" required />
 		<h4 style="padding-top: 1em">Funções</h4>
-		{#await splitPermissionsPromise}
+		{#await splitRolesPromise}
 		...
-		{:then splitPermissions}
+		{:then splitRoles}
 			<Grid narrow padding>
 				<Row>
-					{#each splitPermissions.reverse() as splitGroup}
+					{#each splitRoles.reverse() as splitGroup}
 						<Column>
-							{#each splitGroup as permission}
-								{#if permissionIsActive(permission)}
-									<Checkbox checked on:check={() => togglePermissionSelection(permission)} labelText={permission.summary}/>
+							{#each splitGroup as role}
+								{#if roleIsActive(role)}
+									<Checkbox checked on:check={() => toggleRoleSelection(role)} labelText={role.summary}/>
 								{:else}
-									<Checkbox on:check={() => togglePermissionSelection(permission)} labelText={permission.summary}/>
+									<Checkbox on:check={() => toggleRoleSelection(role)} labelText={role.summary}/>
 								{/if}
 							{/each}
 						</Column>
