@@ -2,6 +2,7 @@
 	import 'carbon-components-svelte/css/all.css';
 	import StatusBar from './StatusBar.svelte'
 	import DataTable from './DataTable/DataTable.svelte'
+	import UserModal from './UserModal.svelte'
 	import {
 		Toolbar,
 		Button,
@@ -29,6 +30,8 @@
 	// 	{ id: 'a', assunto: 'Assunto 0', centro: 'cs', tipo: 3000, pend: 'Revisão do defensor' },
 	// 	{ id: 'b', assunto: 'Assunto 1', centro: 'brs', tipo: 443, pend: 'Revisão inicial do Secretário' },
 	// ];
+	
+	let modalIsOpen = false;
 
 	var usersPromise;
 	export function updateUsers() {
@@ -94,6 +97,8 @@
 
 </style>
 
+<UserModal bind:open={modalIsOpen}/>
+
 <StatusBar />
 <h1>Documenta</h1>
 <!-- <h2 class=realh2>Usuários</h2> -->
@@ -111,7 +116,7 @@
 				<ToolbarBatchActions>
 				  <Button icon={TrashCan16}>Eliminar</Button>
 				  {#if selectedRowIds.length < 2}
-					  <Button on:click={() => console.log("Showing edit button")} icon={Edit16}>Editar</Button>
+					  <Button on:click={() => modalIsOpen = true} icon={Edit16}>Editar</Button>
 				  {/if}
 				</ToolbarBatchActions>
 				<ToolbarContent>
