@@ -1,4 +1,5 @@
 <script>
+	import { purpose } from './stores.js'
 	import {
 		FluidForm,
 		TextInput,
@@ -19,16 +20,15 @@
 	}
 	
 	export let open = false;
-	export let purpose = 'registering';
 	export let selectedRole = null;
 
 	let formState = {name: "", description: ""}
 	
 	let validationIsEnabled = false
 
-	// $: nameInvalid = coreNameInvalid && validationIsEnabled
-	// $: descriptionInvalid = coreDescriptionInvalid && validationIsEnabled
-	// $: console.log("[nameInvalid, descriptionInvalid, formState.name, formState.description]: ", nameInvalid, descriptionInvalid, formState.name, formState.description)
+	$: nameIsInvalid = nameInvalid(formState.name, validationIsEnabled)
+	$: descriptionIsInvalid = descriptionInvalid(formState.description, validationIsEnabled)
+	$: console.log("[RoleModal:purpose]: ", $purpose)
 	
 	$: console.log("[RoleModal::selectedRole]: ", selectedRole)
 	
@@ -37,7 +37,9 @@
 	}
 	
 	function nameInvalid() {
-		return coreNameInvalid() && validationIsEnabled
+		nameIsInvalid = coreNameInvalid() && validationIsEnabled
+		console.log("[nameInvalid]: ", nameIsInvalid)
+		return nameIsInvalid
 	}
 	
 	function coreDescriptionInvalid() {
@@ -45,15 +47,17 @@
 	}
 	
 	function descriptionInvalid() {
-		return coreDescriptionInvalid() && validationIsEnabled
+		descriptionIsInvalid = coreDescriptionInvalid() && validationIsEnabled
+		console.log("[descriptionInvalid]: ", descriptionIsInvalid)
+		return descriptionIsInvalid
 	}
 
 	function someInputIsInvalid() {
 		return coreNameInvalid() || coreDescriptionInvalid()
 	}
 	
-	function updateFormBasedOnPurpose(actionPurpose, selectedRole) {
-		console.log("[RoleModal::purpose]: ", actionPurpose)
+	function updateFormBasedOnPurpose() {
+		console.log("[updateFormBasedOnPurpose] selectedRole: ", selectedRole)
 		if (selectedRole != null) {
 			console.log("[RoleModal::updateFormBasedOnPurpose]: Updating formState")
 			formState.name = selectedRole.name
@@ -63,8 +67,6 @@
 		}
 		splitPermissionsPromise = getSplitPermissions(3);
 	}
-	
-	$: updateFormBasedOnPurpose(purpose, selectedRole)
 
 	let available_permissions = []
 	let splitPermissionsPromise = getSplitPermissions(3);
@@ -152,79 +154,80 @@
 		formState = formState
 		disableValidation()
 		unselectAllPermissions()
-		setTimeout(() => purpose = null, splitPermissionsPromise = getSplitPermissions(3), 700)
+		setTimeout(() => splitPermissionsPromise = getSplitPermissions(3), 700)
 		// splitPermissionsPromise = null
 	}
 	
 	async function submitForm() {
-			if (someInputIsInvalid()) {
-				console.log("[submitForm:someInputIsInvalid:formState]: ", formState)
-				enableValidation()
-				return
-			}
-			disableValidation()
+		if (someInputIsInvalid()) {
+			console.log("[submitForm:someInputIsInvalid:formState]: ", formState)
+			enableValidation()
+			return
+		}
+		disableValidation()
+		console.log("[submitForm]: Building request for answering purpose: ", $purpose)
 
-			try {     
-				let requestBody;
-				let response;
-				if (purpose == "registering") {
-					requestBody = JSON.stringify({
-								"name": formState.name,
-								"description": formState.description,
-								"permissions": getSelectedPermissionIds(),
-							});
+		try {     
+			let requestBody;
+			let response;
+			if ($purpose == "registering") {
+				requestBody = JSON.stringify({
+							"name": formState.name,
+							"description": formState.description,
+							"permissions": getSelectedPermissionIds(),
+						});
 
-					console.log("[submitForm:registering:requestBody]: ", requestBody);
+				console.log("[submitForm:registering:requestBody]: ", requestBody);
 
-					response = await fetch('http://localhost:3123/api/v1/role', {
-							method: 'post',
+				response = await fetch('http://localhost:3123/api/v1/role', {
+						method: 'post',
 
-							body: requestBody,
-							headers: {
-								'Content-type': 'application/json; charset=UTF-8'
-							}
+						body: requestBody,
+						headers: {
+							'Content-type': 'application/json; charset=UTF-8'
 						}
-					);
-				} else if (purpose == "editing") {
-					requestBody = JSON.stringify({
-								"id": selectedRole.id,
-								"name": formState.name,
-								"description": formState.description,
-								"permissions": getSelectedPermissionIds(),
-							});
+					}
+				);
+			} else if ($purpose == "editing") {
+				requestBody = JSON.stringify({
+							"id": selectedRole.id,
+							"name": formState.name,
+							"description": formState.description,
+							"permissions": getSelectedPermissionIds(),
+						});
 
-					console.log("[submitForm:editing:requestBody]: ", requestBody);
+				console.log("[submitForm:editing:requestBody]: ", requestBody);
 
-					response = await fetch('http://localhost:3123/api/v1/role', {
-							method: 'put',
+				response = await fetch('http://localhost:3123/api/v1/role', {
+						method: 'put',
 
-							body: requestBody,
-							headers: {
-								'Content-type': 'application/json; charset=UTF-8'
-							}
+						body: requestBody,
+						headers: {
+							'Content-type': 'application/json; charset=UTF-8'
 						}
-					);
-				} else {
-					return;
-				}
-				
-				if (response.status == 200) {
-					console.log('[Add role]: Successfully registered role');
-					open = false;
-					clearForm();
-					// updateRolesTable();
-					signalBackendModification();
-					// fireToastNotification("success", {email: formState.userValue});
-				} else {
-					console.log('[Add role]: Got valid response from server but role registration has failed.')
-					console.log(response)
-					// buildErrorToastFromResponse(response)
-				}
-
-			} catch(err) {
-				console.error(`Error: ${err}`);
+					}
+				);
+			} else {
 				return;
 			}
+			
+			if (response.status == 200) {
+				console.log('[Add role]: Successfully registered role');
+				open = false;
+				clearForm();
+				// updateRolesTable();
+				signalBackendModification();
+				// fireToastNotification("success", {email: formState.userValue});
+			} else {
+				console.log('[Add role]: Got valid response from server but role registration has failed.')
+				console.log(response)
+				// buildErrorToastFromResponse(response)
+			}
+
+		} catch(err) {
+			console.error(`Error: ${err}`);
+			return;
+		}
 	}
 </script>
 
@@ -234,13 +237,19 @@
 	primaryButtonText="Confirmar"
 	secondaryButtonText="Cancelar"
 	on:click:button--secondary={() => (open = false)}
-	on:open={() => clearForm()}
+	on:open={() => {
+		if ($purpose == 'registering') {
+			clearForm()
+		} else {
+			updateFormBasedOnPurpose()
+		}
+	}}
 	on:close={() => clearForm()}
 	on:submit={() => submitForm()}
 >
 	<FluidForm>
-		<TextInput bind:value={formState.name} invalidText="Título inválido" invalid={nameInvalid()} labelText="Nome" required />
-		<TextArea bind:value={formState.description} invalid={descriptionInvalid()} invalidText="Descrição inválida" placeholder="Uma breve descrição da função" required />
+		<TextInput bind:value={formState.name} invalidText="Título inválido" invalid={nameIsInvalid} labelText="Nome" required />
+		<TextArea bind:value={formState.description} invalid={descriptionIsInvalid} invalidText="Descrição inválida" placeholder="Uma breve descrição da função" required />
 		<h4 style="padding-top: 1em">Permissões</h4>
 		{#await splitPermissionsPromise}
 		...

@@ -1,6 +1,7 @@
 <script>
 	import 'carbon-components-svelte/css/all.css';
 	import StatusBar from './StatusBar.svelte'
+	import { purpose } from './stores.js'
 	import DataTable from './DataTable/DataTable.svelte'
 	import {
 		Toolbar,
@@ -38,7 +39,6 @@
 	];
 									
 	let open = false;
-	let modalPurpose = false;
 	let deleteConfirmationOpen = false;
 	let formState = {}
 	
@@ -71,7 +71,9 @@
 	}
 
 	let selectedRole = {}
-	$: selectedRole = getSelectedRole(selectedRowIds, modalPurpose)
+	// $: selectedRole = getSelectedRole(selectedRowIds, modalPurpose)
+
+	$: selectedRole = getSelectedRole(selectedRowIds)
 	
 	async function submitBatchDeletion() {
 		deleteConfirmationOpen = false;
@@ -110,6 +112,15 @@
 			return;
 		}
 	}
+	
+	//TODO: IMPROVE THIS
+	function handleBackendModification() {
+		updateRolesTable()
+		rolesPromise.then(() => {
+			selectedRole = getSelectedRole(selectedRowIds)
+			console.log("[handleBackendModification]: auxSelectedRole: ", auxSelectedRole)
+		})
+	}
 
 	var rolesPromise;
 	export function updateRolesTable() {
@@ -140,12 +151,12 @@
 	
 	function openRegistrationModal() {
 		// window.open("/register.html", '_blank').focus();
-		modalPurpose = 'registering'
+		$purpose = 'registering'
 		setTimeout(() => open = true, 100)
 	}
 	
 	function openEditModal() {
-		modalPurpose = 'editing'
+		$purpose = 'editing'
 		setTimeout(() => open = true, 100)
 	}
 	
@@ -188,9 +199,8 @@
 	
 		<RoleModal
 			bind:open={open}
-			bind:purpose={modalPurpose}
 			bind:selectedRole={selectedRole}
-			on:backendModification={updateRolesTable}
+			on:backendModification={handleBackendModification}
 		/>
 
 	      <Modal
