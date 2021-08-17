@@ -10,6 +10,8 @@
 		PasswordInput,
 		Checkbox
 	} from "carbon-components-svelte"
+	import isEmail from 'validator/es/lib/isEmail';
+	import isStrongPassword from 'validator/es/lib/isStrongPassword';
 
 	import { createEventDispatcher } from 'svelte';
 
@@ -25,14 +27,62 @@
 		"email": "",
 		"first_name": "",
 		"last_name": "",
-		"initiais": "",
+		"initials": "",
+	}
+
+	let passwordOptions = {
+		minLength: 8,
+		minLowercase: 0,
+		minUppercase: 0,
+		minNumbers: 0,
+		minSymbols: 0,
+		returnScore: false,
+		pointsPerUnique: 1,
+		pointsPerRepeat: 10,
+		pointsForContainingLower: 100,
+		pointsForContainingUpper: 1000,
+		pointsForContainingNumber: 10000,
+		pointsForContainingSymbol: 100000
 	}
 	
 	let validationIsEnabled = false;
-	let emailIsInvalid = false;
-	let firstNameIsInvalid = false;
-	let lastNameIsInvalid = false;
-	let initiaisAreInvalid = false;
+	
+	$: coreUserInvalid = formState != null && formState.email != null && !isEmail(formState.email)
+	$: corePasswordInvalid = purpose == "registering" && formState != null && formState.passwordValue != null && !isStrongPassword(formState.passwordValue, passwordOptions)
+	$: corePassword2Invalid = purpose == "registering" && formState != null && formState.passwordValue2 != null && formState.passwordValue != formState.passwordValue2
+	$: coreFirstNameInvalid = formState != null && formState.firstName != null && formState.firstName == ""
+	$: coreLastNameInvalid = formState != null && formState.lastName != null && formState.lastName == ""
+	$: coreInitialsInvalid = formState != null && formState.initials != null && formState.initials == ""
+
+	$: userIsInvalid = validationIsEnabled && coreUserInvalid
+	$: passwordIsInvalid = validationIsEnabled && corePasswordInvalid
+	$: password2IsInvalid = validationIsEnabled && corePassword2Invalid
+	$: firstNameIsInvalid = validationIsEnabled && coreFirstNameInvalid
+	$: lastNameIsInvalid = validationIsEnabled && coreLastNameInvalid
+	$: initialsAreInvalid = validationIsEnabled && coreInitialsInvalid
+	
+	let failedLastTime = false
+
+	$: weakPasswordMessage = "A senha escolhida deve ter pelo menos 8 caracteres."
+
+	$: someInputIsInvalid = coreUserInvalid || corePasswordInvalid || corePassword2Invalid || coreFirstNameInvalid || coreLastNameInvalid || coreInitialsInvalid
+	
+	const invalidEntryMessage = "Entrada inválida"
+	let invalidPasswordMessage = "Senha inválida"
+	
+	$: invalidPasswordMessage = evaluatePasswords(formState.passwordValue, formState.passwordValue2)
+	
+	function evaluatePasswords(value1, value2) {
+		if (value1 != value2) {
+			// passwordInvalid = true;
+			// password2Invalid = true;
+			return "Senhas fornecidas não coincidem"
+		} else {
+			// passwordInvalid = false;
+			// password2Invalid = false;
+			return ""
+		}
+	}
 	
 	export let purpose = "editing"
 	$: if (purpose == 'registering') { clearForm() }
@@ -49,14 +99,12 @@
 	
 	function updateFormState(userInfo) {
 		if (userInfo != null) {
-			//TODO: REMOVE THE FOLLOWING ONCE WE START RETRIEVING SUCH INFORMATION FROM THE DB!
-			userInfo.roles = []
-
 			formState.email = userInfo.email;
 			formState.firstName = userInfo.firstName;
 			formState.lastName = userInfo.lastName;
 			formState.initials = userInfo.initials;
-			formState.roles = userInfo.initials;
+			formState.roles = userInfo.roles;
+			formState = formState
 		} else {
 			clearForm()
 		}
@@ -71,11 +119,6 @@
 	
 	function disableValidation() {
 		validationIsEnabled = false;
-	}
-	
-	function someInputIsInvalid() {
-		//TODO: ACTUALLY IMPLEMENT THIS
-		return false;
 	}
 	
 	let available_roles = []
@@ -164,8 +207,9 @@
 	}
 
 	async function submitForm() {
-		if (someInputIsInvalid()) {
+		if (someInputIsInvalid) {
 			console.log("[submitForm:someInputIsInvalid:formState]: ", formState)
+			console.log("[submitForm]: [coreUserInvalid, coreFirstNameInvalid, coreLastNameInvalid, coreInitialsInvalid, corePasswordInvalid, corePassword2Invalid] = ", [coreUserInvalid, coreFirstNameInvalid, coreLastNameInvalid, coreInitialsInvalid, corePasswordInvalid, corePassword2Invalid])
 			enableValidation()
 			return
 		}
@@ -177,7 +221,7 @@
 			if (purpose == "registering") {
 				requestBody = JSON.stringify({
 							"email": formState.email,
-							"phash": formState.password,
+							"phash": formState.passwordValue,
 							"firstName": formState.firstName,
 							"lastName": formState.lastName,
 							"initials": formState.initials,
@@ -247,27 +291,30 @@
 	primaryButtonText="Confirmar"
 	secondaryButtonText="Cancelar"
 	on:click:button--secondary={() => (open = false)}
-	on:open={() => {}}
+	on:open={() => {
+		updateFormState(userInfo)
+		
+	}}
 	on:close={() => {
-		// clearFormDelayed(800)
+		disableValidation()
+		clearFormDelayed(800)
 	}}
 	on:submit={() => {
 		submitForm()
-		// clearFormDelayed(800);
 	}}
 >
 	<FluidForm>
 		{#await purposePromise}
 			Loading...
 		{:then p}
-			<TextInput bind:value={formState.email} invalidText="Título inválido" invalid={emailIsInvalid} labelText="E-mail" required />
+			<TextInput bind:value={formState.email} invalidText="Endereço de e-mail inválido" invalid={userIsInvalid} labelText="E-mail" required />
 			{#if p == "registering"}
-				<PasswordInput bind:value={formState.password} labelText="Senha" />
-				<PasswordInput bind:value={formState.passwordConfirmation} labelText="Confirmação da senha" />
+				<PasswordInput bind:value={formState.passwordValue} invalid={passwordIsInvalid} invalidText={weakPasswordMessage} labelText="Senha" />
+				<PasswordInput bind:value={formState.passwordValue2} invalid={password2IsInvalid} invalidText="Senha diferente da anterior" labelText="Confirmação da senha" />
 			{/if}
 			<TextInput bind:value={formState.firstName} invalidText="Entrada inválida" invalid={firstNameIsInvalid} labelText="Primeiro nome" required />
 			<TextInput bind:value={formState.lastName} invalidText="Entrada inválida" invalid={lastNameIsInvalid} labelText="Último nome" required />
-			<TextInput bind:value={formState.initials} invalidText="Iniciais inválidas" invalid={initiaisAreInvalid} labelText="Iniciais" required />
+			<TextInput bind:value={formState.initials} invalidText="Iniciais inválidas" invalid={initialsAreInvalid} labelText="Iniciais" required />
 		{/await}
 		<h4 style="padding-top: 1em">Funções</h4>
 		{#await splitRolesPromise}
