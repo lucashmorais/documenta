@@ -148,6 +148,10 @@
 		setTimeout(() => splitRolesPromise = getSplitRoles(3), 700)
 		// splitRolesPromise = null
 	}
+	
+	function clearFormDelayed(delay) {
+		setTimeout(clearForm, delay)
+	}
 
 	async function submitForm() {
 		if (someInputIsInvalid()) {
@@ -232,15 +236,13 @@
 	primaryButtonText="Confirmar"
 	secondaryButtonText="Cancelar"
 	on:click:button--secondary={() => (open = false)}
-	on:open={() => {updateFormState(userInfo)}}
+	on:open={() => {}}
 	on:close={() => {
-		//TODO: DELAY THIS TO AVOID FLICKERING
-		clearForm()
+		// clearFormDelayed(800)
 	}}
 	on:submit={() => {
 		submitForm()
-		//TODO: DELAY THIS TO AVOID FLICKERING
-		clearForm();
+		// clearFormDelayed(800);
 	}}
 >
 	<FluidForm>
