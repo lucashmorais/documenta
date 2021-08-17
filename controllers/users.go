@@ -15,7 +15,7 @@ func GetUser(c *fiber.Ctx) error {
 
 	db := database.DBConn
 	var user User
-	db.Where("email = ?", "bob@gmail.com").Where("p_hash = ?", "password123").Find(&user)
+	db.Preload("Roles").Where("email = ?", "bob@gmail.com").Where("p_hash = ?", "password123").Find(&user)
 	// db.Where("Name = ?", "Albert Billford").Find(&user)
 
 	return c.JSON(user)
@@ -27,7 +27,7 @@ func GetUsers(c *fiber.Ctx) error {
 
 	db := database.DBConn
 	var user []User
-	db.Find(&user)
+	db.Preload("Roles").Find(&user)
 	// db.Where("Name = ?", "Albert Billford").Find(&user)
 
 	return c.JSON(user)

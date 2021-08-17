@@ -73,7 +73,7 @@
 							roleObj = {}
 							// console.log(u)
 							roleObj.id = u.ID
-							roleObj.summary= u.Name
+							roleObj.name= u.Name
 							roleObj.selected = false
 							console.log(roleObj)
 							available_roles.push(roleObj)
@@ -119,7 +119,7 @@
 	}
 	
 	function roleIsActive(role) {
-		const isActive = userInfo != null && userInfo.roles.filter((p) => p == role.summary).length > 0
+		const isActive = userInfo != null && userInfo.roles.filter((p) => p == role.name).length > 0
 		if (isActive) {
 			toggleRoleSelection(role)
 		}
@@ -246,9 +246,9 @@
 						<Column>
 							{#each splitGroup as role}
 								{#if roleIsActive(role)}
-									<Checkbox checked on:check={() => toggleRoleSelection(role)} labelText={role.summary}/>
+									<Checkbox checked on:check={() => toggleRoleSelection(role)} labelText={role.name}/>
 								{:else}
-									<Checkbox on:check={() => toggleRoleSelection(role)} labelText={role.summary}/>
+									<Checkbox on:check={() => toggleRoleSelection(role)} labelText={role.name}/>
 								{/if}
 							{/each}
 						</Column>

@@ -8,7 +8,8 @@
 		Button,
 		ToolbarBatchActions,
 		ToolbarContent,
-		ToolbarSearch
+		ToolbarSearch,
+		Tag
 	} from "carbon-components-svelte";
 	// import Save16 from "carbon-icons-svelte/lib/Save16";
 	import TrashCan16 from "carbon-icons-svelte/lib/TrashCan16";
@@ -19,7 +20,8 @@
 		{ key: 'firstName', value: 'Primeiro nome' },
 		{ key: 'lastName', value: 'Último nome' },
 		{ key: 'initials', value: 'Iniciais' },
-		{ key: 'passwordHash', value: 'Hash da senha' },
+		// { key: 'passwordHash', value: 'Hash da senha' },
+		{ key: 'roleNames', value: 'Funções' },
 	];
 	
 	let rows=[];
@@ -51,6 +53,7 @@
 			fetch("http://localhost:3123/api/v1/users").
 				then((response)=>response.json().
 					then(function (users) {
+						console.log(users)
 						rows = []
 						let userObj = {}
 						for (const u of users) {
@@ -63,8 +66,11 @@
 							userObj.lastName = u.LastName
 							userObj.initials = u.Initials
 							userObj.passwordHash = u.PHash
+							userObj.roles = u.Roles
+							userObj.roleNames = u.Roles.map((r) => r.Name)
+							userObj.rolePermissions = u.Roles.map((r) => r.Permissions)
+							console.log("[updateUsers]: User just built: ", userObj)
 							rows.push(userObj)
-							// {"Name":"","Permissions":null}},{"ID":18,"CreatedAt":"2021-07-16T16:29:48.508153567-03:00","UpdatedAt":"2021-07-16T16:29:48.508153567-03:00","DeletedAt":null,"Name":"","FirstName":"","LastName":"","Title":"","Initials":"","Email":"bob5@gmail.com","PHash":"$s2$16384$8$1$Y6/11yOsr8lGANCNCgYjqgQt$j4cqxYraVArl+tIN0y7WZu7/YARYhkcQVbXpOIwNrFo=",
 						}
 						resolve(users)
 					}
@@ -146,6 +152,17 @@
 				  <Button on:click={goToRegisterPage}>Novo usuário</Button>
 				</ToolbarContent>
 		      </Toolbar>
+				<span slot="cell" let:row let:cell>
+					{#if cell.key === 'roleNames'}
+						{#each cell.value as v}
+							  <Tag>
+							    {v}
+							  </Tag>
+						{/each}
+					{:else}
+						{cell.value}
+					{/if}
+			      </span>
 			</DataTable>
 		</div>
 </div>
