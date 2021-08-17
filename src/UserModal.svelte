@@ -10,6 +10,14 @@
 		Checkbox
 	} from "carbon-components-svelte"
 
+	import { createEventDispatcher } from 'svelte';
+
+	const dispatch = createEventDispatcher();
+
+	function signalBackendModification() {
+		dispatch('backendModification');
+	}
+
 	export let open = false;
 	
 	let formState = {
@@ -39,6 +47,8 @@
 			formState.lastName = userInfo.lastName;
 			formState.initials = userInfo.initials;
 			formState.roles = userInfo.initials;
+		} else {
+			clearForm()
 		}
 	}
 	
@@ -200,8 +210,7 @@
 				open = false;
 				clearForm();
 				// updateRolesTable();
-				//TODO: RE-ENABLE THE FOLLOWING PIECE OF CODE
-				// signalBackendModification();
+				signalBackendModification();
 				// fireToastNotification("success", {email: formState.userValue});
 			} else {
 				console.log('[Add role]: Got valid response from server but role registration has failed.')
@@ -223,12 +232,14 @@
 	primaryButtonText="Confirmar"
 	secondaryButtonText="Cancelar"
 	on:click:button--secondary={() => (open = false)}
-	on:open={() => {}}
+	on:open={() => {updateFormState(userInfo)}}
 	on:close={() => {
+		//TODO: DELAY THIS TO AVOID FLICKERING
 		clearForm()
 	}}
 	on:submit={() => {
 		submitForm()
+		//TODO: DELAY THIS TO AVOID FLICKERING
 		clearForm();
 	}}
 >

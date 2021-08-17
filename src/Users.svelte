@@ -77,6 +77,7 @@
 				)
 			)
 		})
+		return usersPromise
 	}
 
 	updateUsers();
@@ -118,6 +119,12 @@
 <UserModal 
 	bind:open={modalIsOpen}
 	bind:userInfo={selectedRow}
+	on:backendModification={() => {
+		console.log("[Users::backendModificationHandler]: Just got a new modification signal")
+		updateUsers().then(() => {
+			updateSelectedRow()
+		})
+	}}
 />
 
 <StatusBar />
