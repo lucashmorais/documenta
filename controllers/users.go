@@ -39,7 +39,7 @@ func PostUser(c *fiber.Ctx) error {
 
 	user := struct {
 		gorm.Model
-		PHash     string `json: "email"`
+		PHash     string `json: "phash"`
 		Email     string `json: "email"`
 		FirstName string `json: "firstName"`
 		LastName  string `json: "lastName"`
@@ -74,7 +74,7 @@ func PostUser(c *fiber.Ctx) error {
 		})
 	}
 
-	fmt.Printf("[hash from user-provided password]: %s", hash)
+	// fmt.Printf("[hash from user-provided password]: %s\n", hash)
 
 	user.PHash = hash
 

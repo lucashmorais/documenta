@@ -7,6 +7,7 @@
 		Grid,
 		Column,
 		Row,
+		PasswordInput,
 		Checkbox
 	} from "carbon-components-svelte"
 
@@ -35,6 +36,14 @@
 	
 	export let purpose = "editing"
 	$: if (purpose == 'registering') { clearForm() }
+
+	let purposePromise = null;
+	function updatePurposePromise(ignored) {
+		purposePromise = new Promise((resolve, reject) => {
+			resolve(purpose)			
+		})
+	}
+	$: updatePurposePromise(purpose)
 
 	export let userInfo = null;
 	
@@ -168,6 +177,7 @@
 			if (purpose == "registering") {
 				requestBody = JSON.stringify({
 							"email": formState.email,
+							"phash": formState.password,
 							"firstName": formState.firstName,
 							"lastName": formState.lastName,
 							"initials": formState.initials,
@@ -247,10 +257,18 @@
 	}}
 >
 	<FluidForm>
-		<TextInput bind:value={formState.email} invalidText="Título inválido" invalid={emailIsInvalid} labelText="E-mail" required />
-		<TextInput bind:value={formState.firstName} invalidText="Entrada inválida" invalid={firstNameIsInvalid} labelText="Primeiro nome" required />
-		<TextInput bind:value={formState.lastName} invalidText="Entrada inválida" invalid={lastNameIsInvalid} labelText="Último nome" required />
-		<TextInput bind:value={formState.initials} invalidText="Iniciais inválidas" invalid={initiaisAreInvalid} labelText="Iniciais" required />
+		{#await purposePromise}
+			Loading...
+		{:then p}
+			<TextInput bind:value={formState.email} invalidText="Título inválido" invalid={emailIsInvalid} labelText="E-mail" required />
+			{#if p == "registering"}
+				<PasswordInput bind:value={formState.password} labelText="Senha" />
+				<PasswordInput bind:value={formState.passwordConfirmation} labelText="Confirmação da senha" />
+			{/if}
+			<TextInput bind:value={formState.firstName} invalidText="Entrada inválida" invalid={firstNameIsInvalid} labelText="Primeiro nome" required />
+			<TextInput bind:value={formState.lastName} invalidText="Entrada inválida" invalid={lastNameIsInvalid} labelText="Último nome" required />
+			<TextInput bind:value={formState.initials} invalidText="Iniciais inválidas" invalid={initiaisAreInvalid} labelText="Iniciais" required />
+		{/await}
 		<h4 style="padding-top: 1em">Funções</h4>
 		{#await splitRolesPromise}
 		...
