@@ -33,7 +33,8 @@
 	let lastNameIsInvalid = false;
 	let initiaisAreInvalid = false;
 	
-	let purpose = "editing"
+	export let purpose = "editing"
+	$: if (purpose == 'registering') { clearForm() }
 
 	export let userInfo = null;
 	
@@ -175,7 +176,7 @@
 
 				console.log("[submitForm:registering:requestBody]: ", requestBody);
 
-				response = await fetch('http://localhost:3123/api/v1/role', {
+				response = await fetch('http://localhost:3123/api/v1/user', {
 						method: 'post',
 
 						body: requestBody,
@@ -217,7 +218,7 @@
 				signalBackendModification();
 				// fireToastNotification("success", {email: formState.userValue});
 			} else {
-				console.log('[Add role]: Got valid response from server but role registration has failed.')
+				console.log('[Add role]: Got valid response from server but user registration has failed.')
 				console.log(response)
 				// buildErrorToastFromResponse(response)
 			}

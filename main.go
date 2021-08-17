@@ -100,6 +100,7 @@ func setupRouter(app *fiber.App) {
 
 	protected.Post("user", controllers.PostUser)
 	protected.Put("user", controllers.PutUser)
+	protected.Delete("users", controllers.DeleteUsers)
 
 	protected.Get("roles", controllers.GetRoles)
 	protected.Post("role", controllers.PostRole)

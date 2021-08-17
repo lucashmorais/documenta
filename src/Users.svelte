@@ -3,6 +3,7 @@
 	import StatusBar from './StatusBar.svelte'
 	import DataTable from './DataTable/DataTable.svelte'
 	import UserModal from './UserModal.svelte'
+	import SimpleDeleteModal from './SimpleDeleteModal.svelte'
 	import {
 		Toolbar,
 		Button,
@@ -39,13 +40,21 @@
 	}
 
 	$: updateSelectedRow(selectedRowIds)
-
-	// let rows=[
-	// 	{ id: 'a', assunto: 'Assunto 0', centro: 'cs', tipo: 3000, pend: 'Revisão do defensor' },
-	// 	{ id: 'b', assunto: 'Assunto 1', centro: 'brs', tipo: 443, pend: 'Revisão inicial do Secretário' },
-	// ];
 	
-	let modalIsOpen = false;
+	let editModalIsOpen = false;
+	let deleteModalIsOpen = false;
+	
+	let editModalPurpose = null
+	
+	function updateEditModalPurposeBasedOnSelection(ignored) {
+		if (selectedRowIds.length == 1) {
+			editModalPurpose = "editing"
+		} else {
+			editModalPurpose = "registering"
+		}
+	}
+	$: updateEditModalPurposeBasedOnSelection(selectedRowIds)
+	$: console.log("[Users::editModalPurpose]: ", editModalPurpose)
 
 	var usersPromise;
 	export function updateUsers() {
@@ -86,6 +95,43 @@
 		window.open("/register.html", '_blank').focus();
 	}
 	
+	async function submitBatchDeletion() {
+		deleteModalIsOpen = false;
+		console.log("[submitBatchDeletion::selectedRowIds]: ", selectedRowIds)
+
+		try {     
+			let requestBody = JSON.stringify({
+						"ids": selectedRowIds,
+					});
+
+			console.log("[submitForm:requestBody]: ", requestBody);
+
+			const response = await fetch('http://localhost:3123/api/v1/users', {
+					method: 'delete',
+
+					body: requestBody,
+					headers: {
+						'Content-type': 'application/json; charset=UTF-8'
+					}
+				}
+			);
+			
+			if (response.status == 200) {
+				console.log('[Add role]: Successfully deleted users');
+				selectedRowIds = [];
+				updateUsers();
+			} else {
+				console.log('[Add role]: Got valid response from server but user deletion has failed.')
+				console.log(response)
+				// buildErrorToastFromResponse(response)
+			}
+
+		} catch(err) {
+			console.error(`Error: ${err}`);
+			return;
+		}
+	}
+	
 	// setInterval(() => console.log(selectedRowIds), 500)
 </script>
 
@@ -116,9 +162,18 @@
 
 </style>
 
+<SimpleDeleteModal
+	bind:open={deleteModalIsOpen}
+	bind:selectedItems={selectedRowIds}
+	on:deletionConfirmed={submitBatchDeletion}
+	singularString="usuário"
+	pluralString="usuários"
+/>
+
 <UserModal 
-	bind:open={modalIsOpen}
+	bind:open={editModalIsOpen}
 	bind:userInfo={selectedRow}
+	bind:purpose={editModalPurpose}
 	on:backendModification={() => {
 		console.log("[Users::backendModificationHandler]: Just got a new modification signal")
 		updateUsers().then(() => {
@@ -142,21 +197,15 @@
 			>
 			<Toolbar>
 				<ToolbarBatchActions>
-				  <Button icon={TrashCan16}>Eliminar</Button>
+				  <Button on:click={() => deleteModalIsOpen = true} icon={TrashCan16}>Eliminar</Button>
 				  {#if selectedRowIds.length < 2}
-					  <Button on:click={() => modalIsOpen = true} icon={Edit16}>Editar</Button>
+					  <Button on:click={() => editModalIsOpen = true} icon={Edit16}>Editar</Button>
 				  {/if}
 				</ToolbarBatchActions>
 				<ToolbarContent>
 				  <ToolbarSearch />
-				  <!-- <ToolbarMenu>
-				    <ToolbarMenuItem primaryFocus>Restart all</ToolbarMenuItem>
-				    <ToolbarMenuItem href="https://cloud.ibm.com/docs/loadbalancer-service">
-				      API documentation
-				    </ToolbarMenuItem>
-				    <ToolbarMenuItem danger>Stop all</ToolbarMenuItem>
-				  </ToolbarMenu> -->
-				  <Button on:click={goToRegisterPage}>Novo usuário</Button>
+				  <!-- <Button on:click={goToRegisterPage}>Novo usuário</Button> -->
+				  <Button on:click={() => editModalIsOpen = true}>Novo usuário</Button>
 				</ToolbarContent>
 		      </Toolbar>
 				<span slot="cell" let:row let:cell>

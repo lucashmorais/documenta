@@ -35,7 +35,18 @@ func GetUsers(c *fiber.Ctx) error {
 
 func PostUser(c *fiber.Ctx) error {
 	db := database.DBConn
-	var user, oldUser User
+	var oldUser User
+
+	user := struct {
+		gorm.Model
+		PHash     string `json: "email"`
+		Email     string `json: "email"`
+		FirstName string `json: "firstName"`
+		LastName  string `json: "lastName"`
+		Initials  string `json: "initials"`
+		Roles     []int  `json: "roles"`
+	}{}
+
 	err := c.BodyParser(&user)
 
 	if err != nil {
@@ -67,8 +78,14 @@ func PostUser(c *fiber.Ctx) error {
 
 	user.PHash = hash
 
-	db.Create(&user)
-	return c.JSON(user)
+	var roleSlice []Role
+	db.Find(&roleSlice, user.Roles)
+	fmt.Println(roleSlice)
+
+	dbUser := User{PHash: user.PHash, Email: user.Email, FirstName: user.FirstName, LastName: user.LastName, Initials: user.Initials, Roles: roleSlice}
+	db.Create(&dbUser)
+
+	return c.JSON(dbUser)
 }
 
 func PutUser(c *fiber.Ctx) error {
@@ -101,4 +118,27 @@ func PutUser(c *fiber.Ctx) error {
 	db.Model(&dbUser).Update(user)
 	db.Model(&dbUser).Association("Roles").Replace(roleSlice)
 	return c.JSON(user)
+}
+
+func DeleteUsers(c *fiber.Ctx) error {
+	db := database.DBConn
+	idsToDelete := struct {
+		gorm.Model
+		Ids []int `json: "ids"`
+	}{}
+
+	err := c.BodyParser(&idsToDelete)
+
+	if err != nil {
+		return c.Status(400).JSON(&fiber.Map{
+			"success": false,
+			"cause":   "form_decode_error",
+		})
+	}
+
+	fmt.Println("[idsToDelete]", idsToDelete)
+	fmt.Println("[idsToDelete.Ids]", idsToDelete.Ids)
+	db.Delete(&User{}, idsToDelete.Ids)
+
+	return c.SendStatus(200)
 }
