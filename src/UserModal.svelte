@@ -59,8 +59,7 @@
 	}
 	
 	let available_roles = []
-	let splitRolesPromise = getSplitRoles(3);
-	splitRolesPromise.then(value => console.log(value))
+	$: splitRolesPromise = getSplitRoles(3, userInfo);
 	
 	export function updateRoles() {
 		return new Promise((resolve, reject) => {
@@ -86,7 +85,7 @@
 	}
 	
 	// TODO: ENSURE THIS WORKS FOR ALL POSSIBLE REMAINDER VALUES
-	function getSplitRoles(numBlocks) {
+	function getSplitRoles(numBlocks, ignoredParam) {
 		return new Promise(async function(resolve) {
 			await updateRoles()
 			let numRoles = available_roles.length
@@ -119,7 +118,9 @@
 	}
 	
 	function roleIsActive(role) {
-		const isActive = userInfo != null && userInfo.roles.filter((p) => p == role.name).length > 0
+		// console.log("[UserModal::roleIsActive::role]: ", userInfo)
+		// console.log("[UserModal::roleIsActive::userInfo]: ", userInfo)
+		const isActive = userInfo != null && userInfo.roleNames.filter((p) => p == role.name).length > 0
 		if (isActive) {
 			toggleRoleSelection(role)
 		}
