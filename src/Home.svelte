@@ -1,6 +1,7 @@
 <script>
 	import 'carbon-components-svelte/css/all.css';
 	import StatusBar from './StatusBar.svelte'
+	import ProcessModal from './ProcessModal.svelte'
 	// import DataTable from './DataTable.svelte'
 	// import DataTable from './DataTable/DataTable.svelte'
 	import TrashCan16 from "carbon-icons-svelte/lib/TrashCan16";
@@ -17,7 +18,7 @@
 
 	let reps = [1,2,3,4,5,6]
 	let selectedRowIds = [];
-	let editModalIsOpen;
+	let editModalIsOpen = false;
 	let deleteModalIsOpen;
 
 	let headers=[{ key: 'assunto', value: 'Assunto' }, { key: 'centro', value: 'Centro' }, { key: 'tipo', value: 'Tipo' }, { key: 'pend', value: 'Pendência Atual' }]
@@ -84,6 +85,9 @@
 
 </style>
 
+<ProcessModal 
+	bind:open={editModalIsOpen}
+/>
 <StatusBar />
 <h1>Documenta</h1>
 
