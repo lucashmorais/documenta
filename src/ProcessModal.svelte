@@ -7,20 +7,20 @@
 		Grid,
 		Column,
 		Row,
-		PasswordInput,
+		Dropdown,
 		Checkbox
 	} from "carbon-components-svelte"
 	import isEmail from 'validator/es/lib/isEmail';
 	import isStrongPassword from 'validator/es/lib/isStrongPassword';
-
+	
 	import { createEventDispatcher } from 'svelte';
-
+	
 	const dispatch = createEventDispatcher();
-
+	
 	function signalBackendModification() {
 		dispatch('backendModification');
 	}
-
+	
 	export let open = false;
 	
 	let formState = {
@@ -29,7 +29,7 @@
 		"last_name": "",
 		"initials": "",
 	}
-
+	
 	let passwordOptions = {
 		minLength: 8,
 		minLowercase: 0,
@@ -53,7 +53,7 @@
 	$: coreFirstNameInvalid = formState != null && formState.firstName != null && formState.firstName == ""
 	$: coreLastNameInvalid = formState != null && formState.lastName != null && formState.lastName == ""
 	$: coreInitialsInvalid = formState != null && formState.initials != null && formState.initials == ""
-
+	
 	$: userIsInvalid = validationIsEnabled && coreUserInvalid
 	$: passwordIsInvalid = validationIsEnabled && corePasswordInvalid
 	$: password2IsInvalid = validationIsEnabled && corePassword2Invalid
@@ -61,10 +61,13 @@
 	$: lastNameIsInvalid = validationIsEnabled && coreLastNameInvalid
 	$: initialsAreInvalid = validationIsEnabled && coreInitialsInvalid
 	
+	let titleIsInvalid = false;
+	let summaryIsInvalid = false;
+	
 	let failedLastTime = false
-
+	
 	$: weakPasswordMessage = "A senha escolhida deve ter pelo menos 8 caracteres."
-
+	
 	$: someInputIsInvalid = coreUserInvalid || corePasswordInvalid || corePassword2Invalid || coreFirstNameInvalid || coreLastNameInvalid || coreInitialsInvalid
 	
 	const invalidEntryMessage = "Entrada inválida"
@@ -84,9 +87,9 @@
 		}
 	}
 	
-	export let purpose = "editing"
+	export let purpose = "registering"
 	$: if (purpose == 'registering') { clearForm() }
-
+	
 	let purposePromise = null;
 	function updatePurposePromise(ignored) {
 		purposePromise = new Promise((resolve, reject) => {
@@ -94,7 +97,7 @@
 		})
 	}
 	$: updatePurposePromise(purpose)
-
+	
 	export let userInfo = null;
 	
 	function updateFormState(userInfo) {
@@ -121,74 +124,29 @@
 		validationIsEnabled = false;
 	}
 	
-	let available_roles = []
-	$: splitRolesPromise = getSplitRoles(3, userInfo);
+	let available_types;
 	
-	export function updateRoles() {
+	function updateProcessTypes() {
 		return new Promise((resolve, reject) => {
-			fetch("http://localhost:3123/api/v1/roles").
+			fetch("http://localhost:3123/api/v1/process_types").
 				then((response)=>response.json().
-					then(function (roles) {
-						available_roles = []
-						let roleObj = {}
-						for (const u of roles) {
-							roleObj = {}
-							// console.log(u)
-							roleObj.id = u.ID
-							roleObj.name= u.Name
-							roleObj.selected = false
-							console.log(roleObj)
-							available_roles.push(roleObj)
+					then(function (types) {
+						available_types = []
+						console.log("[updateProcessTypes::types]: ", types)
+						for (const u of types) {
+							let typeObj = {}
+							typeObj.id = u.ID
+							typeObj.text= u.Name
+							typeObj.description = u.Description
+							console.log(typeObj)
+							available_types.push(typeObj)
 						}
-						resolve(roles)
-					}
+						resolve(types)
+					})
 				)
-			)
 		})
 	}
-	
-	// TODO: ENSURE THIS WORKS FOR ALL POSSIBLE REMAINDER VALUES
-	function getSplitRoles(numBlocks, ignoredParam) {
-		return new Promise(async function(resolve) {
-			await updateRoles()
-			let numRoles = available_roles.length
-			let numPerBlock = numRoles / numBlocks
-			
-			let splitRoles = []
-			for (let i = 0; i < numRoles; i += numPerBlock) {
-				splitRoles.push(available_roles.slice(i, i + numPerBlock))
-			}
-			resolve(splitRoles)
-		});
-	}
-	
-	function getSelectedRoles() {
-		return available_roles.filter(p => p.selected)
-	}
-	
-	function getSelectedRoleIds() {
-		return getSelectedRoles().map(p => p.id)
-	}
-	
-	function unselectAllRoles() {
-		available_roles.map(p => p.selected = false)
-	}
-
-	function toggleRoleSelection(role) {
-		role.selected = !role.selected
-		console.log(getSelectedRoles())
-		console.log(getSelectedRoleIds())
-	}
-	
-	function roleIsActive(role) {
-		// console.log("[UserModal::roleIsActive::role]: ", userInfo)
-		// console.log("[UserModal::roleIsActive::userInfo]: ", userInfo)
-		const isActive = userInfo != null && userInfo.roleNames.filter((p) => p == role.name).length > 0
-		if (isActive) {
-			toggleRoleSelection(role)
-		}
-		return isActive;
-	}
+	updateProcessTypes();
 	
 	function clearForm() {
 		const keys = Object.keys(formState)
@@ -197,15 +155,12 @@
 		}
 		formState = formState
 		disableValidation()
-		unselectAllRoles()
-		setTimeout(() => splitRolesPromise = getSplitRoles(3), 700)
-		// splitRolesPromise = null
 	}
 	
 	function clearFormDelayed(delay) {
 		setTimeout(clearForm, delay)
 	}
-
+	
 	async function submitForm() {
 		if (someInputIsInvalid) {
 			console.log("[submitForm:someInputIsInvalid:formState]: ", formState)
@@ -214,51 +169,51 @@
 			return
 		}
 		disableValidation()
-
+		
 		try {     
 			let requestBody;
 			let response;
 			if (purpose == "registering") {
 				requestBody = JSON.stringify({
-							"email": formState.email,
-							"phash": formState.passwordValue,
-							"firstName": formState.firstName,
-							"lastName": formState.lastName,
-							"initials": formState.initials,
-							"roles": getSelectedRoleIds(),
-						});
-
+					"email": formState.email,
+					"phash": formState.passwordValue,
+					"firstName": formState.firstName,
+					"lastName": formState.lastName,
+					"initials": formState.initials,
+					"roles": getSelectedRoleIds(),
+				});
+				
 				console.log("[submitForm:registering:requestBody]: ", requestBody);
-
+				
 				response = await fetch('http://localhost:3123/api/v1/user', {
-						method: 'post',
-
-						body: requestBody,
-						headers: {
-							'Content-type': 'application/json; charset=UTF-8'
-						}
+					method: 'post',
+					
+					body: requestBody,
+					headers: {
+						'Content-type': 'application/json; charset=UTF-8'
 					}
+				}
 				);
 			} else if (purpose == "editing") {
 				requestBody = JSON.stringify({
-							"id": userInfo.id,
-							"email": formState.email,
-							"firstName": formState.firstName,
-							"lastName": formState.lastName,
-							"initials": formState.initials,
-							"roles": getSelectedRoleIds(),
-						});
-
+					"id": userInfo.id,
+					"email": formState.email,
+					"firstName": formState.firstName,
+					"lastName": formState.lastName,
+					"initials": formState.initials,
+					"roles": getSelectedRoleIds(),
+				});
+				
 				console.log("[submitForm:editing:requestBody]: ", requestBody);
-
+				
 				response = await fetch('http://localhost:3123/api/v1/user', {
-						method: 'put',
-
-						body: requestBody,
-						headers: {
-							'Content-type': 'application/json; charset=UTF-8'
-						}
+					method: 'put',
+					
+					body: requestBody,
+					headers: {
+						'Content-type': 'application/json; charset=UTF-8'
 					}
+				}
 				);
 			} else {
 				return;
@@ -276,7 +231,7 @@
 				console.log(response)
 				// buildErrorToastFromResponse(response)
 			}
-
+			
 		} catch(err) {
 			console.error(`Error: ${err}`);
 			return;
@@ -303,38 +258,21 @@
 		submitForm()
 	}}
 >
-	<FluidForm>
 		{#await purposePromise}
 			Loading...
 		{:then p}
-			<TextInput bind:value={formState.email} invalidText="Endereço de e-mail inválido" invalid={userIsInvalid} labelText="E-mail" required />
-			{#if p == "registering"}
-				<PasswordInput bind:value={formState.passwordValue} invalid={passwordIsInvalid} invalidText={weakPasswordMessage} labelText="Senha" />
-				<PasswordInput bind:value={formState.passwordValue2} invalid={password2IsInvalid} invalidText="Senha diferente da anterior" labelText="Confirmação da senha" />
-			{/if}
-			<TextInput bind:value={formState.firstName} invalidText="Entrada inválida" invalid={firstNameIsInvalid} labelText="Primeiro nome" required />
-			<TextInput bind:value={formState.lastName} invalidText="Entrada inválida" invalid={lastNameIsInvalid} labelText="Último nome" required />
-			<TextInput bind:value={formState.initials} invalidText="Iniciais inválidas" invalid={initialsAreInvalid} labelText="Iniciais" required />
+			<TextInput invalidText="Endereço de e-mail inválido" invalid={titleIsInvalid} labelText="Título" required />
+			<!-- <Dropdown
+				titleText="Tipo de processo"
+				selectedIndex={0}
+				items={[{ id: '0', text: 'Slack' }, { id: '1', text: 'Email' }, { id: '2', text: 'Fax' }]}
+			/> -->
+			<!-- Ensure race conditions involving `available_types` do not cause any trouble -->
+			<Dropdown
+				titleText="Tipo de processo"
+				selectedIndex={0}
+				items={available_types}
+			/>
+			<TextArea invalidText="Endereço de e-mail inválido" invalid={summaryIsInvalid} labelText="Resumo" required />
 		{/await}
-		<h4 style="padding-top: 1em">Funções</h4>
-		{#await splitRolesPromise}
-		...
-		{:then splitRoles}
-			<Grid narrow padding>
-				<Row>
-					{#each splitRoles.reverse() as splitGroup}
-						<Column>
-							{#each splitGroup as role}
-								{#if roleIsActive(role)}
-									<Checkbox checked on:check={() => toggleRoleSelection(role)} labelText={role.name}/>
-								{:else}
-									<Checkbox on:check={() => toggleRoleSelection(role)} labelText={role.name}/>
-								{/if}
-							{/each}
-						</Column>
-					{/each}
-				</Row>
-		      </Grid>
-		{/await}
-	</FluidForm>
 </Modal>
