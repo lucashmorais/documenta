@@ -69,6 +69,10 @@ func initDatabase() {
 	fmt.Println("Database connection successfully established")
 
 	database.DBConn.AutoMigrate(&controllers.Process{})
+	database.DBConn.AutoMigrate(&controllers.Center{})
+	database.DBConn.AutoMigrate(&controllers.ProcessType{})
+	database.DBConn.AutoMigrate(&controllers.ProcessStatus{})
+
 	database.DBConn.AutoMigrate(&controllers.Comment{})
 	database.DBConn.AutoMigrate(&controllers.User{})
 	database.DBConn.AutoMigrate(&controllers.Role{})
@@ -84,7 +88,9 @@ func setupRouter(app *fiber.App) {
 	app.Get("/api/v1/users", controllers.GetUsers)
 
 	protected := app.Group("/api/v1", authRequired())
-	// protected.Post("process", controllers.NewProcess)
+
+	protected.Get("processes", controllers.GetProcesses)
+	protected.Post("process", controllers.PostProcess)
 
 	protected.Post("comment", controllers.NewComment)
 	protected.Put("comment/:id", controllers.UpdateComment)

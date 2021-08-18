@@ -14,8 +14,9 @@ type Process struct {
 	Author    string `json: "author"`
 	Summary   string `json: "summary"`
 	Reference int    `json: "reference"`
+	Status    ProcessStatus
 	Center    Center
-	Type      Type
+	Type      ProcessType
 }
 
 type Comment struct {
@@ -64,9 +65,15 @@ type Center struct {
 	Name      string
 }
 
-type Type struct {
+type ProcessStatus struct {
 	gorm.Model
-	ID          int
+	Name        string
+	Description string
+}
+
+type ProcessType struct {
+	gorm.Model
+	Name        string
 	Description string
 }
 
