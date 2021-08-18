@@ -34,7 +34,6 @@ type Comment struct {
 
 type User struct {
 	gorm.Model
-	// ID       int
 	Name      string `json: "name"`
 	FirstName string `json: "firstName"`
 	LastName  string `json: "lastName"`
