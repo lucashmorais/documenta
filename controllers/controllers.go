@@ -11,9 +11,9 @@ import (
 type Process struct {
 	gorm.Model
 	Title     string `json: "title"`
-	Author    string `json: "author"`
 	Summary   string `json: "summary"`
 	Reference int    `json: "reference"`
+	Author    User
 	Status    ProcessStatus
 	Center    Center
 	Type      ProcessType
