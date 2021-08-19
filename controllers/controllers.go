@@ -13,20 +13,27 @@ type Process struct {
 	Title     string `json: "title"`
 	Summary   string `json: "summary"`
 	Reference int    `json: "reference"`
-	Author    User
-	Status    ProcessStatus
 	Center    Center
-	Type      ProcessType
+
+	// These are all "belongs to" relationships
+	UserID          uint
+	User            User
+	ProcessStatusID uint
+	ProcessStatus   ProcessType
+	ProcessTypeID   uint
+	ProcessType     ProcessType
 }
 
 type Comment struct {
 	gorm.Model
-	Title         string `json: "title"`
-	Content       string `json: "content"`
-	UserID        int    `json: userID`
-	User          User
-	ProcessID     int `json:processID`
-	Process       Process
+	Title   string `json: "title"`
+	Content string `json: "content"`
+
+	User      User
+	UserID    int `json: userID`
+	Process   Process
+	ProcessID int `json:processID`
+
 	UnixCreatedAt int64
 	UnixUpdatedAt int64
 	UnixDeletedAt int64

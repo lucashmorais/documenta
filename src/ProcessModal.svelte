@@ -24,10 +24,9 @@
 	export let open = false;
 	
 	let formState = {
-		"email": "",
-		"first_name": "",
-		"last_name": "",
-		"initials": "",
+		"title": "",
+		"summary": "",
+		"selectedType": 0,
 	}
 	
 	let passwordOptions = {
@@ -47,19 +46,19 @@
 	
 	let validationIsEnabled = false;
 	
-	$: coreUserInvalid = formState != null && formState.email != null && !isEmail(formState.email)
-	$: corePasswordInvalid = purpose == "registering" && formState != null && formState.passwordValue != null && !isStrongPassword(formState.passwordValue, passwordOptions)
-	$: corePassword2Invalid = purpose == "registering" && formState != null && formState.passwordValue2 != null && formState.passwordValue != formState.passwordValue2
-	$: coreFirstNameInvalid = formState != null && formState.firstName != null && formState.firstName == ""
-	$: coreLastNameInvalid = formState != null && formState.lastName != null && formState.lastName == ""
-	$: coreInitialsInvalid = formState != null && formState.initials != null && formState.initials == ""
+	// $: coreUserInvalid = formState != null && formState.email != null && !isEmail(formState.email)
+	// $: corePasswordInvalid = purpose == "registering" && formState != null && formState.passwordValue != null && !isStrongPassword(formState.passwordValue, passwordOptions)
+	// $: corePassword2Invalid = purpose == "registering" && formState != null && formState.passwordValue2 != null && formState.passwordValue != formState.passwordValue2
+	// $: coreFirstNameInvalid = formState != null && formState.firstName != null && formState.firstName == ""
+	// $: coreLastNameInvalid = formState != null && formState.lastName != null && formState.lastName == ""
+	// $: coreInitialsInvalid = formState != null && formState.initials != null && formState.initials == ""
 	
-	$: userIsInvalid = validationIsEnabled && coreUserInvalid
-	$: passwordIsInvalid = validationIsEnabled && corePasswordInvalid
-	$: password2IsInvalid = validationIsEnabled && corePassword2Invalid
-	$: firstNameIsInvalid = validationIsEnabled && coreFirstNameInvalid
-	$: lastNameIsInvalid = validationIsEnabled && coreLastNameInvalid
-	$: initialsAreInvalid = validationIsEnabled && coreInitialsInvalid
+	// $: userIsInvalid = validationIsEnabled && coreUserInvalid
+	// $: passwordIsInvalid = validationIsEnabled && corePasswordInvalid
+	// $: password2IsInvalid = validationIsEnabled && corePassword2Invalid
+	// $: firstNameIsInvalid = validationIsEnabled && coreFirstNameInvalid
+	// $: lastNameIsInvalid = validationIsEnabled && coreLastNameInvalid
+	// $: initialsAreInvalid = validationIsEnabled && coreInitialsInvalid
 	
 	let titleIsInvalid = false;
 	let summaryIsInvalid = false;
@@ -68,12 +67,13 @@
 	
 	$: weakPasswordMessage = "A senha escolhida deve ter pelo menos 8 caracteres."
 	
-	$: someInputIsInvalid = coreUserInvalid || corePasswordInvalid || corePassword2Invalid || coreFirstNameInvalid || coreLastNameInvalid || coreInitialsInvalid
+	let someInputIsInvalid = false;
+	// $: someInputIsInvalid = coreUserInvalid || corePasswordInvalid || corePassword2Invalid || coreFirstNameInvalid || coreLastNameInvalid || coreInitialsInvalid
 	
 	const invalidEntryMessage = "Entrada inválida"
 	let invalidPasswordMessage = "Senha inválida"
 	
-	$: invalidPasswordMessage = evaluatePasswords(formState.passwordValue, formState.passwordValue2)
+	// $: invalidPasswordMessage = evaluatePasswords(formState.passwordValue, formState.passwordValue2)
 	
 	function evaluatePasswords(value1, value2) {
 		if (value1 != value2) {
@@ -113,7 +113,7 @@
 		}
 	}
 	
-	$: console.log("[UserModal::userInfo]: ", userInfo)
+	$: console.log("[ProcessModal::userInfo]: ", userInfo)
 	$: updateFormState(userInfo)
 	
 	function enableValidation() {
@@ -151,7 +151,12 @@
 	function clearForm() {
 		const keys = Object.keys(formState)
 		for (const key of keys) {
-			formState[key] = ""
+			if (key == "selectedType") {
+				formState[key] = 0
+			}
+			else {
+				formState[key] = ""
+			}
 		}
 		formState = formState
 		disableValidation()
@@ -175,17 +180,14 @@
 			let response;
 			if (purpose == "registering") {
 				requestBody = JSON.stringify({
-					"email": formState.email,
-					"phash": formState.passwordValue,
-					"firstName": formState.firstName,
-					"lastName": formState.lastName,
-					"initials": formState.initials,
-					"roles": getSelectedRoleIds(),
+					"title": formState.title,
+					"summary": formState.summary,
+					"typeID": available_types[formState.selectedType].id,
 				});
 				
 				console.log("[submitForm:registering:requestBody]: ", requestBody);
 				
-				response = await fetch('http://localhost:3123/api/v1/user', {
+				response = await fetch('http://localhost:3123/api/v1/process', {
 					method: 'post',
 					
 					body: requestBody,
@@ -196,17 +198,14 @@
 				);
 			} else if (purpose == "editing") {
 				requestBody = JSON.stringify({
-					"id": userInfo.id,
-					"email": formState.email,
-					"firstName": formState.firstName,
-					"lastName": formState.lastName,
-					"initials": formState.initials,
-					"roles": getSelectedRoleIds(),
+					"title": formState.title,
+					"summary": formState.summary,
+					"typeID": available_types[formState.selectedType].id,
 				});
 				
 				console.log("[submitForm:editing:requestBody]: ", requestBody);
 				
-				response = await fetch('http://localhost:3123/api/v1/user', {
+				response = await fetch('http://localhost:3123/api/v1/process', {
 					method: 'put',
 					
 					body: requestBody,
@@ -220,14 +219,14 @@
 			}
 			
 			if (response.status == 200) {
-				console.log('[UserModal::submitForm]: Successfully performed action: ', purpose);
+				console.log('[ProcessModal::submitForm]: Successfully performed action: ', purpose);
 				open = false;
 				clearForm();
 				// updateRolesTable();
 				signalBackendModification();
 				// fireToastNotification("success", {email: formState.userValue});
 			} else {
-				console.log('[Add role]: Got valid response from server but user registration has failed.')
+				console.log('[Add role]: Got valid response from server but process registration has failed.')
 				console.log(response)
 				// buildErrorToastFromResponse(response)
 			}
@@ -247,8 +246,8 @@
 	secondaryButtonText="Cancelar"
 	on:click:button--secondary={() => (open = false)}
 	on:open={() => {
+		updateProcessTypes()
 		updateFormState(userInfo)
-		
 	}}
 	on:close={() => {
 		disableValidation()
@@ -261,18 +260,13 @@
 		{#await purposePromise}
 			Loading...
 		{:then p}
-			<TextInput invalidText="Endereço de e-mail inválido" invalid={titleIsInvalid} labelText="Título" required />
-			<!-- <Dropdown
-				titleText="Tipo de processo"
-				selectedIndex={0}
-				items={[{ id: '0', text: 'Slack' }, { id: '1', text: 'Email' }, { id: '2', text: 'Fax' }]}
-			/> -->
-			<!-- Ensure race conditions involving `available_types` do not cause any trouble -->
+			<TextInput bind:value={formState.title} invalidText="Endereço de e-mail inválido" invalid={titleIsInvalid} labelText="Título" required />
+			<!-- TODO: Ensure race conditions involving `available_types` do not cause any trouble -->
 			<Dropdown
 				titleText="Tipo de processo"
-				selectedIndex={0}
+				bind:selectedIndex={formState.selectedType}
 				items={available_types}
 			/>
-			<TextArea invalidText="Endereço de e-mail inválido" invalid={summaryIsInvalid} labelText="Resumo" required />
+			<TextArea bind:value={formState.summary} invalidText="Endereço de e-mail inválido" invalid={summaryIsInvalid} labelText="Resumo" required />
 		{/await}
 </Modal>

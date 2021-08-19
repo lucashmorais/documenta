@@ -43,7 +43,7 @@
 							//TODO: GET THE FOLLOWING FROM THE DB!
 							processObj.centro = "Brasília"
 							processObj.pend = "Encaminhamento final"
-							processObj.tipo = "Circuito breve"
+							processObj.tipo = p.ProcessType.Name
 
 							console.log("[updateProcesses]: Process just built: ", processObj)
 							rows.push(processObj)
@@ -86,6 +86,7 @@
 
 <ProcessModal 
 	bind:open={editModalIsOpen}
+	on:backendModification={updateProcesses}
 />
 <StatusBar />
 <h1>Documenta</h1>
