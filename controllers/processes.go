@@ -22,9 +22,10 @@ func PostProcess(c *fiber.Ctx) error {
 
 	process := struct {
 		gorm.Model
-		Title   string `json: "title"`
-		Summary string `json: "summary"`
-		TypeID  uint   `json: "typeID"`
+		Title    string `json: "title"`
+		Summary  string `json: "summary"`
+		TypeID   uint   `json: "typeID"`
+		CenterID uint   `json: "centerID"`
 	}{}
 
 	err := c.BodyParser(&process)
@@ -37,12 +38,14 @@ func PostProcess(c *fiber.Ctx) error {
 	}
 
 	fmt.Printf("[PostProcess]: Decoded new process: %v\n", process)
-	fmt.Printf("[PostProcess::process::TypeID]: %v\n", process.TypeID)
 
 	var processType ProcessType
 	db.Where(process.TypeID).Find(&processType)
 
-	dbProcess := Process{Title: process.Title, Summary: process.Summary, ProcessTypeID: process.TypeID, ProcessType: processType}
+	var center Center
+	db.Where(process.CenterID).Find(&center)
+
+	dbProcess := Process{Title: process.Title, Summary: process.Summary, ProcessTypeID: process.TypeID, ProcessType: processType, Center: center}
 
 	fmt.Printf("[PostProcess::dbProcess]: %v\n", dbProcess)
 

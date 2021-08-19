@@ -27,6 +27,7 @@
 		"title": "",
 		"summary": "",
 		"selectedType": 0,
+		"selectedCenter": 0,
 	}
 	
 	let passwordOptions = {
@@ -125,6 +126,7 @@
 	}
 	
 	let available_types;
+	let available_centers = [{"id": 0, "text": "Brasília"}, {"id": 1, "text": "João Cachoeira"}];
 	
 	function updateProcessTypes() {
 		return new Promise((resolve, reject) => {
@@ -148,10 +150,33 @@
 	}
 	updateProcessTypes();
 	
+	function updateCenters() {
+		return new Promise((resolve, reject) => {
+			fetch("http://localhost:3123/api/v1/centers").
+				then((response)=>response.json().
+					then(function (centers) {
+						available_centers = []
+						console.log("[updateCenters::centers]: ", centers)
+						for (const u of centers) {
+							let centerObj = {}
+							centerObj.id = u.ID
+							centerObj.text= u.Name
+							centerObj.shortName= u.ShortName
+							centerObj.description = u.Description
+							console.log(centerObj)
+							available_centers.push(centerObj)
+						}
+						resolve(centers)
+					})
+				)
+		})
+	}
+	updateCenters();
+	
 	function clearForm() {
 		const keys = Object.keys(formState)
 		for (const key of keys) {
-			if (key == "selectedType") {
+			if (key == "selectedType" || key == "selectedCenter") {
 				formState[key] = 0
 			}
 			else {
@@ -183,6 +208,7 @@
 					"title": formState.title,
 					"summary": formState.summary,
 					"typeID": available_types[formState.selectedType].id,
+					"centerID": available_centers[formState.selectedCenter].id,
 				});
 				
 				console.log("[submitForm:registering:requestBody]: ", requestBody);
@@ -201,6 +227,7 @@
 					"title": formState.title,
 					"summary": formState.summary,
 					"typeID": available_types[formState.selectedType].id,
+					"centerID": available_centers[formState.selectedCenter].id,
 				});
 				
 				console.log("[submitForm:editing:requestBody]: ", requestBody);
@@ -247,6 +274,7 @@
 	on:click:button--secondary={() => (open = false)}
 	on:open={() => {
 		updateProcessTypes()
+		updateCenters()
 		updateFormState(userInfo)
 	}}
 	on:close={() => {
@@ -266,6 +294,11 @@
 				titleText="Tipo de processo"
 				bind:selectedIndex={formState.selectedType}
 				items={available_types}
+			/>
+			<Dropdown
+				titleText="Centro"
+				bind:selectedIndex={formState.selectedCenter}
+				items={available_centers}
 			/>
 			<TextArea bind:value={formState.summary} invalidText="Endereço de e-mail inválido" invalid={summaryIsInvalid} labelText="Resumo" required />
 		{/await}

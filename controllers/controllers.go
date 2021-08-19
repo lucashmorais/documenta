@@ -13,9 +13,10 @@ type Process struct {
 	Title     string `json: "title"`
 	Summary   string `json: "summary"`
 	Reference int    `json: "reference"`
-	Center    Center
 
 	// These are all "belongs to" relationships
+	CenterID        uint
+	Center          Center
 	UserID          uint
 	User            User
 	ProcessStatusID uint

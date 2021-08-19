@@ -94,6 +94,8 @@ func setupRouter(app *fiber.App) {
 
 	protected.Get("process_types", controllers.GetProcessTypes)
 
+	protected.Get("centers", controllers.GetCenters)
+
 	protected.Post("comment", controllers.NewComment)
 	protected.Put("comment/:id", controllers.UpdateComment)
 	protected.Delete("comment/:id", controllers.DeleteComment)
