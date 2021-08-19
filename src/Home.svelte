@@ -41,7 +41,7 @@
 							processObj.assunto = p.Title
 							
 							//TODO: GET THE FOLLOWING FROM THE DB!
-							processObj.centro = "Brasília"
+							processObj.centro = p.Center.Name
 							processObj.pend = "Encaminhamento final"
 							processObj.tipo = p.ProcessType.Name
 

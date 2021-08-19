@@ -11,7 +11,7 @@ import (
 func GetProcesses(c *fiber.Ctx) error {
 	db := database.DBConn
 	var processes []Process
-	db.Preload("ProcessType").Find(&processes)
+	db.Preload("Center").Preload("ProcessType").Find(&processes)
 
 	return c.JSON(processes)
 }
