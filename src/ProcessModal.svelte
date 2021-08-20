@@ -30,63 +30,15 @@
 		"selectedCenter": 0,
 	}
 	
-	let passwordOptions = {
-		minLength: 8,
-		minLowercase: 0,
-		minUppercase: 0,
-		minNumbers: 0,
-		minSymbols: 0,
-		returnScore: false,
-		pointsPerUnique: 1,
-		pointsPerRepeat: 10,
-		pointsForContainingLower: 100,
-		pointsForContainingUpper: 1000,
-		pointsForContainingNumber: 10000,
-		pointsForContainingSymbol: 100000
-	}
-	
 	let validationIsEnabled = false;
 	
-	// $: coreUserInvalid = formState != null && formState.email != null && !isEmail(formState.email)
-	// $: corePasswordInvalid = purpose == "registering" && formState != null && formState.passwordValue != null && !isStrongPassword(formState.passwordValue, passwordOptions)
-	// $: corePassword2Invalid = purpose == "registering" && formState != null && formState.passwordValue2 != null && formState.passwordValue != formState.passwordValue2
-	// $: coreFirstNameInvalid = formState != null && formState.firstName != null && formState.firstName == ""
-	// $: coreLastNameInvalid = formState != null && formState.lastName != null && formState.lastName == ""
-	// $: coreInitialsInvalid = formState != null && formState.initials != null && formState.initials == ""
+	$: coreTitleIsInvalid = formState != null && formState.title != null && formState.title == ""
+	$: coreSummaryIsInvalid = formState != null && formState.summary != null && formState.summary == ""
+
+	$: titleIsInvalid = validationIsEnabled && coreTitleIsInvalid
+	$: summaryIsInvalid = validationIsEnabled && coreSummaryIsInvalid
 	
-	// $: userIsInvalid = validationIsEnabled && coreUserInvalid
-	// $: passwordIsInvalid = validationIsEnabled && corePasswordInvalid
-	// $: password2IsInvalid = validationIsEnabled && corePassword2Invalid
-	// $: firstNameIsInvalid = validationIsEnabled && coreFirstNameInvalid
-	// $: lastNameIsInvalid = validationIsEnabled && coreLastNameInvalid
-	// $: initialsAreInvalid = validationIsEnabled && coreInitialsInvalid
-	
-	let titleIsInvalid = false;
-	let summaryIsInvalid = false;
-	
-	let failedLastTime = false
-	
-	$: weakPasswordMessage = "A senha escolhida deve ter pelo menos 8 caracteres."
-	
-	let someInputIsInvalid = false;
-	// $: someInputIsInvalid = coreUserInvalid || corePasswordInvalid || corePassword2Invalid || coreFirstNameInvalid || coreLastNameInvalid || coreInitialsInvalid
-	
-	const invalidEntryMessage = "Entrada inválida"
-	let invalidPasswordMessage = "Senha inválida"
-	
-	// $: invalidPasswordMessage = evaluatePasswords(formState.passwordValue, formState.passwordValue2)
-	
-	function evaluatePasswords(value1, value2) {
-		if (value1 != value2) {
-			// passwordInvalid = true;
-			// password2Invalid = true;
-			return "Senhas fornecidas não coincidem"
-		} else {
-			// passwordInvalid = false;
-			// password2Invalid = false;
-			return ""
-		}
-	}
+	$: someInputIsInvalid = coreTitleIsInvalid || coreSummaryIsInvalid
 	
 	export let purpose = "registering"
 	$: if (purpose == 'registering') { clearForm() }
@@ -194,7 +146,7 @@
 	async function submitForm() {
 		if (someInputIsInvalid) {
 			console.log("[submitForm:someInputIsInvalid:formState]: ", formState)
-			console.log("[submitForm]: [coreUserInvalid, coreFirstNameInvalid, coreLastNameInvalid, coreInitialsInvalid, corePasswordInvalid, corePassword2Invalid] = ", [coreUserInvalid, coreFirstNameInvalid, coreLastNameInvalid, coreInitialsInvalid, corePasswordInvalid, corePassword2Invalid])
+			console.log("[submitForm]: [titleIsInvalid, summaryIsInvalid] = ", [titleIsInvalid, summaryIsInvalid])
 			enableValidation()
 			return
 		}
@@ -288,7 +240,7 @@
 		{#await purposePromise}
 			Loading...
 		{:then p}
-			<TextInput bind:value={formState.title} invalidText="Endereço de e-mail inválido" invalid={titleIsInvalid} labelText="Título" required />
+			<TextInput bind:value={formState.title} invalidText="Título pequeno demais" invalid={titleIsInvalid} labelText="Título" required />
 			<!-- TODO: Ensure race conditions involving `available_types` do not cause any trouble -->
 			<Dropdown
 				titleText="Tipo de processo"
@@ -300,6 +252,6 @@
 				bind:selectedIndex={formState.selectedCenter}
 				items={available_centers}
 			/>
-			<TextArea bind:value={formState.summary} invalidText="Endereço de e-mail inválido" invalid={summaryIsInvalid} labelText="Resumo" required />
+			<TextArea bind:value={formState.summary} invalidText="Descrição demasiado curta" invalid={summaryIsInvalid} labelText="Resumo" required />
 		{/await}
 </Modal>
