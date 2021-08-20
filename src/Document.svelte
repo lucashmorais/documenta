@@ -52,6 +52,26 @@
 	let processID = urlParams.get('id')
 	
 	console.log("processID: ", processID)
+
+	export function updateProcess() {
+		let processPromise = new Promise((resolve, reject) => {
+			if (processID != null) {
+				fetch("http://localhost:3123/api/v1/processes?processID=" + processID).
+					then((response)=>response.json().
+						then(function (wrappedProcess) {
+							console.log("[updateProcess]: ", wrappedProcess[0])
+							resolve(wrappedProcess[0])
+						}
+					)
+				)
+			} else {
+				resolve (null);
+			}
+		})
+		return processPromise
+	}
+
+	let processPromise = updateProcess();
 </script>
 
 <style>
