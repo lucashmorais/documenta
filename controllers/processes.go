@@ -18,7 +18,9 @@ func GetProcesses(c *fiber.Ctx) error {
 	typeString := c.Query("typeString")
 	typeIDRaw := c.Query("typeID")
 
-	base := db.Preload("ProcessStatus").
+	base := db.
+		Preload("Center").
+		Preload("ProcessStatus").
 		Preload("ProcessType").
 		Table("processes").
 		Joins("join process_statuses on process_statuses.id = processes.process_status_id").
