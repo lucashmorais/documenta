@@ -13,11 +13,14 @@ func GetProcesses(c *fiber.Ctx) error {
 	db := database.DBConn
 	var processes []Process
 
+	processIDRaw := c.Query("processID")
 	statusString := c.Query("statusString")
 	statusIDRaw := c.Query("statusID")
 	typeString := c.Query("typeString")
 	typeIDRaw := c.Query("typeID")
 
+	// IMPORTANT: The following query will only work for processes that have valid references
+	// to ProcessStatus and ProcessTypes, since it includes joins with these tables
 	base := db.
 		Preload("Center").
 		Preload("ProcessStatus").
@@ -31,6 +34,12 @@ func GetProcesses(c *fiber.Ctx) error {
 	}
 	if typeString != "" {
 		base = base.Where("process_types.name = ?", typeString)
+	}
+	if processIDRaw != "" {
+		i, err := strconv.Atoi(processIDRaw)
+		if err == nil {
+			base = base.Where("processes.id = ?", i)
+		}
 	}
 	if statusIDRaw != "" {
 		i, err := strconv.Atoi(statusIDRaw)
