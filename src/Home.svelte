@@ -8,6 +8,7 @@
 	import Edit16 from "carbon-icons-svelte/lib/Edit16";
 	import {
 		DataTable,
+		DataTableSkeleton,
 		Toolbar,
 		Button,
 		ToolbarBatchActions,
@@ -16,44 +17,67 @@
 		Tag
 	} from "carbon-components-svelte";
 
-	let reps = [1,2,3,4,5,6]
 	let selectedRowIds = [];
 	let editModalIsOpen = false;
 	let deleteModalIsOpen;
 
 	let headers=[{ key: 'assunto', value: 'Assunto' }, { key: 'centro', value: 'Centro' }, { key: 'tipo', value: 'Tipo' }, { key: 'pend', value: 'Pendência Atual' }]
-	let rows=[]
-	// let rows=[{ id: 'a', assunto: 'Assunto 0', centro: 'cs', tipo: 3000, pend: 'Revisão do defensor' }, { id: 'b', assunto: 'Assunto 1', centro: 'brs', tipo: 443, pend: 'Revisão inicial do Secretário' }, { id: 'c', assunto: 'Assunto 2', centro: 'cur', tipo: 80, pend: 'Geração de protocolo' }, { id: 'd', assunto: 'Assunto 6', centro: 'rib', tipo: 3000, pend: 'Round robin' }, { id: 'e', assunto: 'Assunto 4', centro: 'for', tipo: 443, pend: 'Discussão Geral' }, { id: 'f', assunto: 'Assunto 5', centro: 'bh', tipo: 80, pend: 'Encaminhamento final para o ctr' }]
+	
+	//TODO: Remove the following in favor of promise-based data communication
 
-	var processesPromise;
+	var draftProcessesPromise;
+	var activeProcessesPromise;
+	var finishedOrBlockedProcessesPromise;
+	
+	async function coreProcessUpdater(resolve, reject, set) {
+		let rows = []
+		let promises = []
+		for (let queryParam of set) {
+			promises.push( new Promise((resolve, reject) => {
+					fetch("http://localhost:3123/api/v1/processes?statusString=" + queryParam).
+						then((response)=>response.json().
+							then(function (processes) {
+								console.log(processes)
+								let processObj = {}
+								console.log("[updateProcesses::processes]:", processes)
+								for (const p of processes) {
+									processObj = {}
+									processObj.id = p.ID
+									processObj.assunto = p.Title
+									processObj.centro = p.Center.Name
+									processObj.tipo = p.ProcessType.Name
+
+									//TODO: GET THE FOLLOWING FROM THE DB!
+									processObj.pend = "Encaminhamento final"
+
+									console.log("[updateProcesses]: Process just built: ", processObj)
+									rows.push(processObj)
+								}
+								resolve()
+							}
+						)
+					)
+				}
+			))
+		}
+		await Promise.all(promises)
+		resolve(rows)
+	}
+
 	export function updateProcesses() {
-		processesPromise = new Promise((resolve, reject) => {
-			fetch("http://localhost:3123/api/v1/processes").
-				then((response)=>response.json().
-					then(function (processes) {
-						console.log(processes)
-						rows = []
-						let processObj = {}
-						console.log("[updateProcesses::processes]:", processes)
-						for (const p of processes) {
-							processObj = {}
-							processObj.id = p.ID
-							processObj.assunto = p.Title
-							
-							//TODO: GET THE FOLLOWING FROM THE DB!
-							processObj.centro = p.Center.Name
-							processObj.pend = "Encaminhamento final"
-							processObj.tipo = p.ProcessType.Name
-
-							console.log("[updateProcesses]: Process just built: ", processObj)
-							rows.push(processObj)
-						}
-						resolve(processes)
-					}
-				)
-			)
+		let set = []
+		set = ["Rascunho"]
+		draftProcessesPromise = new Promise((resolve, reject) => {
+			coreProcessUpdater(resolve, reject, set)
 		})
-		return processesPromise
+		set = ["Ativo"]
+		activeProcessesPromise = new Promise((resolve, reject) => {
+			coreProcessUpdater(resolve, reject, set)
+		})
+		set = ["Concluído", "Interditado"]
+		finishedOrBlockedProcessesPromise = new Promise((resolve, reject) => {
+			coreProcessUpdater(resolve, reject, set)
+		})
 	}
 	updateProcesses();
 </script>
@@ -94,36 +118,48 @@
 <div class="content1">
 	<h2>Processos esperando ação do usuário</h2>
 		<div class="content2">
-			<DataTable
-				headers={headers}
-				rows={rows}
-			>
-				<Toolbar>
-					<ToolbarBatchActions>
-					  <Button on:click={() => deleteModalIsOpen = true} icon={TrashCan16}>Eliminar</Button>
-					  {#if selectedRowIds.length < 2}
-						  <Button on:click={() => editModalIsOpen = true} icon={Edit16}>Editar</Button>
-					  {/if}
-					</ToolbarBatchActions>
-					<ToolbarContent>
-					  <!-- <ToolbarSearch /> -->
-					  <Button on:click={() => editModalIsOpen = true}>Novo processo</Button>
-					</ToolbarContent>
-				</Toolbar>
-			</DataTable>
+			{#await draftProcessesPromise}
+				<DataTableSkeleton />
+			{:then draftProcesses}
+				<DataTable
+					headers={headers}
+					rows={draftProcesses}
+				>
+					<Toolbar>
+						<ToolbarBatchActions>
+						  <Button on:click={() => deleteModalIsOpen = true} icon={TrashCan16}>Eliminar</Button>
+						  {#if selectedRowIds.length < 2}
+							  <Button on:click={() => editModalIsOpen = true} icon={Edit16}>Editar</Button>
+						  {/if}
+						</ToolbarBatchActions>
+						<ToolbarContent>
+						  <!-- <ToolbarSearch /> -->
+						  <Button on:click={() => editModalIsOpen = true}>Novo processo</Button>
+						</ToolbarContent>
+					</Toolbar>
+				</DataTable>
+			{/await}
 		</div>
 	<h2>Processos em andamento</h2>
 		<div class="content2">
-			<DataTable
-				headers={headers}
-				rows={rows}
-			/>
+			{#await activeProcessesPromise}
+				<DataTableSkeleton />
+			{:then activeProcesses}
+				<DataTable
+					headers={headers}
+					rows={activeProcesses}
+				/>
+			{/await}
 		</div>
 	<h2>Processos finalizados</h2>
 		<div class="content2">
-			<DataTable
-				headers={headers}
-				rows={rows}
-			/>
+			{#await finishedOrBlockedProcessesPromise}
+				<DataTableSkeleton />
+			{:then finishedOrBlockedProcesses}
+				<DataTable
+					headers={headers}
+					rows={finishedOrBlockedProcesses}
+				/>
+			{/await}
 		</div>
 </div>
