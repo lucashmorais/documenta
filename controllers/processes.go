@@ -15,24 +15,34 @@ func GetProcesses(c *fiber.Ctx) error {
 
 	statusString := c.Query("statusString")
 	statusIDRaw := c.Query("statusID")
+	typeString := c.Query("typeString")
+	typeIDRaw := c.Query("typeID")
+
+	base := db.Preload("ProcessStatus").
+		Preload("ProcessType").
+		Table("processes").
+		Joins("join process_statuses on process_statuses.id = processes.process_status_id").
+		Joins("join process_types on process_types.id = processes.process_type_id")
 
 	if statusString != "" {
-		var processStatus ProcessStatus
-		db.Where("name = ?", statusString).Find(&processStatus)
-		db.Preload("ProcessStatus").Preload("ProcessType").Where("process_status_id = ?", processStatus.ID).Find(&processes)
-	} else if statusIDRaw != "" {
-		statusID, err := strconv.Atoi(statusIDRaw)
-		if err == nil {
-			db.Preload("Center").Preload("ProcessStatus").Preload("ProcessType").Where("process_status_id = ?", statusID).Find(&processes)
-		} else {
-			return c.Status(400).JSON(&fiber.Map{
-				"success": false,
-				"cause":   "bad statusID query",
-			})
-		}
-	} else {
-		db.Preload("Center").Preload("ProcessStatus").Preload("ProcessType").Find(&processes)
+		base = base.Where("process_statuses.name = ?", statusString)
 	}
+	if typeString != "" {
+		base = base.Where("process_types.name = ?", typeString)
+	}
+	if statusIDRaw != "" {
+		i, err := strconv.Atoi(statusIDRaw)
+		if err == nil {
+			base = base.Where("process_statuses.id = ?", i)
+		}
+	}
+	if typeIDRaw != "" {
+		i, err := strconv.Atoi(typeIDRaw)
+		if err == nil {
+			base = base.Where("process_types.id = ?", i)
+		}
+	}
+	base.Find(&processes)
 
 	return c.JSON(processes)
 }
