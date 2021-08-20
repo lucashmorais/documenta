@@ -47,6 +47,11 @@
 		Cookie.remove("documentaLoginToken")
 		window.location.href = "/";
 	}
+
+	let urlParams = new URLSearchParams(window.location.search);
+	let processID = urlParams.get('id')
+	
+	console.log("processID: ", processID)
 </script>
 
 <style>
