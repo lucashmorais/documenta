@@ -20,7 +20,7 @@ type Process struct {
 	UserID          uint
 	User            User
 	ProcessStatusID uint
-	ProcessStatus   ProcessType
+	ProcessStatus   ProcessStatus
 	ProcessTypeID   uint
 	ProcessType     ProcessType
 }

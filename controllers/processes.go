@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"fmt"
+	"strconv"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/jinzhu/gorm"
@@ -11,7 +12,27 @@ import (
 func GetProcesses(c *fiber.Ctx) error {
 	db := database.DBConn
 	var processes []Process
-	db.Preload("Center").Preload("ProcessType").Find(&processes)
+
+	statusString := c.Query("statusString")
+	statusIDRaw := c.Query("statusID")
+
+	if statusString != "" {
+		var processStatus ProcessStatus
+		db.Where("name = ?", statusString).Find(&processStatus)
+		db.Preload("ProcessStatus").Preload("ProcessType").Where("process_status_id = ?", processStatus.ID).Find(&processes)
+	} else if statusIDRaw != "" {
+		statusID, err := strconv.Atoi(statusIDRaw)
+		if err == nil {
+			db.Preload("Center").Preload("ProcessStatus").Preload("ProcessType").Where("process_status_id = ?", statusID).Find(&processes)
+		} else {
+			return c.Status(400).JSON(&fiber.Map{
+				"success": false,
+				"cause":   "bad statusID query",
+			})
+		}
+	} else {
+		db.Preload("Center").Preload("ProcessStatus").Preload("ProcessType").Find(&processes)
+	}
 
 	return c.JSON(processes)
 }
@@ -45,7 +66,10 @@ func PostProcess(c *fiber.Ctx) error {
 	var center Center
 	db.Where(process.CenterID).Find(&center)
 
-	dbProcess := Process{Title: process.Title, Summary: process.Summary, ProcessTypeID: process.TypeID, ProcessType: processType, Center: center}
+	var status ProcessStatus
+	db.Where("name = ?", "Rascunho").Find(&status)
+
+	dbProcess := Process{Title: process.Title, Summary: process.Summary, ProcessTypeID: process.TypeID, ProcessType: processType, Center: center, ProcessStatus: status}
 
 	fmt.Printf("[PostProcess::dbProcess]: %v\n", dbProcess)
 
