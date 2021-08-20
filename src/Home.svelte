@@ -21,7 +21,7 @@
 	let editModalIsOpen = false;
 	let deleteModalIsOpen;
 
-	let headers=[{ key: 'assunto', value: 'Assunto' }, { key: 'centro', value: 'Centro' }, { key: 'tipo', value: 'Tipo' }, { key: 'pend', value: 'Pendência Atual' }]
+	let headers=[{ key: 'assunto', value: 'Assunto' }, { key: 'centro', value: 'Centro' }, { key: 'tipo', value: 'Tipo' }, {key: 'estado', value: 'Estado'}, { key: 'pend', value: 'Pendência Atual' }]
 	
 	//TODO: Remove the following in favor of promise-based data communication
 
@@ -46,6 +46,7 @@
 									processObj.assunto = p.Title
 									processObj.centro = p.Center.Name
 									processObj.tipo = p.ProcessType.Name
+									processObj.estado = p.ProcessStatus.Name
 
 									//TODO: GET THE FOLLOWING FROM THE DB!
 									processObj.pend = "Encaminhamento final"
