@@ -119,7 +119,15 @@
 		<InfoLine />
 		<h2>Resumo</h2>
 		<Tile class="summary">
-			Lorem ipsum dolor sit amet, consectetur adipiscing elit. Fusce bibendum urna urna, sed tincidunt quam placerat id. In bibendum, velit ac tristique pretium, erat nulla facilisis elit, id tincidunt dolor eros nec tellus. Nullam pharetra lacus ligula, ac condimentum purus rutrum ac. Pellentesque fermentum felis nisi, ut aliquet erat porttitor egestas. Vivamus sapien mi, tincidunt ac aliquet eget, sodales nec mi. Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Curabitur ullamcorper enim eu condimentum placerat. Quisque tempor mauris porttitor leo sagittis ultricies. Interdum et malesuada fames ac ante ipsum primis in faucibus. Nulla vestibulum, turpis et maximus rutrum, magna nisi finibus massa, at bibendum tortor mi cursus augue. Duis molestie leo ut nisl commodo accumsan. Ut sit amet eros ipsum. Cras quis malesuada mi. Nulla commodo porta lorem, sed imperdiet nunc feugiat quis. In consequat, massa a elementum varius, velit purus mattis diam, eu rhoncus mauris lorem eleifend purus. Sed lacinia dictum eros in lobortis. In tempus fermentum placerat. Morbi consectetur, ex et sagittis placerat, nisl massa gravida metus, et sollicitudin orci nisi sit amet erat. Nunc mattis luctus justo ac pretium. Praesent tincidunt nulla eget facilisis accumsan. Pellentesque turpis felis, blandit a diam vel, pellentesque rutrum libero. Nam non tristique diam. Sed lacinia, ipsum congue eleifend vestibulum, ligula risus egestas elit, vel efficitur leo tellus sit amet libero. Cras efficitur, urna quis tincidunt consequat, mauris lorem laoreet sem, at dignissim elit augue vel arcu. Nulla facilisi. Vestibulum id purus ultricies, sagittis nunc posuere, commodo urna. Morbi leo orci, facilisis ac erat id, vestibulum vestibulum risus. Nam nec arcu neque. Nam dapibus augue quis varius bibendum.
+			{#await processPromise}
+			<div></div>
+			{:then process}
+				{#if process != null}
+					{process.Summary}
+				{:else}
+					Lorem ipsum dolor sit amet
+				{/if}
+			{/await}
 		</Tile>
 
 		<h2>Anexos</h2>
