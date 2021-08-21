@@ -23,8 +23,6 @@
 
 	let headers=[{ key: 'assunto', value: 'Assunto' }, { key: 'centro', value: 'Centro' }, { key: 'tipo', value: 'Tipo' }, {key: 'estado', value: 'Estado'}, { key: 'pend', value: 'Pendência Atual' }]
 	
-	//TODO: Remove the following in favor of promise-based data communication
-
 	var draftProcessesPromise;
 	var activeProcessesPromise;
 	var finishedOrBlockedProcessesPromise;
@@ -81,6 +79,10 @@
 		})
 	}
 	updateProcesses();
+	
+	function handleRowClick(event) {
+		window.open("/document.html?id=" + event.detail.id, '_blank').focus();
+	}
 </script>
 
 <style>
@@ -125,6 +127,7 @@
 				<DataTable
 					headers={headers}
 					rows={draftProcesses}
+					on:click:row={handleRowClick}
 				>
 					<Toolbar>
 						<ToolbarBatchActions>
@@ -149,6 +152,7 @@
 				<DataTable
 					headers={headers}
 					rows={activeProcesses}
+					on:click:row={handleRowClick}
 				/>
 			{/await}
 		</div>
@@ -160,6 +164,7 @@
 				<DataTable
 					headers={headers}
 					rows={finishedOrBlockedProcesses}
+					on:click:row={handleRowClick}
 				/>
 			{/await}
 		</div>
