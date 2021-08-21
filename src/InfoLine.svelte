@@ -5,6 +5,12 @@
 
 	let headers=[{ key: 'centro', value: 'Centro' }, { key: 'tipo', value: 'Tipo' }, { key: 'pend', value: 'Pendência Atual' }]
 	let rows=[{ id: 'a', centro: 'sm', tipo: "Consulta", pend: 'Revisão do defensor' }]
+	
+	export let processPromise;
+
+	$: processPromise.then((process) => {
+		rows=[{ id: 'a', centro: process.Center.Name, tipo: process.ProcessType.Name, pend: 'Revisão do defensor' }]
+	})
 </script>
 
 <style>

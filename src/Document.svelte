@@ -116,7 +116,7 @@
 			/>
 		</div>
 		</h1>
-		<InfoLine />
+		<InfoLine processPromise={processPromise}/>
 		<h2>Resumo</h2>
 		<Tile class="summary">
 			{#await processPromise}
