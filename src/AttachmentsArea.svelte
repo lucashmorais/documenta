@@ -10,6 +10,7 @@
 	let attachmentsPromise;
 	let files;
 	let images;
+	export let processID;
 
 	async function coreSubmit(file) {
 		// https://javascript.info/formdata
@@ -44,30 +45,34 @@
 
 	export function updateAttachments() {
 		attachmentsPromise = new Promise((resolve, reject) => {
-			fetch("http://localhost:3123/api/v1/files").
-				then((response)=>response.json().
-					then(function (attachments) {
-						files = attachments
-						images = []
-						let imgCounter = 0
-						for (let i = 0; i < attachments.length; i++) {
-							let a = attachments[i]
-							console.log(a)
-							// console.log(a.Name) 
-							// console.log(a.UUID) 
-							// console.log(a.ProcessID) 
-							a.src = "http://localhost:3123/api/v1/file/" + a.ID;
-							console.log(a.src);
-							if (a.ContentType.startsWith("image")) {
-								a.imgID = imgCounter
-								imgCounter++
-								images.push(a)
+			if (processID != "" && processID != "0") {
+				fetch("http://localhost:3123/api/v1/files?processID=" + processID).
+					then((response)=>response.json().
+						then(function (attachments) {
+							files = attachments
+							images = []
+							let imgCounter = 0
+							for (let i = 0; i < attachments.length; i++) {
+								let a = attachments[i]
+								console.log(a)
+								// console.log(a.Name) 
+								// console.log(a.UUID) 
+								// console.log(a.ProcessID) 
+								a.src = "http://localhost:3123/api/v1/file/" + a.ID;
+								console.log(a.src);
+								if (a.ContentType.startsWith("image")) {
+									a.imgID = imgCounter
+									imgCounter++
+									images.push(a)
+								}
 							}
+							resolve(attachments)
 						}
-						resolve(attachments)
-					}
+					)
 				)
-			)
+			} else {
+				resolve([])
+			}
 		})
 	}
 	

@@ -131,7 +131,7 @@
 		</Tile>
 
 		<h2>Anexos</h2>
-		<AttachmentsArea/>
+		<AttachmentsArea processID={processID}/>
 
 		<h2>Minutas</h2>
 		<Minutes />

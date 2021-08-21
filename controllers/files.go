@@ -3,6 +3,7 @@ package controllers
 import (
 	"fmt"
 	"os"
+	"strconv"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/google/uuid"
@@ -78,8 +79,17 @@ func NewFormFiles(c *fiber.Ctx) error {
 func GetFilesWithoutBlob(c *fiber.Ctx) error {
 	db := database.DBConn
 	var files []UserFile
-	db.Preload("User").Preload("Process").Find(&files)
-	// db.Preload("User").Preload("Process").Find(&files)
+	processIDRaw := c.Query("processID")
+
+	driver := db.Preload("User").Preload("Process")
+	if processIDRaw != "" {
+		i, err := strconv.Atoi(processIDRaw)
+		if err == nil {
+			driver = driver.Where("process_id = ?", i)
+		}
+	}
+
+	driver.Find(&files)
 
 	return c.JSON(files)
 }
