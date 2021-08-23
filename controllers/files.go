@@ -29,7 +29,7 @@ type UserFile struct {
 	Process     Process
 }
 
-// It seems that Go will only automatically export symbols starting with a capital letter
+// Function that adds a new item to the File gorm table based on the data provided in the POST request as a JSON
 func NewFile(c *fiber.Ctx) error {
 	db := database.DBConn
 	var file UserFile
