@@ -72,6 +72,8 @@ func initDatabase() {
 	database.DBConn.AutoMigrate(&controllers.Center{})
 	database.DBConn.AutoMigrate(&controllers.ProcessType{})
 	database.DBConn.AutoMigrate(&controllers.ProcessStatus{})
+	database.DBConn.AutoMigrate(&controllers.Minute{})
+	database.DBConn.AutoMigrate(&controllers.MinuteVersion{})
 
 	database.DBConn.AutoMigrate(&controllers.Comment{})
 	database.DBConn.AutoMigrate(&controllers.User{})
@@ -107,6 +109,9 @@ func setupRouter(app *fiber.App) {
 	protected.Get("files", controllers.GetFilesWithoutBlob)
 	protected.Get("file/:id", controllers.GetFile)
 	protected.Delete("file/:id", controllers.DeleteFile)
+
+	protected.Get("minutes", controllers.GetMinutes)
+	protected.Get("minute_versions", controllers.GetMinuteVersions)
 
 	protected.Post("user", controllers.PostUser)
 	protected.Put("user", controllers.PutUser)
