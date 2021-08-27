@@ -38,6 +38,8 @@ type MinuteVersion struct {
 	Description string
 	UserID      int
 	User        User
+	Minute      Minute
+	MinuteID    int
 
 	UnixCreatedAt int64
 	UnixUpdatedAt int64
@@ -148,7 +150,7 @@ func GetMinuteVersions(c *fiber.Ctx) error {
 	db := database.DBConn
 	var minutes []MinuteVersion
 
-	minuteID := c.Query("processID")
+	minuteID := c.Query("minuteID")
 
 	driver := db.Preload("User")
 

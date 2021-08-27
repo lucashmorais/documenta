@@ -81,7 +81,27 @@
 			)
 		})
 	}
-	
+
+	export function getMinuteVersions(minuteID) {
+		return new Promise((resolve, reject) => {
+			console.log("[Minutes::getMinuteVersions]: Just entering minutesPromise's inner function")
+			if (processID == "" || processID == "0") {
+				resolve([])
+			}
+			fetch("http://localhost:3123/api/v1/minute_versions?minuteID=" + minuteID).
+				then((response)=>response.json().
+					then(function (versions) {
+						console.log("[Minutes::getMinuteVersions::versions]: ", versions)
+						for (let i = 0; i < versions.length; i++) {
+							let a = versions[i]
+							console.log(a)
+						}
+						resolve(versions)
+					}
+				)
+			)
+		})
+	}
 
 	let newVersionBlocks = [];
 	let numTextHidingCallbacksAdded = 0;
@@ -102,33 +122,6 @@
 </style>
 
 <div class="interventions">
-	<Tile><ActionsBlock city={"Centro de Estudos"} editAction={setupHidingCallback}/></Tile>
-	<Tile>
-		<Accordion>
-			<div use:hideNodeAndPushReference>
-				<AccordionItem open title="Nova versão">
-					<div class="removeOuterPadding">
-						<InterventionForm />
-					</div>
-				</AccordionItem>
-			</div>
-			<AccordionItem open title="10 de março de 2021, 18:55, Defensor: atualizando texto de acordo com a sugestão recebida sobre tipos de atividades por realizar no novo Centro">
-				<p>
-				Natural Language Classifier uses advanced natural language processing and
-				machine learning techniques to create custom classification models. Users
-				train their data and the service predicts the appropriate category for the
-				inputted text.
-				</p>
-			</AccordionItem>
-			<AccordionItem title="10 de março de 2021, 11:55, Vogal de sr: Texto inicial">
-				<p>
-				Translate text, documents, and websites from one language to another.
-				Create industry or region-specific translations via the service's
-				customization capability.
-				</p>
-			</AccordionItem>
-		</Accordion>
-	</Tile>
 	{#await minutesPromise}
 	...
 	{:then minutes}
@@ -148,6 +141,17 @@
 						{minute.Content}
 						</p>
 					</AccordionItem>
+					{#await getMinuteVersions(minute.ID)}
+					...
+					{:then versions}
+						{#each versions as version}
+							<AccordionItem title="{decodeDate(version.UnixCreatedAt)}, {decodeTime(version.UnixCreatedAt)}, {version.User.FirstName} {version.User.LastName}: {version.Description}">
+								<p>
+								{version.Content}
+								</p>
+							</AccordionItem>
+						{/each}
+					{/await}
 				</Accordion>
 			</Tile>
 		{/each}
