@@ -134,7 +134,7 @@
 		<AttachmentsArea processID={processID}/>
 
 		<h2>Minutas</h2>
-		<Minutes />
+		<Minutes processID={processID}/>
 
 		<h2>Nova intervenção</h2>
 		<InterventionForm on:commentWasPosted={refreshComments} />

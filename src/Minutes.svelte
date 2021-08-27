@@ -26,6 +26,7 @@
 	import ActionsBlock from './ActionsBlock.svelte';
 	import InterventionForm from './InterventionForm.svelte';
 	import { onMount } from 'svelte';
+	import { decodeDate, decodeTime } from './utils.js'
 
 	function pushNodeReferenceToArray(node) {
 		newVersionBlocks.push(node)
@@ -57,8 +58,35 @@
 		document.querySelectorAll(".removeOuterPadding").forEach((node) => node.parentNode.style["padding-right"] = "0");
 	})
 
+	export let processID = 0;
+
+	let minutesPromise;
+	export function updateMinutes() {
+		minutesPromise = new Promise((resolve, reject) => {
+			console.log("[Minutes::updateMinutes]: Just entering minutesPromise's inner function")
+			if (processID == "" || processID == "0") {
+				resolve([])
+			}
+			fetch("http://localhost:3123/api/v1/minutes?processID=" + processID).
+				then((response)=>response.json().
+					then(function (minutes) {
+						console.log("[Minutes::updateMinutes::minutes]: ", minutes)
+						for (let i = 0; i < minutes.length; i++) {
+							let a = minutes[i]
+							console.log(a)
+						}
+						resolve(minutes)
+					}
+				)
+			)
+		})
+	}
+	
+
 	let newVersionBlocks = [];
 	let numTextHidingCallbacksAdded = 0;
+
+	updateMinutes();
 </script>
 
 <style>
@@ -74,47 +102,6 @@
 </style>
 
 <div class="interventions">
-	<Tile><ActionsBlock city={"Campinas"} editAction={setupHidingCallback}/></Tile>
-	<Tile>
-		<Accordion>
-			<div use:hideNodeAndPushReference>
-				<AccordionItem open title="Nova versão">
-					<div class="removeOuterPadding">
-						<InterventionForm />
-					</div>
-				</AccordionItem>
-			</div>
-			<AccordionItem open title="10 de março de 2021, 18:55, Defensor">
-				<p>
-				Natural Language Classifier uses advanced natural language processing and
-				machine learning techniques to create custom classification models. Users
-				train their data and the service predicts the appropriate category for the
-				inputted text.
-				</p>
-			</AccordionItem>
-			<AccordionItem title="10 de março de 2021, 15:40, Vogal de sr">
-				<p>
-				Natural Language Classifier uses advanced natural language processing and
-				machine learning techniques to create custom classification models. Users
-				train their data and the service predicts the appropriate category for the
-				inputted text.
-				</p>
-			</AccordionItem>
-			<AccordionItem title="10 de março de 2021, 12:30, Vigário Regional: Adicionando sugestão de pessoas por cuidar dos novos eventos com os pais">
-				<p>
-				Analyze text to extract meta-data from content such as concepts, entities,
-				emotion, relations, sentiment and more.
-				</p>
-			</AccordionItem>
-			<AccordionItem title="10 de março de 2021, 11:55, Vogal de sr: Texto inicial">
-				<p>
-				Translate text, documents, and websites from one language to another.
-				Create industry or region-specific translations via the service's
-				customization capability.
-				</p>
-			</AccordionItem>
-		</Accordion>
-	</Tile>
 	<Tile><ActionsBlock city={"Centro de Estudos"} editAction={setupHidingCallback}/></Tile>
 	<Tile>
 		<Accordion>
@@ -142,24 +129,27 @@
 			</AccordionItem>
 		</Accordion>
 	</Tile>
-	<Tile><ActionsBlock city={"Niterói"} editAction={setupHidingCallback}/></Tile>
-	<Tile>
-		<Accordion>
-			<div use:hideNodeAndPushReference>
-				<AccordionItem open title="Nova versão">
-					<div class="removeOuterPadding">
-						<InterventionForm />
+	{#await minutesPromise}
+	...
+	{:then minutes}
+		{#each minutes as minute}
+			<Tile><ActionsBlock city={"Niterói"} editAction={setupHidingCallback}/></Tile>
+			<Tile>
+				<Accordion>
+					<div use:hideNodeAndPushReference>
+						<AccordionItem open title="Nova versão">
+							<div class="removeOuterPadding">
+								<InterventionForm />
+							</div>
+						</AccordionItem>
 					</div>
-				</AccordionItem>
-			</div>
-			<AccordionItem open title="10 de março de 2021, 18:55, Defensor: Texto inicial">
-				<p>
-				Natural Language Classifier uses advanced natural language processing and
-				machine learning techniques to create custom classification models. Users
-				train their data and the service predicts the appropriate category for the
-				inputted text.
-				</p>
-			</AccordionItem>
-		</Accordion>
-	</Tile>
+					<AccordionItem open title="{decodeDate(minute.UnixCreatedAt)}, {decodeTime(minute.UnixCreatedAt)}, {minute.User.FirstName} {minute.User.LastName}: {minute.Description}">
+						<p>
+						{minute.Content}
+						</p>
+					</AccordionItem>
+				</Accordion>
+			</Tile>
+		{/each}
+	{/await}
 </div>

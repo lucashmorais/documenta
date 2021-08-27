@@ -3,6 +3,7 @@ package controllers
 import (
 	"fmt"
 	"strconv"
+	"time"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/jinzhu/gorm"
@@ -24,6 +25,10 @@ type Minute struct {
 	//TODO: ENSURE THAT BOTH OF THESE ARE UNIQUE!
 	InboundProtocol  string
 	OutboundProtocol string
+
+	UnixCreatedAt int64
+	UnixUpdatedAt int64
+	UnixDeletedAt int64
 }
 
 // Struct that defines fields of the MinuteVersions gorm table
@@ -106,6 +111,7 @@ func NewMinute(c *fiber.Ctx) error {
 
 	// fmt.Printf("[PostMinute]: Decoded new minute: %v\n", minute)
 
+	minute.UnixCreatedAt = time.Now().Unix()
 	minute.UserID = userID
 	db.Create(&minute)
 
