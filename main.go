@@ -142,7 +142,6 @@ func setupRouter(app *fiber.App) {
 	protected.Delete("comment/:id", controllers.DeleteComment)
 	protected.Get("comment/:id", controllers.GetComment)
 	protected.Get("comments", controllers.GetComments)
-	protected.Get("comments/process/:id", controllers.GetCommentsByProcessID)
 
 	protected.Post("files", controllers.NewFormFiles)
 	protected.Get("files", controllers.GetFilesWithoutBlob)

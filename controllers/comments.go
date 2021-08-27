@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"strconv"
 	"time"
 
 	"github.com/gofiber/fiber/v2"
@@ -58,23 +59,28 @@ func GetComment(c *fiber.Ctx) error {
 	return nil
 }
 
-func GetCommentsByProcessID(c *fiber.Ctx) error {
-	process_id := c.Params("id")
-
-	db := database.DBConn
-	var comments []Comment
-
-	//CHECK FIELD NAMES ON DB BROWSER BEFORE QUERYING DATA!!!
-	db.Preload("User").Preload("Process").Where("process_id = ?", process_id).Find(&comments)
-
-	return c.JSON(comments)
-}
-
 func GetComments(c *fiber.Ctx) error {
 	db := database.DBConn
 	var comments []Comment
-	db.Preload("User").Preload("Process").Where("process_id = ?", 1).Find(&comments)
-	db.Preload("User").Preload("Process").Find(&comments)
+	driver := db.Preload("User").Preload("Process")
 
+	processID := c.Query("processID")
+	userID := c.Query("userID")
+
+	if processID != "" {
+		i, err := strconv.Atoi(processID)
+		if err == nil {
+			driver = driver.Where("process_id = ?", i)
+		}
+	}
+
+	if userID != "" {
+		i, err := strconv.Atoi(userID)
+		if err == nil {
+			driver = driver.Where("user_id = ?", i)
+		}
+	}
+
+	driver.Find(&comments)
 	return c.JSON(comments)
 }
