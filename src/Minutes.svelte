@@ -136,21 +136,21 @@
 							</div>
 						</AccordionItem>
 					</div>
-					<AccordionItem open title="{decodeDate(minute.UnixCreatedAt)}, {decodeTime(minute.UnixCreatedAt)}, {minute.User.FirstName} {minute.User.LastName}: {minute.Description}">
-						<p>
-						{minute.Content}
-						</p>
-					</AccordionItem>
 					{#await getMinuteVersions(minute.ID)}
 					...
 					{:then versions}
-						{#each versions as version}
-							<AccordionItem title="{decodeDate(version.UnixCreatedAt)}, {decodeTime(version.UnixCreatedAt)}, {version.User.FirstName} {version.User.LastName}: {version.Description}">
+						{#each versions.reverse() as version}
+							<AccordionItem open={version.ID == versions[0].ID} title="{decodeDate(version.UnixCreatedAt)}, {decodeTime(version.UnixCreatedAt)}, {version.User.FirstName} {version.User.LastName}: {version.Description}">
 								<p>
 								{version.Content}
 								</p>
 							</AccordionItem>
 						{/each}
+						<AccordionItem open={versions.length == 0} title="{decodeDate(minute.UnixCreatedAt)}, {decodeTime(minute.UnixCreatedAt)}, {minute.User.FirstName} {minute.User.LastName}: {minute.Description}">
+							<p>
+							{minute.Content}
+							</p>
+						</AccordionItem>
 					{/await}
 				</Accordion>
 			</Tile>
