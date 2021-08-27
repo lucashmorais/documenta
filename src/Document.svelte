@@ -137,9 +137,9 @@
 		<Minutes processID={processID}/>
 
 		<h2>Nova intervenção</h2>
-		<InterventionForm on:commentWasPosted={refreshComments} />
+		<InterventionForm processID={processID} on:commentWasPosted={refreshComments} />
 
 		<h2>Intervenções</h2>
-		<CommentArea bind:updateComments={coreRefreshComments}/>
+		<CommentArea processID={processID} bind:updateComments={coreRefreshComments}/>
 	</div>
 </Content>

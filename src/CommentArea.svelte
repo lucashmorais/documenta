@@ -4,10 +4,11 @@
 	import { decodeDate, decodeTime } from './utils.js'
 
 	var commentsPromise;
+	export let processID;
 
 	export function updateComments() {
 		commentsPromise = new Promise((resolve, reject) => {
-			fetch("http://localhost:3123/api/v1/comments").
+			fetch("http://localhost:3123/api/v1/comments?processID=" + processID).
 				then((response)=>response.json().
 					then(function (comments) {
 						for (const c of comments) {
@@ -77,6 +78,7 @@
 </style>
 
 {#await commentsPromise}
+...
 {:then comments} 
 	{#each comments as comment}
 		<div class="single-comment">

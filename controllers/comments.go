@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"fmt"
 	"strconv"
 	"time"
 
@@ -11,13 +12,13 @@ import (
 
 type Comment struct {
 	gorm.Model
-	Title   string `json: "title"`
-	Content string `json: "content"`
+	Title   string
+	Content string
 
 	User      User
-	UserID    int `json: userID`
+	UserID    int
 	Process   Process
-	ProcessID int `json:processID`
+	ProcessID int
 
 	UnixCreatedAt int64
 	UnixUpdatedAt int64
@@ -28,20 +29,19 @@ func NewComment(c *fiber.Ctx) error {
 	var comment Comment
 	db := database.DBConn
 
-	defaultUser := User{Name: "Albert Billford", Initials: "AB"}
-	defaultProcess := Process{Title: "Initial Process"}
+	err := c.BodyParser(&comment)
 
-	if err := c.BodyParser(&comment); err != nil {
-		return c.Status(400).SendString("Request did not include information about the new comment")
+	if err != nil {
+		return c.Status(400).JSON(&fiber.Map{
+			"success": false,
+			"cause":   "json_decode_error",
+		})
 	}
 
 	comment.UnixCreatedAt = time.Now().Unix()
+	comment.UserID = RetrieveUserID(c)
 
-	db.Create(&defaultUser)
-	comment.User = defaultUser
-
-	db.Create(&defaultProcess)
-	comment.Process = defaultProcess
+	fmt.Printf("[NewComment::comment]: %v", comment)
 
 	db.Create(&comment)
 	return c.JSON(comment)

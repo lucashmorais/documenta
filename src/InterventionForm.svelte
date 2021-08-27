@@ -21,6 +21,7 @@
 		console.log("[postNewMinute]: Entering")
 		try {     
 			// Here we use the Number function to prevent `processID` from being converted to a string
+			// TODO: Let the description be provided by the user
 			let requestBody = JSON.stringify({
 						"Content": commentContent,
 						"Description": "Texto inicial",
@@ -58,12 +59,17 @@
 	async function postNewComment() {
 		console.log("[postNewComment]: Entering")
 		try {     
+			let requestBody = JSON.stringify({
+						"Content": commentContent,
+						"ProcessID": Number(processID)
+			});
+			
+			console.log("[postNewComment::requestBody]: ", requestBody);
+
 			const response = await fetch('http://localhost:3123/api/v1/comment', {
 					method: 'post',
 
-					body: JSON.stringify({
-						content: commentContent,
-					}),
+					body: requestBody,
 
 					headers: {
 						'Content-type': 'application/json; charset=UTF-8'
