@@ -54,6 +54,45 @@ func logJWTInformation(ctx *fiber.Ctx) error {
 	return ctx.Next()
 }
 
+func testTokenParsing(ctx *fiber.Ctx) error {
+	// Token from another example.  This token is expired
+	tokenString := ctx.Cookies("documentaLoginToken")
+
+	if tokenString == "" {
+		return ctx.Next()
+	}
+
+	fmt.Println("[testTokenParsing::tokenString]: " + tokenString)
+
+	// The function that is passed as the second argument to jwt.Parse should, once called, return a byte slice containing the key to validate the token.
+	// Such second argument is a function rather than a string or a byte array because the key might have to be dynamically determined based on information
+	// about the token.
+	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
+		return []byte(jwtSecret), nil
+	})
+
+	if token.Valid {
+		fmt.Println("[testTokenParsing]: You look nice today")
+
+		fmt.Printf("[testTokenParsing::Locals::userID]: %v\n", controllers.RetrieveUserID(ctx))
+
+	} else if ve, ok := err.(*jwt.ValidationError); ok {
+		if ve.Errors&jwt.ValidationErrorMalformed != 0 {
+			fmt.Println("[testTokenParsing]: That's not even a token")
+		} else if ve.Errors&(jwt.ValidationErrorExpired|jwt.ValidationErrorNotValidYet) != 0 {
+			// Token is either expired or not active yet
+			fmt.Println("[testTokenParsing]: Timing is everything")
+		} else {
+			fmt.Println("[testTokenParsing]: Couldn't handle this token:", err)
+		}
+	} else {
+		fmt.Println("[testTokenParsing]: Couldn't handle this token:", err)
+	}
+
+	// Without this, the next middleware or handler will never be called
+	return ctx.Next()
+}
+
 func helloWorld(c *fiber.Ctx) error {
 	// return c.SendString("Hello, World!")
 	return c.SendString(fmt.Sprintf("%d", time.Now().Unix()))
@@ -156,9 +195,11 @@ func main() {
 	// app.Use("document.html", authRequired())
 	// app.Use("index.html", authRequired())
 	app.Use("/document.html", authRequired())
+	// app.Use("/home.html", authRequired(), testTokenParsing)
 	app.Use("/home.html", authRequired())
 	app.Use("/register.html", authRequired())
 	// app.Use("/", logJWTInformation)
+	// app.Use("/", testTokenParsing)
 
 	initDatabase()
 

@@ -9,7 +9,25 @@ import (
 	"github.com/lucashmorais/documenta/database"
 )
 
+// TODO: CHANGE BEFORE DEPLOYMENT!
 const jwtSecret = "asecret"
+
+func RetrieveUserID(ctx *fiber.Ctx) int {
+	tokenString := ctx.Cookies("documentaLoginToken")
+
+	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
+		return []byte(jwtSecret), nil
+	})
+
+	token_claims := token.Claims.(jwt.MapClaims)
+	i := token_claims["user-id"]
+
+	if err == nil {
+		return int(i.(float64))
+	}
+
+	return 0
+}
 
 func Login(ctx *fiber.Ctx) error {
 	type request struct {
@@ -48,7 +66,8 @@ func Login(ctx *fiber.Ctx) error {
 	// Subject stands for "subject", and is basically a user identifier.
 	// If emails are unique across the whole system, they could be used
 	// as valid subject claims.
-	claims["sub"] = "1"
+	claims["user-email"] = user.Email
+	claims["user-id"] = user.ID
 	claims["exp"] = expiration
 
 	s, err := token.SignedString([]byte(jwtSecret))

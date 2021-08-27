@@ -95,9 +95,21 @@ func NewMinute(c *fiber.Ctx) error {
 		})
 	}
 
-	fmt.Printf("[PostMinute]: Decoded new minute: %v\n", minute)
+	userID := RetrieveUserID(c)
 
+	if userID == 0 {
+		return c.Status(400).JSON(&fiber.Map{
+			"success": false,
+			"cause":   "could_not_retrieve_user_id",
+		})
+	}
+
+	// fmt.Printf("[PostMinute]: Decoded new minute: %v\n", minute)
+
+	minute.UserID = userID
 	db.Create(&minute)
+
+	// fmt.Printf("[PostMinute]: Minute with userID: %v\n", minute)
 
 	return c.JSON(minute)
 }
