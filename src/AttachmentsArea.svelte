@@ -15,7 +15,8 @@
 	async function coreSubmit(file) {
 		// https://javascript.info/formdata
 		let formData = new FormData();
-		formData.append("documents", file, file.name);
+		formData.set("documents", file, file.name);
+		formData.set("processID", processID);
 
 		const response = await fetch('http://localhost:3123/api/v1/files', {
 			method: 'POST',
@@ -55,9 +56,6 @@
 							for (let i = 0; i < attachments.length; i++) {
 								let a = attachments[i]
 								console.log(a)
-								// console.log(a.Name) 
-								// console.log(a.UUID) 
-								// console.log(a.ProcessID) 
 								a.src = "http://localhost:3123/api/v1/file/" + a.ID;
 								console.log(a.src);
 								if (a.ContentType.startsWith("image")) {

@@ -57,6 +57,10 @@ func NewFormFiles(c *fiber.Ctx) error {
 	}
 
 	files := form.File["documents"]
+	processID, err := strconv.Atoi(c.FormValue("processID"))
+	if err != nil {
+		processID = 0
+	}
 
 	for _, file := range files {
 		uuid := uuid.New().String()
@@ -71,6 +75,8 @@ func NewFormFiles(c *fiber.Ctx) error {
 		dbFile.Name = file.Filename
 		dbFile.UUID = uuid
 		dbFile.ContentType = file.Header["Content-Type"][0]
+		dbFile.UserID = RetrieveUserID(c)
+		dbFile.ProcessID = processID
 		db.Create(&dbFile)
 	}
 	return c.JSON(map[string]string{"status": "success"})
