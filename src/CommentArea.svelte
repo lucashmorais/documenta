@@ -1,28 +1,9 @@
 <script>
 	import { Tile } from 'carbon-components-svelte'
 	import { onMount } from 'svelte'
+	import { decodeDate, decodeTime } from './utils.js'
 
 	var commentsPromise;
-
-	function decodeDate(s) {
-		const dtFormat = new Intl.DateTimeFormat('pt-BR', {
-			// timeStyle: 'long',
-			dateStyle: 'long',
-			timeZone: 'America/Sao_Paulo'
-		});
-  
-		return dtFormat.format(new Date(s * 1000));
-	}
-
-	function decodeTime(s) {
-		const dtFormat = new Intl.DateTimeFormat('pt-BR', {
-			timeStyle: 'long',
-			// dateStyle: 'full',
-			timeZone: 'America/Sao_Paulo'
-		});
-  
-		return dtFormat.format(new Date(s * 1000));
-	}
 
 	export function updateComments() {
 		commentsPromise = new Promise((resolve, reject) => {
