@@ -108,7 +108,11 @@
 <Content>
 	<div class="contents">
 		<h1>
-			<div>Definição do Nome do Clube Infantil do Sumaré</div>
+		{#await processPromise}
+		...
+		{:then process}
+			<div>{process.Title}</div>
+		{/await}
 		<div style="margin-left: 0.5em">
 			<Dropdown
 				selectedIndex={0}
