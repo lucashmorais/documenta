@@ -9,6 +9,29 @@ import (
 	"github.com/lucashmorais/documenta/database"
 )
 
+type Process struct {
+	gorm.Model
+	Title     string `json: "title"`
+	Summary   string `json: "summary"`
+	Reference int    `json: "reference"`
+
+	// These are all "belongs to" relationships
+	CenterID        uint
+	Center          Center
+	UserID          uint
+	User            User
+	ProcessStatusID uint
+	ProcessStatus   ProcessStatus
+	ProcessTypeID   uint
+	ProcessType     ProcessType
+}
+
+type ProcessStatus struct {
+	gorm.Model
+	Name        string
+	Description string
+}
+
 func GetProcesses(c *fiber.Ctx) error {
 	db := database.DBConn
 	var processes []Process

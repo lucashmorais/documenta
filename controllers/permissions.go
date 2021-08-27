@@ -2,8 +2,16 @@ package controllers
 
 import (
 	"github.com/gofiber/fiber/v2"
+	"github.com/jinzhu/gorm"
 	"github.com/lucashmorais/documenta/database"
 )
+
+type Permission struct {
+	gorm.Model
+	Summary     string
+	Description string
+	// Roles       []Role `gorm:"many2many:role_permissions"`
+}
 
 func GetPermissions(c *fiber.Ctx) error {
 	// email := c.Params("email")

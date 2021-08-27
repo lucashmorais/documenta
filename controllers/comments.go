@@ -8,23 +8,6 @@ import (
 	"github.com/lucashmorais/documenta/database"
 )
 
-type Process struct {
-	gorm.Model
-	Title     string `json: "title"`
-	Summary   string `json: "summary"`
-	Reference int    `json: "reference"`
-
-	// These are all "belongs to" relationships
-	CenterID        uint
-	Center          Center
-	UserID          uint
-	User            User
-	ProcessStatusID uint
-	ProcessStatus   ProcessStatus
-	ProcessTypeID   uint
-	ProcessType     ProcessType
-}
-
 type Comment struct {
 	gorm.Model
 	Title   string `json: "title"`
@@ -38,50 +21,6 @@ type Comment struct {
 	UnixCreatedAt int64
 	UnixUpdatedAt int64
 	UnixDeletedAt int64
-}
-
-type User struct {
-	gorm.Model
-	Name      string `json: "name"`
-	FirstName string `json: "firstName"`
-	LastName  string `json: "lastName"`
-	Title     string `json: "title"`
-	Initials  string `json: "initials"`
-	Email     string `json: "email"`
-	PHash     string `json: "phash"`
-	Roles     []Role `gorm:"many2many:user_roles"`
-}
-
-type Role struct {
-	gorm.Model
-	Name        string
-	Description string
-	Permissions []Permission `gorm:"many2many:role_permissions"`
-}
-
-type Permission struct {
-	gorm.Model
-	Summary     string
-	Description string
-	// Roles       []Role `gorm:"many2many:role_permissions"`
-}
-
-type Center struct {
-	gorm.Model
-	ShortName string
-	Name      string
-}
-
-type ProcessStatus struct {
-	gorm.Model
-	Name        string
-	Description string
-}
-
-type ProcessType struct {
-	gorm.Model
-	Name        string
-	Description string
 }
 
 func NewComment(c *fiber.Ctx) error {

@@ -9,6 +9,18 @@ import (
 	"github.com/lucashmorais/documenta/database"
 )
 
+type User struct {
+	gorm.Model
+	Name      string `json: "name"`
+	FirstName string `json: "firstName"`
+	LastName  string `json: "lastName"`
+	Title     string `json: "title"`
+	Initials  string `json: "initials"`
+	Email     string `json: "email"`
+	PHash     string `json: "phash"`
+	Roles     []Role `gorm:"many2many:user_roles"`
+}
+
 func GetUser(c *fiber.Ctx) error {
 	// email := c.Params("email")
 	// password := c.Params("password")

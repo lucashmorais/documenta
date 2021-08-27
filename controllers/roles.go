@@ -8,6 +8,13 @@ import (
 	"github.com/lucashmorais/documenta/database"
 )
 
+type Role struct {
+	gorm.Model
+	Name        string
+	Description string
+	Permissions []Permission `gorm:"many2many:role_permissions"`
+}
+
 func GetRoles(c *fiber.Ctx) error {
 	// email := c.Params("email")
 	// password := c.Params("password")
