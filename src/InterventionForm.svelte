@@ -3,17 +3,67 @@
 	import { createEventDispatcher } from 'svelte'
 	let commentContent;
 	let selectedIndex = 0;
+
 	export let processID = 0;
+	export let minuteID = 0;
+	export let minuteOnly = false;
+	
+	$: if (minuteOnly) {
+		selectedIndex = 1;
+	}
 
 	const dispatch = createEventDispatcher();
 	
 	function handlePostClick() {
-		switch(selectedIndex) {
-			case 0:	postNewComment()
-			break;
-			case 1:	postNewMinute()
-			break;
+		if (minuteOnly) {
+			postNewMinuteVersion()
+		} else {
+			switch(selectedIndex) {
+				case 0:	postNewComment()
+				break;
+				case 1:	postNewMinute()
+				break;
+			}
 		}
+	}
+
+	// Function that calls the /api/v1/minute_version endpoint to create a new MinuteVersion
+	async function postNewMinuteVersion() {
+		console.log("[postNewMinuteVersion]: Entering")
+		try {     
+			// Here we use the Number function to prevent `processID` from being converted to a string
+			// TODO: Let the description be provided by the user
+			let requestBody = JSON.stringify({
+						"Content": commentContent,
+						"Description": "Texto inicial",
+						"MinuteID": Number(minuteID)
+					});
+
+			const response = await fetch('http://localhost:3123/api/v1/minute_version', {
+					method: 'post',
+
+					body: requestBody,
+
+					headers: {
+						'Content-type': 'application/json; charset=UTF-8'
+					}
+				}
+			);
+			
+			console.log("[postNewMinuteVersion::requestBody]: ", requestBody);
+
+			response.text().then((text) => {
+				console.log(text);
+				console.log('[postNewMinuteVersion]: Completed!');
+			});
+
+		} catch(err) {
+			console.error(`Error: ${err}`);
+			return;
+		}
+
+		clearText();
+		dispatch('minuteWasPosted');
 	}
 	
 	// Function that calls the /api/v1/minute endpoint to create a new Minute
@@ -107,7 +157,7 @@
 
 <TextArea
 	rows={10}
-	placeholder="Comentário por adicionar..."
+	placeholder={minuteOnly ? "Nova versão da minuta..." : "Comentário por adicionar..."}
 	bind:value={commentContent}
 />
 
@@ -118,11 +168,13 @@
 		<Button on:click={handlePostClick}>Enviar</Button>
 	</ButtonSet>
 
-	<Dropdown
-		hideLabel
-		direction="top"
-		titleText="Contact"
-		bind:selectedIndex={selectedIndex}
-		items={[{ id: '0', text: 'Novo comentário' }, { id: '1', text: 'Nova minuta' }]}
-	/>
+	{#if !minuteOnly}
+		<Dropdown
+			hideLabel
+			direction="top"
+			titleText="Contact"
+			bind:selectedIndex={selectedIndex}
+			items={[{ id: '0', text: 'Novo comentário' }, { id: '1', text: 'Nova minuta' }]}
+		/>
+	{/if}
 </div>

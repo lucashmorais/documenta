@@ -38,7 +38,12 @@
 	let isSideNavOpen = false;
 
 	var coreRefreshComments;
-
+	var coreRefreshMinutes;
+	
+	function refreshMinutes() {
+		coreRefreshMinutes();
+	}
+	
 	function refreshComments() {
 		coreRefreshComments();
 	}
@@ -138,10 +143,10 @@
 		<AttachmentsArea processID={processID}/>
 
 		<h2>Minutas</h2>
-		<Minutes processID={processID}/>
+		<Minutes processID={processID} bind:updateMinutes={coreRefreshMinutes} on:minuteWasPosted={refreshMinutes}/>
 
 		<h2>Nova intervenção</h2>
-		<InterventionForm processID={processID} on:commentWasPosted={refreshComments} />
+		<InterventionForm processID={processID} on:commentWasPosted={refreshComments} on:minuteWasPosted={refreshMinutes}/>
 
 		<h2>Intervenções</h2>
 		<CommentArea processID={processID} bind:updateComments={coreRefreshComments}/>

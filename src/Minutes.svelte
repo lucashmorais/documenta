@@ -59,7 +59,7 @@
 	})
 
 	export let processID = 0;
-
+	
 	let minutesPromise;
 	export function updateMinutes() {
 		minutesPromise = new Promise((resolve, reject) => {
@@ -82,7 +82,7 @@
 		})
 	}
 
-	export function getMinuteVersions(minuteID) {
+	function getMinuteVersions(minuteID) {
 		return new Promise((resolve, reject) => {
 			console.log("[Minutes::getMinuteVersions]: Just entering minutesPromise's inner function")
 			if (processID == "" || processID == "0") {
@@ -132,7 +132,7 @@
 					<div use:hideNodeAndPushReference>
 						<AccordionItem open title="Nova versão">
 							<div class="removeOuterPadding">
-								<InterventionForm />
+								<InterventionForm processID={processID} minuteID={minute.ID} minuteOnly={true} on:minuteWasPosted />
 							</div>
 						</AccordionItem>
 					</div>
