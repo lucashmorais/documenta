@@ -1,7 +1,6 @@
 package controllers
 
 import (
-	"fmt"
 	"strconv"
 	"time"
 
@@ -137,7 +136,18 @@ func NewMinuteVersion(c *fiber.Ctx) error {
 		})
 	}
 
-	fmt.Printf("[PostMinuteVersion]: Decoded new minute version: %v\n", minuteVersion)
+	userID := RetrieveUserID(c)
+
+	if userID == 0 {
+		return c.Status(400).JSON(&fiber.Map{
+			"success": false,
+			"cause":   "could_not_retrieve_user_id",
+		})
+	}
+
+	// fmt.Printf("[PostMinuteVersion]: Decoded new minute version: %v\n", minuteVersion)
+	minuteVersion.UnixCreatedAt = time.Now().Unix()
+	minuteVersion.UserID = userID
 
 	db.Create(&minuteVersion)
 
