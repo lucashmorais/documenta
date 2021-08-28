@@ -25,8 +25,12 @@
   } from "carbon-components-svelte";
 	import ActionsBlock from './ActionsBlock.svelte';
 	import InterventionForm from './InterventionForm.svelte';
+	import SimpleDeleteModal from './SimpleDeleteModal.svelte';
 	import { onMount } from 'svelte';
 	import { decodeDate, decodeTime } from './utils.js'
+	
+	var deleteModalOpen = false;
+	var deleteeIdentifier;
 
 	function pushNodeReferenceToArray(node) {
 		newVersionBlocks.push(node)
@@ -45,9 +49,9 @@
 	}
 
 	function setupHidingCallback(node) {
-		console.log("We are now going to add an event listener to the following node:");
+		// console.log("We are now going to add an event listener to the following node:");
 		console.log(node);
-		console.log("We would like this node to be able to toggle the display of the following text input node:");
+		// console.log("We would like this node to be able to toggle the display of the following text input node:");
 		node.callbackID = numTextHidingCallbacksAdded;
 		console.log(newVersionBlocks[node.callbackID]);
 		numTextHidingCallbacksAdded++;
@@ -60,17 +64,30 @@
 
 	export let processID = 0;
 	
+	function deleteMinute(minuteID) {
+		console.log("[deleteMinute]: Entering")
+		try {     
+			fetch('http://localhost:3123/api/v1/minute/' + minuteID, {
+					method: 'delete',
+				}
+			).then((response) => updateMinutes())
+		} catch(err) {
+			console.error(`Error: ${err}`);
+			return;
+		}
+	}
+	
 	let minutesPromise;
 	export function updateMinutes() {
 		minutesPromise = new Promise((resolve, reject) => {
-			console.log("[Minutes::updateMinutes]: Just entering minutesPromise's inner function")
+			// console.log("[Minutes::updateMinutes]: Just entering minutesPromise's inner function")
 			if (processID == "" || processID == "0") {
 				resolve([])
 			}
 			fetch("http://localhost:3123/api/v1/minutes?processID=" + processID).
 				then((response)=>response.json().
 					then(function (minutes) {
-						console.log("[Minutes::updateMinutes::minutes]: ", minutes)
+						// console.log("[Minutes::updateMinutes::minutes]: ", minutes)
 						for (let i = 0; i < minutes.length; i++) {
 							let a = minutes[i]
 							console.log(a)
@@ -121,12 +138,14 @@
 	}
 </style>
 
+<SimpleDeleteModal bind:open={deleteModalOpen} on:deletionConfirmed={deleteMinute(deleteeIdentifier)} selectedItems={[0]} singularString="minuta" />
+
 <div class="interventions">
 	{#await minutesPromise}
 	...
 	{:then minutes}
 		{#each minutes as minute}
-			<Tile><ActionsBlock city={"Niterói"} editAction={setupHidingCallback}/></Tile>
+			<Tile><ActionsBlock city={"Niterói"} editAction={setupHidingCallback} on:deletionRequested={() => {deleteeIdentifier = minute.ID; deleteModalOpen = true}}/></Tile>
 			<Tile>
 				<Accordion>
 					<div use:hideNodeAndPushReference>

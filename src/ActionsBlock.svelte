@@ -1,7 +1,7 @@
 <script>
 	import { getAttributes, toSVG } from '@carbon/icon-helpers';
 	import { Button, Tag } from "carbon-components-svelte";
-	import { onMount } from 'svelte'
+	import { onMount, createEventDispatcher } from 'svelte'
 
 	import editIcon from '@carbon/icons/es/edit/16';
 	import deleteIcon from '@carbon/icons/es/delete/16';
@@ -14,6 +14,8 @@ import RefKindTag from './RefKindTag.svelte';
 	export let protocolNumber = 222;
 	export let isOutReference = false;
 	export let editAction = () => {};
+
+	const dispatch = createEventDispatcher();
 
 	let editIconNode;
 	let deleteIconNode;
@@ -33,6 +35,10 @@ import RefKindTag from './RefKindTag.svelte';
 		console.log(deleteIcon)
 		editIconNode.prepend(editIconSVG)
 		deleteIconNode.prepend(deleteIconSVG)
+	}
+	
+	function requestDeletion() {
+		dispatch("deletionRequested")
 	}
 
 	onMount(async () => {
@@ -85,11 +91,10 @@ import RefKindTag from './RefKindTag.svelte';
 	</div>
 	<div class="actionsContainer">
 		<div use:editAction>
-		<!-- <div> -->
 			<Button iconDescription="Editar" icon={Edit16} kind="tertiary"></Button>
 		</div>
 		<div>
-			<Button iconDescription="Eliminar" icon={Delete16} kind="danger-tertiary"></Button>
+			<Button iconDescription="Eliminar" icon={Delete16} kind="danger-tertiary" on:click={requestDeletion}></Button>
 		</div>
 	</div>
 </div>
