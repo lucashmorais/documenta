@@ -1,5 +1,5 @@
 <script>
-	import {TextArea, ButtonSet, Button, Dropdown} from 'carbon-components-svelte'
+	import {TextArea, TextInput, ButtonSet, Button, Dropdown} from 'carbon-components-svelte'
 	import { createEventDispatcher } from 'svelte'
 	let commentContent;
 	let selectedIndex = 0;
@@ -7,6 +7,8 @@
 	export let processID = 0;
 	export let minuteID = 0;
 	export let minuteOnly = false;
+	
+	let shortTitle = "";
 	
 	$: if (minuteOnly) {
 		selectedIndex = 1;
@@ -35,7 +37,7 @@
 			// TODO: Let the description be provided by the user
 			let requestBody = JSON.stringify({
 						"Content": commentContent,
-						"Description": "Texto inicial",
+						"Description": shortTitle,
 						"MinuteID": Number(minuteID)
 					});
 
@@ -74,7 +76,7 @@
 			// TODO: Let the description be provided by the user
 			let requestBody = JSON.stringify({
 						"Content": commentContent,
-						"Description": "Texto inicial",
+						"Description": shortTitle,
 						"ProcessID": Number(processID)
 					});
 
@@ -142,6 +144,7 @@
 	}
 
 	function clearText() {
+		shortTitle = "";
 		commentContent = "";
 	}
 
@@ -155,9 +158,13 @@
 	}
 </style>
 
+{#if selectedIndex == 1}
+	<TextInput hideLabel placeholder="Título breve" bind:value={shortTitle} />
+{/if}
+
 <TextArea
 	rows={10}
-	placeholder={minuteOnly ? "Nova versão da minuta..." : "Comentário por adicionar..."}
+	placeholder={minuteOnly ? "Conteúdo da nova versão" : "Texto por adicionar"}
 	bind:value={commentContent}
 />
 
