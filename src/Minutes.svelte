@@ -65,6 +65,7 @@
 	export let processID = 0;
 	
 	function deleteMinute(minuteID) {
+		deleteModalOpen = false;
 		console.log("[deleteMinute]: Entering")
 		try {     
 			fetch('http://localhost:3123/api/v1/minute/' + minuteID, {
