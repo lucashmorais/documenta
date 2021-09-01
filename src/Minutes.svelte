@@ -35,6 +35,7 @@
 	var deleteeIdentifier;
 
 	function pushNodeReferenceToArray(node) {
+		node.is_hidden = true;
 		newVersionBlocks.push(node)
 		console.log(newVersionBlocks.length)
 	}
@@ -57,7 +58,15 @@
 		node.callbackID = numTextHidingCallbacksAdded;
 		console.log(newVersionBlocks[node.callbackID]);
 		numTextHidingCallbacksAdded++;
-		node.addEventListener("click", () => newVersionBlocks[node.callbackID].style.display = "");
+		node.addEventListener("click", () => {
+			if (newVersionBlocks[node.callbackID].is_hidden) {
+				newVersionBlocks[node.callbackID].style.display = "";
+				newVersionBlocks[node.callbackID].is_hidden = false;
+			} else {
+				newVersionBlocks[node.callbackID].style.display = "none";
+				newVersionBlocks[node.callbackID].is_hidden = true;
+			}
+		});
 	}
 
 	onMount(() => {
