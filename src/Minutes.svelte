@@ -29,6 +29,8 @@
 	import { onMount } from 'svelte';
 	import { decodeDate, decodeTime } from './utils.js'
 	
+	export let availableCenters = [];
+	
 	var deleteModalOpen = false;
 	var deleteeIdentifier;
 
@@ -146,13 +148,13 @@
 	...
 	{:then minutes}
 		{#each minutes as minute}
-			<Tile><ActionsBlock city={"Niterói"} editAction={setupHidingCallback} on:deletionRequested={() => {deleteeIdentifier = minute.ID; deleteModalOpen = true}}/></Tile>
+			<Tile><ActionsBlock city={minute.Center.Name} editAction={setupHidingCallback} on:deletionRequested={() => {deleteeIdentifier = minute.ID; deleteModalOpen = true}}/></Tile>
 			<Tile>
 				<Accordion>
 					<div use:hideNodeAndPushReference>
 						<AccordionItem open title="Nova versão">
 							<div class="removeOuterPadding">
-								<InterventionForm processID={processID} minuteID={minute.ID} minuteOnly={true} on:minuteWasPosted />
+								<InterventionForm processID={processID} minuteID={minute.ID} minuteOnly={true} availableCenters={availableCenters} on:minuteWasPosted />
 							</div>
 						</AccordionItem>
 					</div>

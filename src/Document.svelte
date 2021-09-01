@@ -1,4 +1,5 @@
 <script>
+	import { getAvailableCenters } from './utils.js'
 	import InfoLine from './InfoLine.svelte'
 	import CommentArea from './CommentArea.svelte'
 	import Minutes from './Minutes.svelte'
@@ -77,6 +78,12 @@
 	}
 
 	let processPromise = updateProcess();
+
+	let availableCenters = [];
+	getAvailableCenters().then((centers) => {
+		console.log("[getAvailableCentersCallback::centers]: ", centers)
+		availableCenters = centers
+	})
 </script>
 
 <style>
@@ -143,10 +150,10 @@
 		<AttachmentsArea processID={processID}/>
 
 		<h2>Minutas</h2>
-		<Minutes processID={processID} bind:updateMinutes={coreRefreshMinutes} on:minuteWasPosted={refreshMinutes}/>
+		<Minutes processID={processID} bind:updateMinutes={coreRefreshMinutes} on:minuteWasPosted={refreshMinutes} availableCenters={availableCenters}/>
 
 		<h2>Nova intervenção</h2>
-		<InterventionForm processID={processID} on:commentWasPosted={refreshComments} on:minuteWasPosted={refreshMinutes}/>
+		<InterventionForm processID={processID} on:commentWasPosted={refreshComments} on:minuteWasPosted={refreshMinutes} availableCenters={availableCenters}/>
 
 		<h2>Intervenções</h2>
 		<CommentArea processID={processID} bind:updateComments={coreRefreshComments}/>

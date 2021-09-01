@@ -17,3 +17,11 @@ export function decodeTime(s) {
 
 	return dtFormat.format(new Date(s * 1000));
 }
+
+export function getAvailableCenters() {
+	return new Promise((resolve, reject) => {
+		fetch('http://localhost:3123/api/v1/centers').then((response) =>
+			response.json().then((centers) => resolve(centers))
+		);
+	});
+}

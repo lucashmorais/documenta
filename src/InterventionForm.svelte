@@ -1,12 +1,21 @@
 <script>
-	import {TextArea, TextInput, ButtonSet, Button, Dropdown} from 'carbon-components-svelte'
+	import { TextArea, TextInput, ButtonSet, Button, Dropdown } from 'carbon-components-svelte'
 	import { createEventDispatcher } from 'svelte'
 	let commentContent;
 	let selectedIndex = 0;
+	let selectedCenterIndex = 0;
 
 	export let processID = 0;
 	export let minuteID = 0;
 	export let minuteOnly = false;
+	export let availableCenters = [];
+	
+	let centerDropdownOptions = [];
+	function updateDropdownOptions(ctrs) {
+		centerDropdownOptions = ctrs.map((ctr) => {return {text: ctr.Name, id: ctr.ID}})		
+	} 
+
+	$: updateDropdownOptions(availableCenters)
 	
 	let shortTitle = "";
 	
@@ -77,7 +86,8 @@
 			let requestBody = JSON.stringify({
 						"Content": commentContent,
 						"Description": shortTitle,
-						"ProcessID": Number(processID)
+						"ProcessID": Number(processID),
+						"CenterID": Number(centerDropdownOptions[selectedCenterIndex].id)
 					});
 
 			const response = await fetch('http://localhost:3123/api/v1/minute', {
@@ -147,7 +157,6 @@
 		shortTitle = "";
 		commentContent = "";
 	}
-
 </script>
 
 <style>
@@ -155,6 +164,9 @@
 		margin-top: 0.5em;
 		display: flex;
 		justify-content: space-between;
+	}
+	.minuteButtonSet {
+		display: flex;
 	}
 </style>
 
@@ -176,12 +188,23 @@
 	</ButtonSet>
 
 	{#if !minuteOnly}
-		<Dropdown
-			hideLabel
-			direction="top"
-			titleText="Contact"
-			bind:selectedIndex={selectedIndex}
-			items={[{ id: '0', text: 'Novo comentário' }, { id: '1', text: 'Nova minuta' }]}
-		/>
+		<div class="minuteButtonSet">
+			{#if selectedIndex == 1}
+				<Dropdown
+					hideLabel
+					direction="top"
+					titleText="Contact"
+					bind:selectedIndex={selectedCenterIndex}
+					items={centerDropdownOptions}
+				/>
+			{/if}
+			<Dropdown
+				hideLabel
+				direction="top"
+				titleText="Contact"
+				bind:selectedIndex={selectedIndex}
+				items={[{ id: '0', text: 'Novo comentário' }, { id: '1', text: 'Nova minuta' }]}
+			/>
+		</div>
 	{/if}
 </div>
