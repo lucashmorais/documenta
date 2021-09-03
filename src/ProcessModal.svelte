@@ -164,6 +164,7 @@ import { set } from "js-cookie";
 					"summary": formState.summary,
 					"typeID": available_types[formState.selectedType].id,
 					"centerID": available_centers[formState.selectedCenter].id,
+					"userSequenceUserIDs": (await selection_sequence_promise).map((user) => user.ID)
 				});
 				
 				console.log("[submitForm:registering:requestBody]: ", requestBody);
@@ -183,6 +184,7 @@ import { set } from "js-cookie";
 					"summary": formState.summary,
 					"typeID": available_types[formState.selectedType].id,
 					"centerID": available_centers[formState.selectedCenter].id,
+					"userSequenceUserIDs": (await selection_sequence_promise).map((user) => user.ID)
 				});
 				
 				console.log("[submitForm:editing:requestBody]: ", requestBody);
