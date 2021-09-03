@@ -24,6 +24,7 @@ type Process struct {
 	ProcessStatus   ProcessStatus
 	ProcessTypeID   uint
 	ProcessType     ProcessType
+	UserSequence    UserSequence
 }
 
 type ProcessStatus struct {
@@ -87,10 +88,11 @@ func PostProcess(c *fiber.Ctx) error {
 
 	process := struct {
 		gorm.Model
-		Title    string `json: "title"`
-		Summary  string `json: "summary"`
-		TypeID   uint   `json: "typeID"`
-		CenterID uint   `json: "centerID"`
+		Title               string `json: "title"`
+		Summary             string `json: "summary"`
+		TypeID              uint   `json: "typeID"`
+		CenterID            uint   `json: "centerID"`
+		UserSequenceUserIDs []uint `json: "userSequenceUserIDs"`
 	}{}
 
 	err := c.BodyParser(&process)
@@ -113,7 +115,15 @@ func PostProcess(c *fiber.Ctx) error {
 	var status ProcessStatus
 	db.Where("name = ?", "Rascunho").Find(&status)
 
-	dbProcess := Process{Title: process.Title, Summary: process.Summary, ProcessTypeID: process.TypeID, ProcessType: processType, Center: center, ProcessStatus: status}
+	// This retrieves a slice of User objects matching a slice of UserIDs
+	var users []User
+	db.Where("id IN (?)", process.UserSequenceUserIDs).Find(&users)
+
+	userSequence := UserSequence{
+		Users: users,
+	}
+
+	dbProcess := Process{Title: process.Title, Summary: process.Summary, ProcessTypeID: process.TypeID, ProcessType: processType, Center: center, ProcessStatus: status, UserSequence: userSequence}
 
 	fmt.Printf("[PostProcess::dbProcess]: %v\n", dbProcess)
 

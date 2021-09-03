@@ -24,7 +24,6 @@ type User struct {
 type UserSequence struct {
 	gorm.Model
 	ProcessID int
-	Process   Process
 	Users     []User `gorm:"many2many:user_sequence_users"`
 }
 
