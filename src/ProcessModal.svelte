@@ -8,12 +8,15 @@
 		Column,
 		Row,
 		Dropdown,
+		Tag,
 		Checkbox
 	} from "carbon-components-svelte"
 	import isEmail from 'validator/es/lib/isEmail';
 	import isStrongPassword from 'validator/es/lib/isStrongPassword';
 	
 	import { createEventDispatcher } from 'svelte';
+	import { getAvailableUsers } from './utils.js';
+import { set } from "js-cookie";
 	
 	const dispatch = createEventDispatcher();
 	
@@ -215,7 +218,73 @@
 			return;
 		}
 	}
+	
+	let usersPromise = getAvailableUsers((users) => {
+		for (const user of users) {
+			user.negativePriority = 0;
+		}
+	});
+	
+	let available_users = null;
+	usersPromise.then((users) => {available_users = users});
+	
+	function getSelectionSequencePromise(inner_available_users) {
+		return new Promise((resolve, reject) => {
+			if (inner_available_users == null) {
+				return;
+			}
+			let sequence = inner_available_users.filter((user) => {return user.negativePriority > 0})
+			sequence.sort((a, b) => {return a.negativePriority - b.negativePriority})
+			console.log("[getSelectionSequencePromise::sequence]: ", sequence)
+			resolve(sequence)
+		})
+	}
+	
+	let selection_sequence_promise = null;
+	$: selection_sequence_promise = getSelectionSequencePromise(available_users)
+	
+	let negative_priority_counter = 1;
+	
+	// NOTE: This function was entirely written by Co-pilot.
+	function getSetNegativePriorityClickCallback(user) {
+		return () => {
+			// NOTE: This part was written by me.
+			console.log("[SetNegativePriorityClickCallback::user before modification]: ", user)
+			if (user.negativePriority == 0) {
+				user.negativePriority = negative_priority_counter;
+				negative_priority_counter += 1;
+			} else {
+				user.negativePriority = 0;
+			}
+			console.log("[SetNegativePriorityClickCallback::user after modification]: ", user)
+			available_users = available_users
+		}
+	}
 </script>
+
+<style>
+	h4 {
+		margin-top: 1.5em;
+	}
+
+	h6 {
+		margin: 1.3em 0 0.3em 0;
+	}
+	
+	.userTagsWrapper {
+		/* margin: 1em 0; */
+		margin-left: 0;
+	}
+	
+	.userTagsWrapper > * {
+		margin-left: 0!important;
+	}
+	
+	p {
+		font-weight: 100;
+		color: darkgray;
+	}
+</style>
 
 
 <Modal
@@ -237,8 +306,7 @@
 		submitForm()
 	}}
 >
-		{#await purposePromise}
-			Loading...
+		{#await purposePromise}-
 		{:then p}
 			<TextInput bind:value={formState.title} invalidText="Título pequeno demais" invalid={titleIsInvalid} labelText="Título" required />
 			<!-- TODO: Ensure race conditions involving `available_types` do not cause any trouble -->
@@ -253,5 +321,31 @@
 				items={available_centers}
 			/>
 			<TextArea bind:value={formState.summary} invalidText="Descrição demasiado curta" invalid={summaryIsInvalid} labelText="Resumo" required />
+			{#await usersPromise}-
+			{:then users}
+				<h4>Sequência de análise</h4>
+				<h6>Usuários disponíveis</h6>
+				<div class=userTagsWrapper>
+					{#await selection_sequence_promise}-
+					{:then sequence}
+						{#each users as user}
+							<Tag type="high-contrast" disabled={user.negativePriority != 0} on:click={getSetNegativePriorityClickCallback(user)}>{user.FirstName} {user.LastName}</Tag>
+						{/each}
+					{/await}
+				</div>
+				<h6>Usuários selecionados</h6>
+				<div class=userTagsWrapper>
+					{#await selection_sequence_promise}-
+					{:then sequence}
+						{#if sequence.length > 0}
+							{#each sequence as user}
+								<Tag type="high-contrast" on:click={getSetNegativePriorityClickCallback(user)}>{user.FirstName} {user.LastName}</Tag>
+							{/each}
+						{:else}
+							<p>Nenhum usuário selecionado</p>
+						{/if}
+					{/await}
+				</div>
+			{/await}
 		{/await}
 </Modal>

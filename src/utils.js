@@ -25,3 +25,14 @@ export function getAvailableCenters() {
 		);
 	});
 }
+
+export function getAvailableUsers(preProcessingFunc = null) {
+	return new Promise((resolve, reject) => {
+		fetch('http://localhost:3123/api/v1/users').then((response) =>
+			response.json().then((users) => {
+				if (preProcessingFunc) preProcessingFunc(users);
+				resolve(users);
+			})
+		);
+	});
+}
