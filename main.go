@@ -116,6 +116,7 @@ func initDatabase() {
 
 	database.DBConn.AutoMigrate(&controllers.Comment{})
 	database.DBConn.AutoMigrate(&controllers.User{})
+	database.DBConn.AutoMigrate(&controllers.UserSequence{})
 	database.DBConn.AutoMigrate(&controllers.Role{})
 	database.DBConn.AutoMigrate(&controllers.Permission{})
 	database.DBConn.AutoMigrate(&controllers.UserFile{})
@@ -159,6 +160,9 @@ func setupRouter(app *fiber.App) {
 	protected.Post("user", controllers.PostUser)
 	protected.Put("user", controllers.PutUser)
 	protected.Delete("users", controllers.DeleteUsers)
+
+	protected.Get("user_sequences", controllers.GetUserSequences)
+	protected.Post("user_sequence", controllers.PostUserSequence)
 
 	protected.Get("roles", controllers.GetRoles)
 	protected.Post("role", controllers.PostRole)

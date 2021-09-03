@@ -21,6 +21,13 @@ type User struct {
 	Roles     []Role `gorm:"many2many:user_roles"`
 }
 
+type UserSequence struct {
+	gorm.Model
+	ProcessID int
+	Process   Process
+	Users     []User `gorm:"many2many:user_sequence_users"`
+}
+
 func GetUser(c *fiber.Ctx) error {
 	// email := c.Params("email")
 	// password := c.Params("password")
@@ -153,4 +160,39 @@ func DeleteUsers(c *fiber.Ctx) error {
 	db.Delete(&User{}, idsToDelete.Ids)
 
 	return c.SendStatus(200)
+}
+
+func GetUserSequences(c *fiber.Ctx) error {
+	db := database.DBConn
+	var userSequences []UserSequence
+
+	driver := db.Preload("User")
+	processID := c.Query("processID")
+
+	// TODO: Check whether we should convert processID to a number before this
+	if processID != "" {
+		driver = driver.Where("process_id = ?", processID)
+	}
+
+	driver.Find(&userSequences)
+
+	return c.JSON(userSequences)
+}
+
+func PostUserSequence(c *fiber.Ctx) error {
+	db := database.DBConn
+	var userSequence UserSequence
+
+	err := c.BodyParser(&userSequence)
+
+	if err != nil {
+		return c.Status(400).JSON(&fiber.Map{
+			"success": false,
+			"cause":   "form_decode_error",
+		})
+	}
+
+	db.Create(&userSequence)
+
+	return c.JSON(userSequence)
 }
