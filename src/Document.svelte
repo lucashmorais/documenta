@@ -147,7 +147,7 @@
 			{/await}
 		</Tile>
 
-		<h2>Ordem de análise</h2>
+		<h2>Sequência de análise</h2>
 		<SequenceTable processID={processID}/>
 
 		<h2>Anexos</h2>

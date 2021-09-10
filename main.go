@@ -117,6 +117,7 @@ func initDatabase() {
 	database.DBConn.AutoMigrate(&controllers.Comment{})
 	database.DBConn.AutoMigrate(&controllers.User{})
 	database.DBConn.AutoMigrate(&controllers.UserSequence{})
+	database.DBConn.AutoMigrate(&controllers.TokenPassingTimestamp{})
 	database.DBConn.AutoMigrate(&controllers.Role{})
 	database.DBConn.AutoMigrate(&controllers.Permission{})
 	database.DBConn.AutoMigrate(&controllers.UserFile{})
@@ -162,6 +163,8 @@ func setupRouter(app *fiber.App) {
 	protected.Delete("users", controllers.DeleteUsers)
 
 	protected.Get("user_sequences", controllers.GetUserSequences)
+	protected.Get("user_sequence_with_timestamps", controllers.GetLastUserSequenceForGivenProcessWithTimestamps)
+	protected.Get("token_passing_timestamps", controllers.GetTokenPassingTimestamps)
 	protected.Post("user_sequence", controllers.PostUserSequence)
 
 	protected.Get("roles", controllers.GetRoles)

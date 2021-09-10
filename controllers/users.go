@@ -29,6 +29,13 @@ type UserSequence struct {
 	Users          []User `gorm:"many2many:user_sequence_users"`
 }
 
+type TokenPassingTimestamp struct {
+	gorm.Model
+	UserSequenceID int
+	UserSequence   UserSequence
+	UnixTimestamp  int64
+}
+
 func GetUser(c *fiber.Ctx) error {
 	// email := c.Params("email")
 	// password := c.Params("password")
@@ -178,6 +185,51 @@ func GetUserSequences(c *fiber.Ctx) error {
 	driver.Find(&userSequences)
 
 	return c.JSON(userSequences)
+}
+
+// Function that retrieves all TokenPassingTimestamps for a given UserSequence specified by the `userSequenceID` query parameter
+func GetTokenPassingTimestamps(c *fiber.Ctx) error {
+	db := database.DBConn
+	var tokenPassingTimestamps []TokenPassingTimestamp
+
+	userSequenceID := c.Query("userSequenceID")
+
+	if userSequenceID == "" {
+		return c.Status(400).JSON(&fiber.Map{
+			"success": false,
+			"cause":   "user_sequence_id_not_specified",
+		})
+	} else {
+		db.Where("user_sequence_id = ?", userSequenceID).Find(&tokenPassingTimestamps)
+	}
+
+	return c.JSON(tokenPassingTimestamps)
+}
+
+// Function that retrieves as a JSON object both (1) the most recent UserSequence corresponding to
+// a certain `processID` query parameter and (2) all TokenPassingTimestamps for that UserSequence
+// NOTE: This function was entirely written by co-pilot
+func GetLastUserSequenceForGivenProcessWithTimestamps(c *fiber.Ctx) error {
+	db := database.DBConn
+	var userSequence UserSequence
+	var tokenPassingTimestamps []TokenPassingTimestamp
+
+	processID := c.Query("processID")
+
+	if processID == "" {
+		return c.Status(400).JSON(&fiber.Map{
+			"success": false,
+			"cause":   "process_id_not_specified",
+		})
+	} else {
+		db.Preload("Users").Where("process_id = ?", processID).Last(&userSequence)
+		db.Where("user_sequence_id = ?", userSequence.ID).Find(&tokenPassingTimestamps)
+	}
+
+	return c.JSON(map[string]interface{}{
+		"userSequence":           userSequence,
+		"tokenPassingTimestamps": tokenPassingTimestamps,
+	})
 }
 
 func PostUserSequence(c *fiber.Ctx) error {
