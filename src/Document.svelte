@@ -6,6 +6,7 @@
 	import StatusBar from './StatusBar.svelte'
 	import AttachmentsArea from './AttachmentsArea.svelte'
 	import InterventionForm from './InterventionForm.svelte'
+	import SequenceTable from './SequenceTable.svelte'
 	import Login20 from "carbon-icons-svelte/lib/Login20";
 	import UserMultiple20 from "carbon-icons-svelte/lib/UserMultiple20";
 	import Cookie from "js-cookie";
@@ -145,6 +146,9 @@
 				{/if}
 			{/await}
 		</Tile>
+
+		<h2>Ordem de análise</h2>
+		<SequenceTable processID={processID}/>
 
 		<h2>Anexos</h2>
 		<AttachmentsArea processID={processID}/>

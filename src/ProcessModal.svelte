@@ -344,7 +344,7 @@ import { set } from "js-cookie";
 								<Tag type="high-contrast" on:click={getSetNegativePriorityClickCallback(user)}>{user.FirstName} {user.LastName}</Tag>
 							{/each}
 						{:else}
-							<p>Nenhum usuário selecionado</p>
+							<p>Nenhum usuário foi selecionado: o processo será gerenciado exclusivamente pelo Secretário.</p>
 						{/if}
 					{/await}
 				</div>
