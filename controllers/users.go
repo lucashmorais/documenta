@@ -165,7 +165,7 @@ func GetUserSequences(c *fiber.Ctx) error {
 	db := database.DBConn
 	var userSequences []UserSequence
 
-	driver := db.Preload("User")
+	driver := db.Preload("Users")
 	processID := c.Query("processID")
 
 	// TODO: Check whether we should convert processID to a number before this
