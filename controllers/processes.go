@@ -120,7 +120,9 @@ func PostProcess(c *fiber.Ctx) error {
 	db.Where("id IN (?)", process.UserSequenceUserIDs).Find(&users)
 
 	userSequence := UserSequence{
-		Users: users,
+		Users:          users,
+		NumUsers:       len(users),
+		NumCompletions: 0,
 	}
 
 	dbProcess := Process{Title: process.Title, Summary: process.Summary, ProcessTypeID: process.TypeID, ProcessType: processType, Center: center, ProcessStatus: status, UserSequence: userSequence}

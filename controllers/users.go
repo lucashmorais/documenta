@@ -23,8 +23,10 @@ type User struct {
 
 type UserSequence struct {
 	gorm.Model
-	ProcessID int
-	Users     []User `gorm:"many2many:user_sequence_users"`
+	ProcessID      int
+	NumUsers       int
+	NumCompletions int
+	Users          []User `gorm:"many2many:user_sequence_users"`
 }
 
 func GetUser(c *fiber.Ctx) error {
