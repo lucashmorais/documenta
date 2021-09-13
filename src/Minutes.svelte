@@ -1,27 +1,8 @@
 <script>
   import {
-    Header,
-    HeaderNav,
-    HeaderNavItem,
-    HeaderNavMenu,
-    SideNav,
-    SideNavItems,
-    SideNavMenu,
-    SideNavMenuItem,
-    SideNavLink,
-    SideNavDivider,
-    SkipToContent,
-    Content,
-    Grid,
-    Row,
-    Column,
 	Tile,
-	TextArea,
-	ButtonSet,
-	Button,
 	Accordion,
 	AccordionItem,
-	Dropdown
   } from "carbon-components-svelte";
 	import ActionsBlock from './ActionsBlock.svelte';
 	import InterventionForm from './InterventionForm.svelte';
@@ -30,6 +11,7 @@
 	import { decodeDate, decodeTime } from './utils.js'
 	
 	export let availableCenters = [];
+	export let modRightsPromise;
 	
 	var deleteModalOpen = false;
 	var deleteeIdentifier;
@@ -153,23 +135,25 @@
 <SimpleDeleteModal bind:open={deleteModalOpen} on:deletionConfirmed={deleteMinute(deleteeIdentifier)} selectedItems={[0]} singularString="minuta" />
 
 <div class="interventions">
-	{#await minutesPromise}
-	...
-	{:then minutes}
+	{#await minutesPromise then minutes}
 		{#each minutes as minute}
-			<Tile><ActionsBlock city={minute.Center.Name} editAction={setupHidingCallback} on:deletionRequested={() => {deleteeIdentifier = minute.ID; deleteModalOpen = true}}/></Tile>
+			<Tile>
+				<ActionsBlock bind:modRightsPromise city={minute.Center.Name} editAction={setupHidingCallback} on:deletionRequested={() => {deleteeIdentifier = minute.ID; deleteModalOpen = true}}/>
+			</Tile>
 			<Tile>
 				<Accordion>
-					<div use:hideNodeAndPushReference>
-						<AccordionItem open title="Nova versão">
-							<div class="removeOuterPadding">
-								<InterventionForm processID={processID} minuteID={minute.ID} minuteOnly={true} availableCenters={availableCenters} on:minuteWasPosted />
+					{#await modRightsPromise then canModify}
+						{#if canModify}
+							<div use:hideNodeAndPushReference>
+								<AccordionItem open title="Nova versão">
+									<div class="removeOuterPadding">
+										<InterventionForm processID={processID} minuteID={minute.ID} minuteOnly={true} availableCenters={availableCenters} on:minuteWasPosted />
+									</div>
+								</AccordionItem>
 							</div>
-						</AccordionItem>
-					</div>
-					{#await getMinuteVersions(minute.ID)}
-					...
-					{:then versions}
+						{/if}
+					{/await}
+					{#await getMinuteVersions(minute.ID) then versions}
 						{#each versions.reverse() as version}
 							<AccordionItem open={version.ID == versions[0].ID} title="{decodeDate(version.UnixCreatedAt)}, {decodeTime(version.UnixCreatedAt)}, {version.User.FirstName} {version.User.LastName}: {version.Description}">
 								<p>

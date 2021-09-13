@@ -14,6 +14,7 @@ import RefKindTag from './RefKindTag.svelte';
 	export let protocolNumber = 222;
 	export let isOutReference = false;
 	export let editAction = () => {};
+	export let modRightsPromise;
 
 	const dispatch = createEventDispatcher();
 
@@ -89,12 +90,16 @@ import RefKindTag from './RefKindTag.svelte';
 		<div>[Prot] {protocolNumber}</div>
 		<div>[Ref] {referenceNumber} <RefKindTag /></div>
 	</div>
-	<div class="actionsContainer">
-		<div use:editAction>
-			<Button iconDescription="Editar" icon={Edit16} kind="tertiary"></Button>
-		</div>
-		<div>
-			<Button iconDescription="Eliminar" icon={Delete16} kind="danger-tertiary" on:click={requestDeletion}></Button>
-		</div>
-	</div>
+	{#await modRightsPromise then canModify}
+		{#if canModify}
+			<div class="actionsContainer">
+				<div use:editAction>
+					<Button iconDescription="Editar" icon={Edit16} kind="tertiary"></Button>
+				</div>
+				<div>
+					<Button iconDescription="Eliminar" icon={Delete16} kind="danger-tertiary" on:click={requestDeletion}></Button>
+				</div>
+			</div>
+		{/if}
+	{/await}
 </div>

@@ -10,9 +10,16 @@
 	let attachmentsPromise;
 	let files;
 	let images;
+
 	export let processID;
+	export let modRightsPromise;
+	let modRights = false;
 
 	async function coreSubmit(file) {
+		if (!modRights) {
+			return;
+		}
+
 		// https://javascript.info/formdata
 		let formData = new FormData();
 		formData.set("documents", file, file.name);
@@ -28,6 +35,10 @@
 	}
 
 	async function uploadFile() {
+		if (!modRights) {
+			return;
+		}
+
 		console.log(fileUploader)
 		console.log(fileUploader.files)
 		for (const file of fileUploader.files) {
@@ -38,6 +49,10 @@
 	}
 
 	async function deleteFileWithID(fileID) {
+		if (!modRights) {
+			return;
+		}
+
 		fetch("http://localhost:3123/api/v1/file/" + fileID, {method: 'DELETE'}).
 			then((response)=> {
 				updateAttachments()
@@ -114,6 +129,14 @@
 				return downloadFunction;
 		}
 	}
+	
+	function updatePlainRightsVar(p) {
+		if (p) {
+			p.then((canModify) => modRights = canModify)
+		}
+	}
+	
+	$: updatePlainRightsVar(modRightsPromise)
 
 	updateAttachments();
 </script>
@@ -157,27 +180,30 @@
 
 <Modal />
 <div class="fileGrid">
-	{#await attachmentsPromise}
-	<!-- <div></div> -->
-	{:then files}
+	{#await attachmentsPromise then files}
 		{#each files as file, i}
 			<div class="fileTile">
-				<!-- <a href={"http://localhost:3123/api/v1/file/" + file.ID} style="text-decoration: none !important;"> -->
-
 					<ClickableTile on:click={popModal(i, file.ContentType)}>
 						<div style="display: flex; align-items: center; height: 2.5em;">
 							<DocumentDownload24 />
 							<p class="fileName">{file.Name}</p>
 						</div> 
 					</ClickableTile>
-				<!-- </a> -->
-				<div class="deleteHolder">
-					<!-- DELETE -->
-					<Button kind="danger" class="deleteButton" on:click={deleteFileWithID(file.ID)}>Delete</Button>
-				</div>
+
+				{#await modRightsPromise then canModify}
+					{#if canModify}
+						<div class="deleteHolder">
+							<Button kind="danger" class="deleteButton" on:click={deleteFileWithID(file.ID)}>Delete</Button>
+						</div>
+					{/if}
+				{/await}
 			</div>
 		{/each}
 	{/await}
-	<!-- <Button kind="secondary">Novo anexo</Button> -->
-	<FileUploaderButton multiple disableLabelChanges={true} labelText="Adicionar arquivo" bind:ref={fileUploader} on:change={uploadFile}>Novo anexo</FileUploaderButton>
+	
+	{#await modRightsPromise then canModify}
+		{#if canModify}
+			<FileUploaderButton multiple disableLabelChanges={true} labelText="Adicionar arquivo" bind:ref={fileUploader} on:change={uploadFile}>Novo anexo</FileUploaderButton>
+		{/if}
+	{/await}
 </div>

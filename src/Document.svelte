@@ -7,33 +7,10 @@
 	import AttachmentsArea from './AttachmentsArea.svelte'
 	import InterventionForm from './InterventionForm.svelte'
 	import SequenceTable from './SequenceTable.svelte'
-	import Login20 from "carbon-icons-svelte/lib/Login20";
-	import UserMultiple20 from "carbon-icons-svelte/lib/UserMultiple20";
 	import Cookie from "js-cookie";
 	import {
-	Header,
-	HeaderNav,
-	HeaderNavItem,
-	HeaderNavMenu,
-	HeaderUtilities,
-	HeaderGlobalAction,
-	SideNav,
-	SideNavItems,
-	SideNavMenu,
-	SideNavMenuItem,
-	SideNavLink,
-	SideNavDivider,
-	SkipToContent,
 	Content,
-	Grid,
-	Row,
-	Column,
 	Tile,
-	TextArea,
-	ButtonSet,
-	Button,
-	Accordion,
-	AccordionItem,
 	Dropdown
 	} from "carbon-components-svelte";
 
@@ -99,18 +76,18 @@
 		availableCenters = centers
 	})
 	
-	function currentUserHasModificationWrights(seqP, userP) {
+	function currentUserHasModificationRights(seqP, userP) {
 		if (!seqP || !userP){
 			return null;
 		}
 		return new Promise((resolve, reject) => {
 			seqP.then((sequence) => {
 				userP.then((user) => {
-					console.log("[currentUserHasModificationWrights::then::then::sequence]: ", sequence)
-					console.log("[currentUserHasModificationWrights::then::then::user]: ", user)
+					console.log("[currentUserHasModificationRights::then::then::sequence]: ", sequence)
+					console.log("[currentUserHasModificationRights::then::then::user]: ", user)
 					let coreSeq = sequence.sequence
 					let numCompletions = coreSeq.NumCompletions
-					console.log("[currentUserHasModificationWrights::then::then::numCompletions]: ", numCompletions)
+					console.log("[currentUserHasModificationRights::then::then::numCompletions]: ", numCompletions)
 					
 					let result;
 					if (numCompletions >= coreSeq.Users.length) {
@@ -118,14 +95,14 @@
 					} else {
 						result = coreSeq.Users[numCompletions].ID == user.ID
 					}
-					console.log("[currentUserHasModificationWrights::then::then::result]: ", result)
+					console.log("[currentUserHasModificationRights::then::then::result]: ", result)
 					resolve(result)
 				})
 			})
 		})				
 	}
 	
-	$: currentUserHasModificationWrightsPromise = currentUserHasModificationWrights(sequencePromise, currentUserPromise)
+	$: modRightsPromise = currentUserHasModificationRights(sequencePromise, currentUserPromise)
 </script>
 
 <style>
@@ -192,13 +169,17 @@
 		<SequenceTable bind:sequencePromise processID={processID}/>
 
 		<h2>Anexos</h2>
-		<AttachmentsArea processID={processID}/>
+		<AttachmentsArea bind:modRightsPromise processID={processID}/>
 
 		<h2>Minutas</h2>
-		<Minutes processID={processID} bind:updateMinutes={coreRefreshMinutes} on:minuteWasPosted={refreshMinutes} availableCenters={availableCenters}/>
+		<Minutes bind:modRightsPromise={modRightsPromise} processID={processID} bind:updateMinutes={coreRefreshMinutes} on:minuteWasPosted={refreshMinutes} availableCenters={availableCenters}/>
 
-		<h2>Nova intervenção</h2>
-		<InterventionForm processID={processID} on:commentWasPosted={refreshComments} on:minuteWasPosted={refreshMinutes} availableCenters={availableCenters}/>
+		{#await modRightsPromise then modRights}
+			{#if modRights}
+				<h2>Nova intervenção</h2>
+				<InterventionForm processID={processID} on:commentWasPosted={refreshComments} on:minuteWasPosted={refreshMinutes} availableCenters={availableCenters}/>
+			{/if}
+		{/await}
 
 		<h2>Intervenções</h2>
 		<CommentArea processID={processID} bind:updateComments={coreRefreshComments}/>
