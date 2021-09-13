@@ -59,7 +59,7 @@
 		});
 	}
 	
-	let currentUserPromise = getCurrentUser();
+	export let currentUserPromise = getCurrentUser();
 </script>
 
 <style>

@@ -1,6 +1,7 @@
 <script>
 	import { DataTable } from "carbon-components-svelte";
 	import { decodeDate, decodeTime } from './utils.js'
+	import { getNameFromUser } from "./utils.js";
 	import Pen16 from "carbon-icons-svelte/lib/Pen16";
 	
 	export let processID;
@@ -18,7 +19,7 @@
 								function (user, index) { 
 									return {
 										id: index,
-										name: user.FirstName + " " + user.LastName,
+										name: getNameFromUser(user),
 										unix_completion_time: index < numCompletions ? times[index].UnixTimestamp : null 
 									}
 								}
@@ -36,7 +37,7 @@
 		return promise
 	}
 
-	let sequencePromise = updateUserSequence();
+	export let sequencePromise = updateUserSequence();
 </script>
 
 <style>

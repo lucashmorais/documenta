@@ -77,6 +77,19 @@
 		})
 		return processPromise
 	}
+	
+	let sequencePromise;
+	let currentUserPromise;
+	
+	function printCurrentUser(p) {
+		if (p) {
+			p.then((user) => {
+				console.log("[Document::printCurrentUser:then]: ", user)			
+			})
+		}
+	}
+	
+	$: printCurrentUser(currentUserPromise)
 
 	let processPromise = updateProcess();
 
@@ -85,6 +98,34 @@
 		console.log("[getAvailableCentersCallback::centers]: ", centers)
 		availableCenters = centers
 	})
+	
+	function currentUserHasModificationWrights(seqP, userP) {
+		if (!seqP || !userP){
+			return null;
+		}
+		return new Promise((resolve, reject) => {
+			seqP.then((sequence) => {
+				userP.then((user) => {
+					console.log("[currentUserHasModificationWrights::then::then::sequence]: ", sequence)
+					console.log("[currentUserHasModificationWrights::then::then::user]: ", user)
+					let coreSeq = sequence.sequence
+					let numCompletions = coreSeq.NumCompletions
+					console.log("[currentUserHasModificationWrights::then::then::numCompletions]: ", numCompletions)
+					
+					let result;
+					if (numCompletions >= coreSeq.Users.length) {
+						result = false
+					} else {
+						result = coreSeq.Users[numCompletions].ID == user.ID
+					}
+					console.log("[currentUserHasModificationWrights::then::then::result]: ", result)
+					resolve(result)
+				})
+			})
+		})				
+	}
+	
+	$: currentUserHasModificationWrightsPromise = currentUserHasModificationWrights(sequencePromise, currentUserPromise)
 </script>
 
 <style>
@@ -116,7 +157,7 @@
 	}
 </style>
 
-<StatusBar />
+<StatusBar bind:currentUserPromise/>
 
 <Content>
 	<div class="contents">
@@ -148,7 +189,7 @@
 		</Tile>
 
 		<h2>Sequência de análise</h2>
-		<SequenceTable processID={processID}/>
+		<SequenceTable bind:sequencePromise processID={processID}/>
 
 		<h2>Anexos</h2>
 		<AttachmentsArea processID={processID}/>
