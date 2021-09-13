@@ -232,6 +232,18 @@ func GetLastUserSequenceForGivenProcessWithTimestamps(c *fiber.Ctx) error {
 	})
 }
 
+// Function that retrieves a JSON object describing the current logged User identified by the JWT passed to the server
+func GetLoggedUser(c *fiber.Ctx) error {
+	db := database.DBConn
+	userID := RetrieveUserID(c)
+
+	var loggedUser User
+
+	db.Where("id = ?", userID).First(&loggedUser)
+
+	return c.JSON(loggedUser)
+}
+
 func PostUserSequence(c *fiber.Ctx) error {
 	db := database.DBConn
 	var userSequence UserSequence

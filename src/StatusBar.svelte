@@ -2,6 +2,7 @@
 	import Login20 from "carbon-icons-svelte/lib/Login20";
 	import UserMultiple20 from "carbon-icons-svelte/lib/UserMultiple20";
 	import Cookie from "js-cookie";
+	import { getNameFromUser } from "./utils";
 	import {
 	Header,
 	HeaderNav,
@@ -41,7 +42,33 @@
 		Cookie.remove("documentaLoginToken")
 		window.location.href = "/";
 	}
+	
+	// Function that fetches a JSON object describing the currently logged user from the `localhost:3123/api/v1/current_user` endpoint
+	function getCurrentUser() {
+		return fetch("/api/v1/current_user", {
+			method: "GET",
+			headers: {
+				"Content-Type": "application/json",
+				"Authorization": "Bearer " + Cookie.get("documentaLoginToken")
+			}
+		})
+		.then(response => response.json())
+		.then(json => {
+			console.log("[getCurrentUser.then.then::json]: ", json)
+			return json;
+		});
+	}
+	
+	let currentUserPromise = getCurrentUser();
 </script>
+
+<style>
+	.userNameDisplay {
+		color: white;
+		display: flex;
+		align-items: center;
+	}
+</style>
 
 <Header company="CR" platformName="Documenta" bind:isSideNavOpen expandedByDefault=false persistentHamburgerMenu=true>
   <div slot="skip-to-content">
@@ -49,6 +76,10 @@
   </div>
   <HeaderUtilities>
 	<!-- <HeaderGlobalAction aria-label="Settings" icon={Login20} /> -->
+	{#await currentUserPromise}-
+	{:then user}
+		<div class="userNameDisplay">{getNameFromUser(user)}</div>
+	{/await}
 	<HeaderGlobalAction aria-label="Change user" icon={UserMultiple20} on:click={logout}/>
 	<!-- <HeaderGlobalAction aria-label="Settings" /> -->
 </HeaderUtilities>

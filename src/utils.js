@@ -61,3 +61,7 @@ export function getUserSequences(processID) {
 		);
 	});
 }
+
+export function getNameFromUser(user) {
+	return `${user.FirstName} ${user.LastName}`;
+}
