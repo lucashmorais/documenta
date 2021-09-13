@@ -46,8 +46,7 @@
 	}
 </style>
       
-{#await sequencePromise}-
-{:then value}
+{#await sequencePromise then value}
 	<DataTable
 		useStaticWidth
 		headers={[{ key: 'name', value: 'Nome' }, { key: 'unix_completion_time', value: 'Conclusão' }]}

@@ -308,8 +308,7 @@ import { set } from "js-cookie";
 		submitForm()
 	}}
 >
-		{#await purposePromise}-
-		{:then p}
+		{#await purposePromise then p}
 			<TextInput bind:value={formState.title} invalidText="Título pequeno demais" invalid={titleIsInvalid} labelText="Título" required />
 			<!-- TODO: Ensure race conditions involving `available_types` do not cause any trouble -->
 			<Dropdown
@@ -323,13 +322,11 @@ import { set } from "js-cookie";
 				items={available_centers}
 			/>
 			<TextArea bind:value={formState.summary} invalidText="Descrição demasiado curta" invalid={summaryIsInvalid} labelText="Resumo" required />
-			{#await usersPromise}-
-			{:then users}
+			{#await usersPromise then users}
 				<h4>Sequência de análise</h4>
 				<h6>Usuários disponíveis</h6>
 				<div class=userTagsWrapper>
-					{#await selection_sequence_promise}-
-					{:then sequence}
+					{#await selection_sequence_promise then sequence}
 						{#each users as user}
 							<Tag type="high-contrast" disabled={user.negativePriority != 0} on:click={getSetNegativePriorityClickCallback(user)}>{user.FirstName} {user.LastName}</Tag>
 						{/each}
@@ -337,8 +334,7 @@ import { set } from "js-cookie";
 				</div>
 				<h6>Usuários selecionados</h6>
 				<div class=userTagsWrapper>
-					{#await selection_sequence_promise}-
-					{:then sequence}
+					{#await selection_sequence_promise then sequence}
 						{#if sequence.length > 0}
 							{#each sequence as user}
 								<Tag type="high-contrast" on:click={getSetNegativePriorityClickCallback(user)}>{user.FirstName} {user.LastName}</Tag>

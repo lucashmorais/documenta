@@ -139,9 +139,7 @@
 <Content>
 	<div class="contents">
 		<h1>
-		{#await processPromise}
-		...
-		{:then process}
+		{#await processPromise then process}
 			<div>{process.Title}</div>
 		{/await}
 		<div style="margin-left: 0.5em">
@@ -154,9 +152,7 @@
 		<InfoLine processPromise={processPromise}/>
 		<h2>Resumo</h2>
 		<Tile class="summary">
-			{#await processPromise}
-			<div></div>
-			{:then process}
+			{#await processPromise then process}
 				{#if process != null}
 					{process.Summary}
 				{:else}

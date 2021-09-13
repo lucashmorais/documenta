@@ -304,9 +304,7 @@
 	}}
 >
 	<FluidForm>
-		{#await purposePromise}
-			Loading...
-		{:then p}
+		{#await purposePromise then p}
 			<TextInput bind:value={formState.email} invalidText="Endereço de e-mail inválido" invalid={userIsInvalid} labelText="E-mail" required />
 			{#if p == "registering"}
 				<PasswordInput bind:value={formState.passwordValue} invalid={passwordIsInvalid} invalidText={weakPasswordMessage} labelText="Senha" />
@@ -317,9 +315,7 @@
 			<TextInput bind:value={formState.initials} invalidText="Iniciais inválidas" invalid={initialsAreInvalid} labelText="Iniciais" required />
 		{/await}
 		<h4 style="padding-top: 1em">Funções</h4>
-		{#await splitRolesPromise}
-		...
-		{:then splitRoles}
+		{#await splitRolesPromise then splitRoles}
 			<Grid narrow padding>
 				<Row>
 					{#each splitRoles.reverse() as splitGroup}

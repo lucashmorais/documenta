@@ -76,8 +76,7 @@
   </div>
   <HeaderUtilities>
 	<!-- <HeaderGlobalAction aria-label="Settings" icon={Login20} /> -->
-	{#await currentUserPromise}-
-	{:then user}
+	{#await currentUserPromise then user}
 		<div class="userNameDisplay">{getNameFromUser(user)}</div>
 	{/await}
 	<HeaderGlobalAction aria-label="Change user" icon={UserMultiple20} on:click={logout}/>

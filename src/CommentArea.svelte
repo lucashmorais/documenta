@@ -77,9 +77,7 @@
 
 </style>
 
-{#await commentsPromise}
-...
-{:then comments} 
+{#await commentsPromise then comments}
 	{#each comments as comment}
 		<div class="single-comment">
 		<div class="text">
