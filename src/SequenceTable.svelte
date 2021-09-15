@@ -1,7 +1,6 @@
 <script>
 	import { DataTable } from "carbon-components-svelte";
-	import { decodeDate, decodeTime } from './utils.js'
-	import { getNameFromUser } from "./utils.js";
+	import { getNameFromUser, decodeDate, decodeTime, countCompletion } from "./utils.js";
 	import Pen16 from "carbon-icons-svelte/lib/Pen16";
 	import { Button } from "carbon-components-svelte";
 	
@@ -64,7 +63,7 @@
 			Apenas o usuário ressaltado pode realizar modificações.
 		</span>
 		{#await modRightsPromise then canModify}
-			<Button disabled={!canModify} iconDescription="Editar">Finalizar turno</Button>
+			<Button disabled={!canModify} iconDescription="Editar" on:click={() => countCompletion(processID)}>Finalizar turno</Button>
 		{/await}
 	</div>
 	<span slot="cell" let:row let:cell>
