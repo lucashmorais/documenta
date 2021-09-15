@@ -9,7 +9,7 @@
   "devDependencies": {
     "@rollup/plugin-commonjs": "^14.0.0",
     "@rollup/plugin-node-resolve": "^8.0.0",
-    "carbon-components-svelte": "^0.32.1",
+    "carbon-components-svelte": "^0.44.1",
     "carbon-icons-svelte": "^10.28.0",
     "chokidar-cli": "^2.1.0",
     "rollup": "^2.52.4",

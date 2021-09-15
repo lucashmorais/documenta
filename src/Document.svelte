@@ -162,7 +162,7 @@
 		</Tile>
 
 		<h2>Sequência de análise</h2>
-		<SequenceTable bind:sequencePromise processID={processID}/>
+		<SequenceTable bind:modRightsPromise bind:sequencePromise processID={processID}/>
 
 		<h2>Anexos</h2>
 		<AttachmentsArea bind:modRightsPromise processID={processID}/>

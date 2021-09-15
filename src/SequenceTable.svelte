@@ -3,8 +3,10 @@
 	import { decodeDate, decodeTime } from './utils.js'
 	import { getNameFromUser } from "./utils.js";
 	import Pen16 from "carbon-icons-svelte/lib/Pen16";
+	import { Button } from "carbon-components-svelte";
 	
 	export let processID;
+	export let modRightsPromise;
 
 	export function updateUserSequence() {
 		let promise = new Promise((resolve, reject) => {
@@ -41,17 +43,30 @@
 </script>
 
 <style>
-	.modificationTokenHolder{
+	.modificationTokenHolder {
 		font-weight: 900!important;		
+	}
+	.customToolbar {
+		display: flex;
+		align-items: center;
+		justify-content: space-around;
 	}
 </style>
       
 {#await sequencePromise then value}
 	<DataTable
-		useStaticWidth
 		headers={[{ key: 'name', value: 'Nome' }, { key: 'unix_completion_time', value: 'Conclusão' }]}
 		rows={value.user_rows}
 	>
+	<!-- <strong slot="title">Sequência de análise</strong> -->
+	<div slot="description" class="customToolbar">
+		<span style="font-size: 1rem">
+			Apenas o usuário ressaltado pode realizar modificações.
+		</span>
+		{#await modRightsPromise then canModify}
+			<Button disabled={!canModify} iconDescription="Editar">Finalizar turno</Button>
+		{/await}
+	</div>
 	<span slot="cell" let:row let:cell>
 		{#if !cell.value}
 			<div></div>
