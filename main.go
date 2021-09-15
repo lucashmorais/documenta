@@ -167,6 +167,7 @@ func setupRouter(app *fiber.App) {
 	protected.Get("user_sequence_with_timestamps", controllers.GetLastUserSequenceForGivenProcessWithTimestamps)
 	protected.Get("token_passing_timestamps", controllers.GetTokenPassingTimestamps)
 	protected.Post("user_sequence", controllers.PostUserSequence)
+	protected.Post("user_sequence/count_completion", controllers.IncreaseSequenceCompletionCounter)
 
 	protected.Get("roles", controllers.GetRoles)
 	protected.Post("role", controllers.PostRole)

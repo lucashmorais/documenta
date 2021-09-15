@@ -261,3 +261,24 @@ func PostUserSequence(c *fiber.Ctx) error {
 
 	return c.JSON(userSequence)
 }
+
+// Function that increases the `NumCompletions` field of the most recent
+// `UserSequence` corresponding to a certain `processID` query parameter
+func IncreaseSequenceCompletionCounter(c *fiber.Ctx) error {
+	db := database.DBConn
+	var userSequence UserSequence
+
+	processID := c.Query("processID")
+
+	if processID == "" {
+		return c.Status(400).JSON(&fiber.Map{
+			"success": false,
+			"cause":   "process_id_not_specified",
+		})
+	} else {
+		db.Preload("Users").Where("process_id = ?", processID).Last(&userSequence)
+		db.Model(&userSequence).Update("NumCompletions", userSequence.NumCompletions+1)
+	}
+
+	return c.JSON(userSequence)
+}

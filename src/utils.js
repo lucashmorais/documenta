@@ -65,3 +65,16 @@ export function getUserSequences(processID) {
 export function getNameFromUser(user) {
 	return `${user.FirstName} ${user.LastName}`;
 }
+
+// Function that calls the /api/v1/user_sequence/count_completion POST endpoint,
+// passing `processID`  as a query parameter
+export function countCompletion(processID) {
+	return new Promise((resolve, reject) => {
+		fetch(
+			`http://localhost:3123/api/v1/user_sequence/count_completion?processID=${processID}`,
+			{
+				method: 'POST',
+			}
+		).then((response) => response.json().then((count) => resolve(count)));
+	});
+}
