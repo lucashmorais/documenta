@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"fmt"
+	"time"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/hlandau/passlib"
@@ -279,6 +280,11 @@ func IncreaseSequenceCompletionCounter(c *fiber.Ctx) error {
 		db.Preload("Users").Where("process_id = ?", processID).Last(&userSequence)
 		db.Model(&userSequence).Update("NumCompletions", userSequence.NumCompletions+1)
 	}
+
+	var tokenPassingTimestamp TokenPassingTimestamp
+	tokenPassingTimestamp.UserSequenceID = int(userSequence.ID)
+	tokenPassingTimestamp.UnixTimestamp = time.Now().Unix()
+	db.Create(&tokenPassingTimestamp)
 
 	return c.JSON(userSequence)
 }
