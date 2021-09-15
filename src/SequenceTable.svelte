@@ -39,6 +39,11 @@
 	}
 
 	export let sequencePromise = updateUserSequence();
+	
+	function passModificationRightsAlong() {
+		countCompletion(processID);
+		sequencePromise = updateUserSequence()
+	}
 </script>
 
 <style>
@@ -63,7 +68,7 @@
 			Apenas o usuário ressaltado pode realizar modificações.
 		</span>
 		{#await modRightsPromise then canModify}
-			<Button disabled={!canModify} iconDescription="Editar" on:click={() => countCompletion(processID)}>Finalizar turno</Button>
+			<Button disabled={!canModify} iconDescription="Editar" on:click={passModificationRightsAlong}>Finalizar turno</Button>
 		{/await}
 	</div>
 	<span slot="cell" let:row let:cell>
