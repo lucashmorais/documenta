@@ -72,7 +72,6 @@
 		headers={[{ key: 'name', value: 'Nome' }, { key: 'unix_completion_time', value: 'Conclusão' }]}
 		rows={value.user_rows}
 	>
-	<!-- <strong slot="title">Sequência de análise</strong> -->
 	<div slot="description" class="customToolbar">
 		<span style="font-size: 1rem">
 			Apenas o usuário ressaltado pode realizar modificações.
