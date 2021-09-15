@@ -6,7 +6,7 @@
   } from "carbon-components-svelte";
 	import ActionsBlock from './ActionsBlock.svelte';
 	import InterventionForm from './InterventionForm.svelte';
-	import SimpleDeleteModal from './SimpleDeleteModal.svelte';
+	import SimpleConfirmationModal from './SimpleConfirmationModal.svelte';
 	import { onMount } from 'svelte';
 	import { decodeDate, decodeTime } from './utils.js'
 	
@@ -132,7 +132,7 @@
 	}
 </style>
 
-<SimpleDeleteModal bind:open={deleteModalOpen} on:deletionConfirmed={deleteMinute(deleteeIdentifier)} selectedItems={[0]} singularString="minuta" />
+<SimpleConfirmationModal bind:open={deleteModalOpen} on:actionConfirmed={deleteMinute(deleteeIdentifier)} selectedItems={[0]} singularString="minuta" />
 
 <div class="interventions">
 	{#await minutesPromise then minutes}
