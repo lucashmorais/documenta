@@ -3,6 +3,7 @@
 	import { getNameFromUser, decodeDate, decodeTime, countCompletion } from "./utils.js";
 	import Pen16 from "carbon-icons-svelte/lib/Pen16";
 	import { Button } from "carbon-components-svelte";
+	import SimpleConfirmationModal from "./SimpleConfirmationModal.svelte";
 	
 	export let processID;
 	export let modRightsPromise;
@@ -44,6 +45,9 @@
 		countCompletion(processID);
 		sequencePromise = updateUserSequence()
 	}
+	
+	let modPassingModalOpen = false;
+	const modPassingModalMessage = "Você tem certeza de que gostaria de passar o documento para a próxima pessoa da sequência?"
 </script>
 
 <style>
@@ -56,6 +60,12 @@
 		justify-content: space-around;
 	}
 </style>
+
+<SimpleConfirmationModal
+	bind:open={modPassingModalOpen}
+	on:actionConfirmed={() => {modPassingModalOpen = false; passModificationRightsAlong();}} 
+	customMessage={modPassingModalMessage}
+/>
       
 {#await sequencePromise then value}
 	<DataTable
@@ -68,7 +78,7 @@
 			Apenas o usuário ressaltado pode realizar modificações.
 		</span>
 		{#await modRightsPromise then canModify}
-			<Button disabled={!canModify} iconDescription="Editar" on:click={passModificationRightsAlong}>Finalizar turno</Button>
+			<Button disabled={!canModify} iconDescription="Editar" on:click={() => modPassingModalOpen = true}>Finalizar turno</Button>
 		{/await}
 	</div>
 	<span slot="cell" let:row let:cell>
