@@ -75,6 +75,6 @@ export function countCompletion(processID) {
 			{
 				method: 'POST',
 			}
-		).then((response) => response.json().then((count) => resolve(count)));
+		).then((response) => response.json().then((updatedSequence) => resolve(updatedSequence)));
 	});
 }

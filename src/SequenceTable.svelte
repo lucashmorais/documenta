@@ -41,8 +41,8 @@
 
 	export let sequencePromise = updateUserSequence();
 	
-	function passModificationRightsAlong() {
-		countCompletion(processID);
+	async function passModificationRightsAlong() {
+		await countCompletion(processID);
 		sequencePromise = updateUserSequence()
 	}
 	
