@@ -3,7 +3,7 @@
 	import StatusBar from './StatusBar.svelte'
 	import DataTable from './DataTable/DataTable.svelte'
 	import UserModal from './UserModal.svelte'
-	import SimpleConfirmationModal from './SimpleDeleteModal.svelte'
+	import SimpleConfirmationModal from './SimpleConfirmationModal.svelte'
 	import {
 		Toolbar,
 		Button,
