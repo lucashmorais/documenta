@@ -37,6 +37,13 @@ type UserSequenceKind struct {
 	Name string
 }
 
+type UserSequenceKindIDValue int
+
+const (
+	Revision UserSequenceKindIDValue = 1
+	Approval UserSequenceKindIDValue = 2
+)
+
 type TokenPassingTimestamp struct {
 	gorm.Model
 	UserSequenceID int

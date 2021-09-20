@@ -157,7 +157,7 @@ func PostProcess(c *fiber.Ctx) error {
 		Users:              users,
 		NumUsers:           len(users),
 		NumCompletions:     0,
-		UserSequenceKindID: 1,
+		UserSequenceKindID: int(Revision),
 	}
 
 	dbProcess := Process{Title: process.Title, Summary: process.Summary, ProcessTypeID: process.TypeID, ProcessType: processType, Center: center, ProcessStatus: status, UserSequence: userSequence}
