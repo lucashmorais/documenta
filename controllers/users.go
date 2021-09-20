@@ -288,3 +288,25 @@ func IncreaseSequenceCompletionCounter(c *fiber.Ctx) error {
 
 	return c.JSON(userSequence)
 }
+
+// Function that retrieves a JSON object describing all the Permissions of the currently logged User.
+func GetLoggedUserPermissions(c *fiber.Ctx) error {
+	db := database.DBConn
+	loggedUserID := RetrieveUserID(c)
+	loggedUser := User{}
+
+	db.Where(loggedUserID).Find(&loggedUser)
+
+	var roles []Role
+	db.Model(&loggedUser).Association("Roles").Find(&roles)
+
+	var permissions []Permission
+
+	for _, role := range roles {
+		var rolePermissions []Permission
+		db.Model(role).Association("Permissions").Find(&permissions)
+		permissions = append(permissions, rolePermissions...)
+	}
+
+	return c.JSON(permissions)
+}

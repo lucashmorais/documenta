@@ -159,6 +159,7 @@ func setupRouter(app *fiber.App) {
 	protected.Delete("minute_version/:id", controllers.DeleteMinuteVersion)
 
 	protected.Get("current_user", controllers.GetLoggedUser)
+	protected.Get("current_user/permissions", controllers.GetLoggedUserPermissions)
 	protected.Post("user", controllers.PostUser)
 	protected.Put("user", controllers.PutUser)
 	protected.Delete("users", controllers.DeleteUsers)
