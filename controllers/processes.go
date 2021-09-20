@@ -42,6 +42,7 @@ func GetProcesses(c *fiber.Ctx) error {
 	statusIDRaw := c.Query("statusID")
 	typeString := c.Query("typeString")
 	typeIDRaw := c.Query("typeID")
+	onlyModifiableByUser := c.Query("onlyModifiableByUser")
 
 	// IMPORTANT: The following query will only work for processes that have valid references
 	// to ProcessStatus and ProcessTypes, since it includes joins with these tables
@@ -77,7 +78,40 @@ func GetProcesses(c *fiber.Ctx) error {
 			base = base.Where("process_types.id = ?", i)
 		}
 	}
+
 	base.Find(&processes)
+
+	// If `onlyModifiableUser == "true"`, the following piece of code
+	// builds a new Process slice from `processes` such that, for each and all of its elements,
+	// the `num_completions` field of the most recent `UserSequence` related to it is equal to
+	// the position of the the current logged user in the `user_sequence_users` slice whose all
+	// elements are related to that `UserSequence`.
+	//
+	// (interesting) NOTE: Github copilot failed to implement this
+	if onlyModifiableByUser == "true" {
+		userID := RetrieveUserID(c)
+		processesTheCurrentUserCanModify := []Process{}
+
+		for idx, proc := range processes {
+			var userSeq UserSequence
+			db.Where("process_id = ?", proc.ID).Last(&userSeq)
+
+			if userSeq.ID != 0 {
+				var users []User
+
+				// This finds users belonging to the many2many relationship
+				// between UserSequence and Users
+				db.Model(&userSeq).Association("Users").Find(&users)
+
+				activeUser := users[userSeq.NumCompletions]
+				if userID == int(activeUser.ID) {
+					processesTheCurrentUserCanModify = append(processesTheCurrentUserCanModify, processes[idx])
+				}
+			}
+		}
+
+		processes = processesTheCurrentUserCanModify
+	}
 
 	return c.JSON(processes)
 }

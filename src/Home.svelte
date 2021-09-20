@@ -23,16 +23,18 @@
 
 	let headers=[{ key: 'assunto', value: 'Assunto' }, { key: 'centro', value: 'Centro' }, { key: 'tipo', value: 'Tipo' }, {key: 'estado', value: 'Estado'}, { key: 'pend', value: 'Pendência Atual' }]
 	
+	var pendingProcessesPromise;
 	var draftProcessesPromise;
 	var activeProcessesPromise;
 	var finishedOrBlockedProcessesPromise;
 	
-	async function coreProcessUpdater(resolve, reject, set) {
+	async function coreProcessUpdater(resolve, reject, set, modifiable = false) {
 		let rows = []
 		let promises = []
 		for (let queryParam of set) {
 			promises.push( new Promise((resolve, reject) => {
-					fetch("http://localhost:3123/api/v1/processes?statusString=" + queryParam).
+					let modifiableString = modifiable ? "true" : "false"
+					fetch("http://localhost:3123/api/v1/processes?statusString=" + queryParam + "&onlyModifiableByUser=" + modifiableString).
 						then((response)=>response.json().
 							then(function (processes) {
 								console.log(processes)
@@ -65,6 +67,10 @@
 
 	export function updateProcesses() {
 		let set = []
+		set = ["Ativo", "Rascunho"]
+		pendingProcessesPromise = new Promise((resolve, reject) => {
+			coreProcessUpdater(resolve, reject, set, true)
+		})
 		set = ["Rascunho"]
 		draftProcessesPromise = new Promise((resolve, reject) => {
 			coreProcessUpdater(resolve, reject, set)
@@ -119,7 +125,26 @@
 <h1>Documenta</h1>
 
 <div class="content1">
-	<h2>Processos esperando ação do usuário</h2>
+	<h2>Processos aguardando ação do usuário</h2>
+		<div class="content2">
+			{#await pendingProcessesPromise}
+				<DataTableSkeleton />
+			{:then pendingProcesses}
+				<DataTable
+					headers={headers}
+					rows={pendingProcesses}
+					on:click:row={handleRowClick}
+				>
+					<Toolbar>
+						<ToolbarContent>
+						  <!-- <ToolbarSearch /> -->
+						  <Button on:click={() => editModalIsOpen = true}>Novo processo</Button>
+						</ToolbarContent>
+					</Toolbar>
+				</DataTable>
+			{/await}
+		</div>
+	<h2>Rascunhos</h2>
 		<div class="content2">
 			{#await draftProcessesPromise}
 				<DataTableSkeleton />
@@ -129,18 +154,6 @@
 					rows={draftProcesses}
 					on:click:row={handleRowClick}
 				>
-					<Toolbar>
-						<ToolbarBatchActions>
-						  <Button on:click={() => deleteModalIsOpen = true} icon={TrashCan16}>Eliminar</Button>
-						  {#if selectedRowIds.length < 2}
-							  <Button on:click={() => editModalIsOpen = true} icon={Edit16}>Editar</Button>
-						  {/if}
-						</ToolbarBatchActions>
-						<ToolbarContent>
-						  <!-- <ToolbarSearch /> -->
-						  <Button on:click={() => editModalIsOpen = true}>Novo processo</Button>
-						</ToolbarContent>
-					</Toolbar>
 				</DataTable>
 			{/await}
 		</div>
