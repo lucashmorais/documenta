@@ -289,8 +289,11 @@ func IncreaseSequenceCompletionCounter(c *fiber.Ctx) error {
 	return c.JSON(userSequence)
 }
 
-// Function that retrieves a JSON object describing all the Permissions of the currently logged User.
-func GetLoggedUserPermissions(c *fiber.Ctx) error {
+// If `permissionID` is equal to zero, this function returns a slice of all
+// Permissions held by the logged user. Otherwise, it returns a non-empty
+// Permission slice if, and only if, the user holds a Permission with DB index
+// equal to `permissionID`.
+func CoreGetLoggedUserPermissions(c *fiber.Ctx, permissionID int) []Permission {
 	db := database.DBConn
 	loggedUserID := RetrieveUserID(c)
 	loggedUser := User{}
@@ -304,9 +307,21 @@ func GetLoggedUserPermissions(c *fiber.Ctx) error {
 
 	for _, role := range roles {
 		var rolePermissions []Permission
-		db.Model(role).Association("Permissions").Find(&permissions)
+		if permissionID != 0 {
+			db.Where("permission_id = ?", permissionID).Model(role).Association("Permissions").Find(&permissions)
+			if len(permissions) > 0 {
+				return permissions
+			}
+		} else {
+			db.Model(role).Association("Permissions").Find(&permissions)
+		}
 		permissions = append(permissions, rolePermissions...)
 	}
 
-	return c.JSON(permissions)
+	return permissions
+}
+
+// Function that retrieves a JSON object describing all the Permissions of the currently logged User.
+func GetLoggedUserPermissions(c *fiber.Ctx) error {
+	return c.JSON(CoreGetLoggedUserPermissions(c, 0))
 }
