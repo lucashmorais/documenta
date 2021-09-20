@@ -117,6 +117,7 @@ func initDatabase() {
 	database.DBConn.AutoMigrate(&controllers.Comment{})
 	database.DBConn.AutoMigrate(&controllers.User{})
 	database.DBConn.AutoMigrate(&controllers.UserSequence{})
+	database.DBConn.AutoMigrate(&controllers.UserSequenceKind{})
 	database.DBConn.AutoMigrate(&controllers.TokenPassingTimestamp{})
 	database.DBConn.AutoMigrate(&controllers.Role{})
 	database.DBConn.AutoMigrate(&controllers.Permission{})

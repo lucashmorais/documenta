@@ -24,10 +24,17 @@ type User struct {
 
 type UserSequence struct {
 	gorm.Model
-	ProcessID      int
-	NumUsers       int
-	NumCompletions int
-	Users          []User `gorm:"many2many:user_sequence_users"`
+	ProcessID          int
+	NumUsers           int
+	NumCompletions     int
+	UserSequenceKindID int
+	UserSequenceKind   UserSequenceKind
+	Users              []User `gorm:"many2many:user_sequence_users"`
+}
+
+type UserSequenceKind struct {
+	ID   int
+	Name string
 }
 
 type TokenPassingTimestamp struct {
