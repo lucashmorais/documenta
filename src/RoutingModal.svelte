@@ -1,24 +1,13 @@
 <script>
 	import {
 		Modal,
-		FluidForm,
-		TextArea,
-		TextInput,
-		Grid,
-		Column,
-		Row,
-		Dropdown,
 		Tag,
-		Checkbox
 	} from "carbon-components-svelte"
-	import isEmail from 'validator/es/lib/isEmail';
-	import isStrongPassword from 'validator/es/lib/isStrongPassword';
 	import { translatable } from './translatable.js'
 	import { ContentSwitcher, Switch } from "carbon-components-svelte";
 	
 	import { createEventDispatcher } from 'svelte';
 	import { getAvailableUsers } from './utils.js';
-import { set } from "js-cookie";
 	
 	const dispatch = createEventDispatcher();
 	
@@ -35,15 +24,7 @@ import { set } from "js-cookie";
 		"selectedCenter": 0,
 	}
 	
-	let validationIsEnabled = false;
-	
-	$: coreTitleIsInvalid = formState != null && formState.title != null && formState.title == ""
-	$: coreSummaryIsInvalid = formState != null && formState.summary != null && formState.summary == ""
-
-	$: titleIsInvalid = validationIsEnabled && coreTitleIsInvalid
-	$: summaryIsInvalid = validationIsEnabled && coreSummaryIsInvalid
-	
-	$: someInputIsInvalid = coreTitleIsInvalid || coreSummaryIsInvalid
+	export let processID;
 	
 	export let processExaminationState = "analysis"
 	$: if (processExaminationState == 'analysis') { clearForm() }
@@ -73,77 +54,10 @@ import { set } from "js-cookie";
 	
 	export let userInfo = null;
 	
-	function updateFormState(userInfo) {
-		if (userInfo != null) {
-			formState.email = userInfo.email;
-			formState.firstName = userInfo.firstName;
-			formState.lastName = userInfo.lastName;
-			formState.initials = userInfo.initials;
-			formState.roles = userInfo.roles;
-			formState = formState
-		} else {
-			clearForm()
-		}
-	}
-	
 	$: console.log("[ProcessModal::userInfo]: ", userInfo)
-	$: updateFormState(userInfo)
-	
-	function enableValidation() {
-		validationIsEnabled = true;
-	}
-	
-	function disableValidation() {
-		validationIsEnabled = false;
-	}
 	
 	let available_types;
 	let available_centers = [{"id": 0, "text": "Brasília"}, {"id": 1, "text": "João Cachoeira"}];
-	
-	function updateProcessTypes() {
-		return new Promise((resolve, reject) => {
-			fetch("http://localhost:3123/api/v1/process_types").
-				then((response)=>response.json().
-					then(function (types) {
-						available_types = []
-						console.log("[updateProcessTypes::types]: ", types)
-						for (const u of types) {
-							let typeObj = {}
-							typeObj.id = u.ID
-							typeObj.text= u.Name
-							typeObj.description = u.Description
-							console.log(typeObj)
-							available_types.push(typeObj)
-						}
-						resolve(types)
-					})
-				)
-		})
-	}
-	updateProcessTypes();
-	
-	function updateCenters() {
-		return new Promise((resolve, reject) => {
-			fetch("http://localhost:3123/api/v1/centers").
-				then((response)=>response.json().
-					then(function (centers) {
-						available_centers = []
-						console.log("[updateCenters::centers]: ", centers)
-						for (const u of centers) {
-							let centerObj = {}
-							centerObj.id = u.ID
-							centerObj.text= u.Name
-							centerObj.shortName= u.ShortName
-							centerObj.description = u.Description
-							console.log(centerObj)
-							available_centers.push(centerObj)
-						}
-						resolve(centers)
-					})
-				)
-		})
-	}
-	updateCenters();
 	
 	function clearForm() {
 		const keys = Object.keys(formState)
@@ -156,7 +70,6 @@ import { set } from "js-cookie";
 			}
 		}
 		formState = formState
-		disableValidation()
 	}
 	
 	function clearFormDelayed(delay) {
@@ -164,29 +77,20 @@ import { set } from "js-cookie";
 	}
 	
 	async function submitForm() {
-		if (someInputIsInvalid) {
-			console.log("[submitForm:someInputIsInvalid:formState]: ", formState)
-			console.log("[submitForm]: [titleIsInvalid, summaryIsInvalid] = ", [titleIsInvalid, summaryIsInvalid])
-			enableValidation()
-			return
-		}
-		disableValidation()
 		
 		try {     
 			let requestBody;
 			let response;
 			if (processExaminationState == "analysis") {
 				requestBody = JSON.stringify({
-					"title": formState.title,
-					"summary": formState.summary,
-					"typeID": available_types[formState.selectedType].id,
-					"centerID": available_centers[formState.selectedCenter].id,
-					"userSequenceUserIDs": (await selection_sequence_promise).map((user) => user.ID)
+					"userSequenceUserIDs": (await selection_sequence_promise).map((user) => user.ID),
+					"userSequenceKindID": ctxSelectedIdx + 1,
+					"processID": parseInt(processID)
 				});
 				
 				console.log("[submitForm:analysis:requestBody]: ", requestBody);
 				
-				response = await fetch('http://localhost:3123/api/v1/process', {
+				response = await fetch('http://localhost:3123/api/v1/user_sequence_simple', {
 					method: 'post',
 					
 					body: requestBody,
@@ -328,12 +232,8 @@ import { set } from "js-cookie";
 	secondaryButtonText="Cancelar"
 	on:click:button--secondary={() => (open = false)}
 	on:open={() => {
-		updateProcessTypes()
-		updateCenters()
-		updateFormState(userInfo)
 	}}
 	on:close={() => {
-		disableValidation()
 		clearFormDelayed(800)
 	}}
 	on:submit={() => {
