@@ -277,6 +277,40 @@ func PostUserSequence(c *fiber.Ctx) error {
 	return c.JSON(userSequence)
 }
 
+func PostUserSequenceSimple(c *fiber.Ctx) error {
+	db := database.DBConn
+	basicUserSequence := struct {
+		gorm.Model
+		UserSequenceKindID  int    `json: "userSequenceKindID"`
+		UserSequenceUserIDs []uint `json: "userSequenceUserIDs"`
+		ProcessID           int    `json: "processID"`
+	}{}
+
+	err := c.BodyParser(&basicUserSequence)
+
+	if err != nil {
+		return c.Status(400).JSON(&fiber.Map{
+			"success": false,
+			"cause":   "form_decode_error",
+		})
+	}
+
+	var users []User
+	db.Where("id IN (?)", basicUserSequence.UserSequenceUserIDs).Find(&users)
+
+	userSequence := UserSequence{
+		Users:              users,
+		NumUsers:           len(users),
+		NumCompletions:     0,
+		UserSequenceKindID: basicUserSequence.UserSequenceKindID,
+		ProcessID:          basicUserSequence.ProcessID,
+	}
+
+	db.Create(&userSequence)
+
+	return c.JSON(userSequence)
+}
+
 // Function that increases the `NumCompletions` field of the most recent
 // `UserSequence` corresponding to a certain `processID` query parameter
 func IncreaseSequenceCompletionCounter(c *fiber.Ctx) error {
