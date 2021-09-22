@@ -2,6 +2,7 @@
 	import { getAvailableCenters } from './utils.js'
 	import InfoLine from './InfoLine.svelte'
 	import CommentArea from './CommentArea.svelte'
+	import RoutingModal from './RoutingModal.svelte'
 	import Minutes from './Minutes.svelte'
 	import StatusBar from './StatusBar.svelte'
 	import AttachmentsArea from './AttachmentsArea.svelte'
@@ -133,6 +134,8 @@
 		line-height: 150%;
 	}
 </style>
+
+<RoutingModal open={true} processPromise={processPromise} sequencePromise={sequencePromise}/>
 
 <StatusBar bind:currentUserPromise/>
 

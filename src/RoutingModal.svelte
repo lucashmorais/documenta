@@ -8,6 +8,7 @@
 	
 	import { createEventDispatcher } from 'svelte';
 	import { getAvailableUsers } from './utils.js';
+	import { constants } from './constants'
 	
 	const dispatch = createEventDispatcher();
 	
@@ -24,7 +25,26 @@
 		"selectedCenter": 0,
 	}
 	
-	export let processID;
+	function setupSequenceCallbacks(_promise) {
+		if (_promise) {
+			_promise.then((seqObj) => {
+				let sequence = seqObj.sequence
+				console.log("[RoutingModal::setupSequenceCallbacks::__callback::sequence]: ", sequence)
+				let kindID = sequence.UserSequenceKindID;
+
+				if (kindID == constants.db.UserSequenceKinds.REVIEW) {
+					processExaminationState = "analysis"
+				} else if (kindID == constants.db.UserSequenceKinds.APPROVAL) {
+					processExaminationState = "approval"
+				}
+			})
+		}		
+	}
+	
+	export let processPromise;
+	export let sequencePromise;
+	
+	$: setupSequenceCallbacks(sequencePromise)
 	
 	export let processExaminationState = "analysis"
 	$: if (processExaminationState == 'analysis') { clearForm() }
@@ -33,6 +53,7 @@
 	
 	function getStringSet(_examinationState) {
 		let set = translatable.ptBR.routingModal[_examinationState]
+		console.log("[RoutingModal::getStringSet::_examinationState]: ", _examinationState)
 		console.log("[RoutingModal::getStringSet::set]: ", set)
 		return set
 	}
@@ -77,10 +98,11 @@
 	}
 	
 	async function submitForm() {
-		
 		try {     
 			let requestBody;
 			let response;
+			let processID = (await processPromise).ID;
+
 			if (processExaminationState == "analysis") {
 				requestBody = JSON.stringify({
 					"userSequenceUserIDs": (await selection_sequence_promise).map((user) => user.ID),
