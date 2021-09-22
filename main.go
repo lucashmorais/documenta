@@ -135,6 +135,7 @@ func setupRouter(app *fiber.App) {
 
 	protected.Get("processes", controllers.GetProcesses)
 	protected.Post("process", controllers.PostProcess)
+	protected.Put("process/:process_id/set_status/:status_id", controllers.PatchProcessStatus)
 
 	protected.Get("process_types", controllers.GetProcessTypes)
 

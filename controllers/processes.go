@@ -169,3 +169,23 @@ func PostProcess(c *fiber.Ctx) error {
 
 	return c.JSON(dbProcess)
 }
+
+// Function that updates a `Process`'s `ProcessStatus`
+func PatchProcessStatus(c *fiber.Ctx) error {
+	db := database.DBConn
+
+	processID := c.Params("process_id")
+	statusID := c.Params("status_id")
+
+	var process Process
+	db.Where("id = ?", processID).Find(&process)
+
+	var status ProcessStatus
+	db.Where("id = ?", statusID).Find(&status)
+
+	process.ProcessStatus = status
+
+	db.Save(&process)
+
+	return c.JSON(process)
+}
