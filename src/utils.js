@@ -78,3 +78,12 @@ export function countCompletion(processID) {
 		).then((response) => response.json().then((updatedSequence) => resolve(updatedSequence)));
 	});
 }
+
+// Function that calls the /api/v1/process/:process_id/set_status/:status PUT endpoint to set the status of a `Process`
+export function setProcessStatus(processID, status) {
+	return new Promise((resolve, reject) => {
+		fetch(`http://localhost:3123/api/v1/process/${processID}/set_status/${status}`, {
+			method: 'PUT',
+		}).then((response) => response.json().then((updatedProcess) => resolve(updatedProcess)));
+	});
+}

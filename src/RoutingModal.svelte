@@ -7,7 +7,7 @@
 	import { ContentSwitcher, Switch } from "carbon-components-svelte";
 	
 	import { createEventDispatcher } from 'svelte';
-	import { getAvailableUsers } from './utils.js';
+	import { getAvailableUsers, setProcessStatus } from './utils.js';
 	import { constants } from './constants'
 	
 	const dispatch = createEventDispatcher();
@@ -119,28 +119,43 @@
 					headers: {
 						'Content-type': 'application/json; charset=UTF-8'
 					}
-				}
-				);
-			} else if (processExaminationState == "approval") {
-				requestBody = JSON.stringify({
-					"title": formState.title,
-					"summary": formState.summary,
-					"typeID": available_types[formState.selectedType].id,
-					"centerID": available_centers[formState.selectedCenter].id,
-					"userSequenceUserIDs": (await selection_sequence_promise).map((user) => user.ID)
 				});
 				
-				console.log("[submitForm:approval:requestBody]: ", requestBody);
+				console.log("[RoutingModel::submitForm::response]: ", response)
+				console.log("[RoutingModel::submitForm::ctxSelectedIdx]: ", ctxSelectedIdx)
 				
-				response = await fetch('http://localhost:3123/api/v1/process', {
-					method: 'put',
-					
-					body: requestBody,
-					headers: {
-						'Content-type': 'application/json; charset=UTF-8'
-					}
+				if (response.status == 200 && ctxSelectedIdx == constants.ui.RoutingModal.ContextSwitch.CHANGE_STATE) {
+					console.log("[RoutingModel] We are about to update the Process' status")
+					setProcessStatus(processID, constants.db.ProcessStatuses.ACTIVE)										
+				} else {
+					console.log("[RoutingModel] Skipping updating to Process status")
 				}
-				);
+			} else if (processExaminationState == "approval") {
+				if (ctxSelectedIdx == constants.ui.RoutingModal.ContextSwitch.MAINTAIN_STATE) {
+					requestBody = JSON.stringify({
+						"userSequenceUserIDs": (await selection_sequence_promise).map((user) => user.ID),
+						"userSequenceKindID": constants.db.UserSequenceKinds.APPROVAL,
+						"processID": parseInt(processID)
+					});
+					
+					console.log("[submitForm:analysis:requestBody]: ", requestBody);
+					
+					response = await fetch('http://localhost:3123/api/v1/user_sequence_simple', {
+						method: 'post',
+						
+						body: requestBody,
+						headers: {
+							'Content-type': 'application/json; charset=UTF-8'
+						}
+					});
+					
+					if (response.status == 200) {
+						setProcessStatus(processID, constants.db.ProcessStatuses.ACTIVE)										
+					}
+				} else {
+					setProcessStatus(processID, constants.db.ProcessStatuses.FINISHED)										
+					return;
+				}
 			} else {
 				return;
 			}
@@ -148,14 +163,9 @@
 			if (response.status == 200) {
 				console.log('[ProcessModal::submitForm]: Successfully performed action: ', processExaminationState);
 				open = false;
-				clearForm();
-				// updateRolesTable();
 				signalBackendModification();
-				// fireToastNotification("success", {email: formState.userValue});
-			} else {
-				console.log('[Add role]: Got valid response from server but process registration has failed.')
-				console.log(response)
-				// buildErrorToastFromResponse(response)
+				// TODO: CHECK IF THIS IS NEEDED
+				clearForm();
 			}
 			
 		} catch(err) {
