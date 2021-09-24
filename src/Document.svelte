@@ -1,5 +1,5 @@
 <script>
-	import { getAvailableCenters, setProcessStatus } from './utils.js'
+	import { getAvailableCenters, getCurrentUserPermissions, setProcessStatus, hasPermission } from './utils.js'
 	import InfoLine from './InfoLine.svelte'
 	import CommentArea from './CommentArea.svelte'
 	import RoutingModal from './RoutingModal.svelte'
@@ -171,6 +171,15 @@
 		})
 	}
 	$: checkIfPendingConfirmation(processPromise, sequencePromise, processExaminationState)
+	
+	let userPermissionsPromise = getCurrentUserPermissions()
+	$: if (userPermissionsPromise) {
+		userPermissionsPromise.then((value) => {
+			console.log("[Document::userPermissions]: ", value)
+
+		})
+	}
+
 </script>
 
 <style>
@@ -202,11 +211,24 @@
 	}
 </style>
 
-<!-- <RoutingModal open={true} processPromise={processPromise} sequencePromise={sequencePromise}/> -->
-<RoutingModal open={true} processPromise={processPromise} processExaminationState={processExaminationState}
-	on:processChange={updateProcess}
-	on:sequenceChange={updateSequence}
-/>
+{#await Promise.all([processPromise, userPermissionsPromise]) then [proc, userPermissions]}
+	{#if
+		(
+			proc.ProcessStatusID == constants.db.ProcessStatuses.AWAITING_REVIEW_CONFIRMATION
+			&& hasPermission(userPermissions, constants.db.Permissions.CONFIRM_PROCESS_REVIEW)
+		)
+		||
+		(
+			proc.ProcessStatusID == constants.db.ProcessStatuses.AWAITING_APPROVAL_CONFIRMATION
+			&& hasPermission(userPermissions, constants.db.Permissions.CONFIRM_PROCESS_APPROVAL)
+		)
+	}
+		<RoutingModal open={true} processPromise={processPromise} processExaminationState={processExaminationState}
+			on:processChange={updateProcess}
+			on:sequenceChange={updateSequence}
+		/>
+	{/if}
+{/await}
 
 <StatusBar bind:currentUserPromise/>
 

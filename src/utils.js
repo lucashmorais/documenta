@@ -87,3 +87,23 @@ export function setProcessStatus(processID, status) {
 		}).then((response) => response.json().then((updatedProcess) => resolve(updatedProcess)));
 	});
 }
+// Function that calls the /api/v1/current_user/permissions GET endpoint to get the permissions of the current user
+export function getCurrentUserPermissions() {
+	return new Promise((resolve, reject) => {
+		fetch('http://localhost:3123/api/v1/current_user/permissions').then((response) =>
+			response.json().then((permissions) => {
+				resolve(permissions);
+			})
+		);
+	});
+}
+
+export function hasPermission(permissions, targetID) {
+	let _filteredVec = permissions.filter((perm) => perm.ID == targetID);
+	console.log('[hasPermission]: {permissions, targetID, _filteredVec} = ', {
+		permissions,
+		targetID,
+		_filteredVec,
+	});
+	return _filteredVec.length > 0;
+}

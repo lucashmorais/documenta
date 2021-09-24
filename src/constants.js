@@ -12,6 +12,10 @@ constants.db.ProcessStatuses = {
 	AWAITING_REVIEW_CONFIRMATION: 5,
 	AWAITING_APPROVAL_CONFIRMATION: 6,
 };
+constants.db.Permissions = {
+	CONFIRM_PROCESS_REVIEW: 17,
+	CONFIRM_PROCESS_APPROVAL: 18,
+};
 constants.ui = {};
 constants.ui.RoutingModal = {};
 constants.ui.RoutingModal.ContextSwitch = {
