@@ -1,5 +1,5 @@
 <script>
-	import { getAvailableCenters } from './utils.js'
+	import { getAvailableCenters, setProcessStatus } from './utils.js'
 	import InfoLine from './InfoLine.svelte'
 	import CommentArea from './CommentArea.svelte'
 	import RoutingModal from './RoutingModal.svelte'
@@ -14,6 +14,7 @@
 	Tile,
 	Dropdown
 	} from "carbon-components-svelte";
+	import { constants } from './constants'
 
 	let isSideNavOpen = false;
 
@@ -58,6 +59,26 @@
 	
 	let sequencePromise;
 	let currentUserPromise;
+
+	let processExaminationState = "analysis"
+	
+	async function updateProcessExaminationState(_promise) {
+		if (_promise) {
+			let seqObj = await _promise
+			let sequence = seqObj.sequence
+
+			console.log("[Document::setupSequenceCallbacks::__callback::sequence]: ", sequence)
+
+			let kindID = sequence.UserSequenceKindID;
+
+			if (kindID == constants.db.UserSequenceKinds.REVIEW) {
+				processExaminationState = "analysis"
+			} else if (kindID == constants.db.UserSequenceKinds.APPROVAL) {
+				processExaminationState = "approval"
+			}
+		}		
+	}
+	$: updateProcessExaminationState(sequencePromise)
 	
 	function printCurrentUser(p) {
 		if (p) {
@@ -81,29 +102,69 @@
 		if (!seqP || !userP){
 			return null;
 		}
-		return new Promise((resolve, reject) => {
-			seqP.then((sequence) => {
-				userP.then((user) => {
-					console.log("[currentUserHasModificationRights::then::then::sequence]: ", sequence)
-					console.log("[currentUserHasModificationRights::then::then::user]: ", user)
-					let coreSeq = sequence.sequence
-					let numCompletions = coreSeq.NumCompletions
-					console.log("[currentUserHasModificationRights::then::then::numCompletions]: ", numCompletions)
-					
-					let result;
-					if (numCompletions >= coreSeq.Users.length) {
-						result = false
-					} else {
-						result = coreSeq.Users[numCompletions].ID == user.ID
-					}
-					console.log("[currentUserHasModificationRights::then::then::result]: ", result)
-					resolve(result)
-				})
+		return new Promise(async function (resolve, reject) {
+			let sequence = await seqP
+			userP.then((user) => {
+				console.log("[currentUserHasModificationRights::then::then::sequence]: ", sequence)
+				console.log("[currentUserHasModificationRights::then::then::user]: ", user)
+				let coreSeq = sequence.sequence
+				let numCompletions = coreSeq.NumCompletions
+				console.log("[currentUserHasModificationRights::then::then::numCompletions]: ", numCompletions)
+				
+				let result;
+				if (numCompletions >= coreSeq.Users.length) {
+					result = false
+				} else {
+					result = coreSeq.Users[numCompletions].ID == user.ID
+				}
+				console.log("[currentUserHasModificationRights::then::then::result]: ", result)
+				resolve(result)
 			})
 		})				
 	}
 	
 	$: modRightsPromise = currentUserHasModificationRights(sequencePromise, currentUserPromise)
+	
+	function checkIfPendingConfirmation(_procPromise, _seqPromise, _examinationState) {
+		console.log("[checkIfPendingConfirmation]: {_procPromise, _seqPromise, _examinationState}: ",
+			{_procPromise, _seqPromise, _examinationState})			
+
+		if (!_procPromise || !_seqPromise || (_examinationState == "")) {
+			console.log("[checkIfPendingConfirmation]: Some variable is missing, so we are returning now.")			
+			return
+		}
+		
+		_procPromise.then((proc) => {
+			_seqPromise.then((seqWrapper) => {
+				let seq = seqWrapper.sequence
+				if (proc.ProcessStatusID != constants.db.ProcessStatuses.ACTIVE) {
+					console.log("[checkIfPendingConfirmation]: Process is not active")			
+				} else {
+					console.log("[checkIfPendingConfirmation::seq]: ", seq)			
+					if (seq.NumCompletions == seq.NumUsers) {
+						switch(seq.UserSequenceKindID) {
+							case constants.db.UserSequenceKinds.REVIEW:
+								console.log("[checkIfPendingConfirmation]: Process is pending review confirmation")			
+								setProcessStatus(processID, constants.db.ProcessStatuses.AWAITING_REVIEW_CONFIRMATION)
+							break;
+							case constants.db.UserSequenceKinds.APPROVAL:
+								console.log("[checkIfPendingConfirmation]: Process is pending approval confirmation")			
+								setProcessStatus(processID, constants.db.ProcessStatuses.AWAITING_APPROVAL_CONFIRMATION)
+							break;
+							default:
+								console.log("[checkIfPendingConfirmation]: Sequence has bad UserSequenceKindID")			
+							break;
+						}
+					} else {
+						console.log("[checkIfPendingConfirmation]: The current sequence's number of " + 
+						"confirmations does not match the number of users it describes, so this process " +
+						"certainly is not pending review/approval confirmation.")			
+					}
+				}
+			})
+		})
+	}
+	$: checkIfPendingConfirmation(processPromise, sequencePromise, processExaminationState)
 </script>
 
 <style>
@@ -135,7 +196,8 @@
 	}
 </style>
 
-<RoutingModal open={true} processPromise={processPromise} sequencePromise={sequencePromise}/>
+<!-- <RoutingModal open={true} processPromise={processPromise} sequencePromise={sequencePromise}/> -->
+<RoutingModal open={true} processPromise={processPromise} processExaminationState={processExaminationState}/>
 
 <StatusBar bind:currentUserPromise/>
 

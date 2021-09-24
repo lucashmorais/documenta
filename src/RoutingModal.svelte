@@ -24,27 +24,8 @@
 		"selectedType": 0,
 		"selectedCenter": 0,
 	}
-	
-	function setupSequenceCallbacks(_promise) {
-		if (_promise) {
-			_promise.then((seqObj) => {
-				let sequence = seqObj.sequence
-				console.log("[RoutingModal::setupSequenceCallbacks::__callback::sequence]: ", sequence)
-				let kindID = sequence.UserSequenceKindID;
 
-				if (kindID == constants.db.UserSequenceKinds.REVIEW) {
-					processExaminationState = "analysis"
-				} else if (kindID == constants.db.UserSequenceKinds.APPROVAL) {
-					processExaminationState = "approval"
-				}
-			})
-		}		
-	}
-	
 	export let processPromise;
-	export let sequencePromise;
-	
-	$: setupSequenceCallbacks(sequencePromise)
 	
 	export let processExaminationState = "analysis"
 	$: if (processExaminationState == 'analysis') { clearForm() }
@@ -153,6 +134,7 @@
 						setProcessStatus(processID, constants.db.ProcessStatuses.ACTIVE)										
 					}
 				} else {
+					open = false;
 					setProcessStatus(processID, constants.db.ProcessStatuses.FINISHED)										
 					return;
 				}
