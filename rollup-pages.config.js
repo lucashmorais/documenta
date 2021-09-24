@@ -8,7 +8,12 @@ import css from 'rollup-plugin-css-only';
 const inputs = [
 	{
 		input: 'src/main.js',
-		output: { file: 'public/build/main.js', name: 'main' },
+		output: {
+			file: 'public/build/main.js',
+			name: 'main',
+			// format: 'es',
+			inlineDynamicImports: true,
+		},
 		css: 'main.css',
 	},
 	{
@@ -23,7 +28,13 @@ const inputs = [
 	},
 	{
 		input: 'src/document.js',
-		output: { file: 'public/build/document.js', name: 'document' },
+		output: {
+			file: 'public/build/document.js',
+			name: 'document',
+			// format: 'es',
+			inlineDynamicImports: true,
+			// format: 'iife',
+		},
 		css: 'document.css',
 	},
 	{

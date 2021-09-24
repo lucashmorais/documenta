@@ -1,6 +1,7 @@
 <script>
 	import { getAvailableCenters, getCurrentUserPermissions, setProcessStatus, hasPermission } from './utils.js'
 	import InfoLine from './InfoLine.svelte'
+	import { jsPDF } from "jspdf/dist/jspdf.es";
 	import CommentArea from './CommentArea.svelte'
 	import RoutingModal from './RoutingModal.svelte'
 	import Minutes from './Minutes.svelte'
@@ -180,6 +181,12 @@
 		})
 	}
 
+	function generateExamplePDF() {
+	        var pdf = new jsPDF();
+		pdf.text(30, 30, 'Hello world!');
+		pdf.save('hello_world.pdf');	
+	}
+	generateExamplePDF();
 </script>
 
 <style>
