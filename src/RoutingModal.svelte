@@ -12,8 +12,12 @@
 	
 	const dispatch = createEventDispatcher();
 	
-	function signalBackendModification() {
-		dispatch('backendModification');
+	function signalSequenceModification() {
+		dispatch('sequenceChange');
+	}
+	
+	function signalProcessModification() {
+		dispatch('processChange');
 	}
 	
 	export let open = false;
@@ -101,13 +105,15 @@
 						'Content-type': 'application/json; charset=UTF-8'
 					}
 				});
+				signalSequenceModification();
 				
 				console.log("[RoutingModel::submitForm::response]: ", response)
 				console.log("[RoutingModel::submitForm::ctxSelectedIdx]: ", ctxSelectedIdx)
 				
 				if (response.status == 200 && ctxSelectedIdx == constants.ui.RoutingModal.ContextSwitch.CHANGE_STATE) {
 					console.log("[RoutingModel] We are about to update the Process' status")
-					setProcessStatus(processID, constants.db.ProcessStatuses.ACTIVE)										
+					await setProcessStatus(processID, constants.db.ProcessStatuses.ACTIVE)										
+					signalProcessModification();
 				} else {
 					console.log("[RoutingModel] Skipping updating to Process status")
 				}
@@ -129,27 +135,21 @@
 							'Content-type': 'application/json; charset=UTF-8'
 						}
 					});
+					signalSequenceModification();
 					
 					if (response.status == 200) {
-						setProcessStatus(processID, constants.db.ProcessStatuses.ACTIVE)										
+						await setProcessStatus(processID, constants.db.ProcessStatuses.ACTIVE)										
+						signalProcessModification();
 					}
 				} else {
 					open = false;
-					setProcessStatus(processID, constants.db.ProcessStatuses.FINISHED)										
+					await setProcessStatus(processID, constants.db.ProcessStatuses.FINISHED)										
+					signalProcessModification();
 					return;
 				}
 			} else {
 				return;
 			}
-			
-			if (response.status == 200) {
-				console.log('[ProcessModal::submitForm]: Successfully performed action: ', processExaminationState);
-				open = false;
-				signalBackendModification();
-				// TODO: CHECK IF THIS IS NEEDED
-				clearForm();
-			}
-			
 		} catch(err) {
 			console.error(`Error: ${err}`);
 			return;

@@ -40,7 +40,7 @@
 	console.log("processID: ", processID)
 
 	export function updateProcess() {
-		let processPromise = new Promise((resolve, reject) => {
+		processPromise = new Promise((resolve, reject) => {
 			if (processID != null) {
 				fetch("http://localhost:3123/api/v1/processes?processID=" + processID).
 					then((response)=>response.json().
@@ -54,7 +54,12 @@
 				resolve (null);
 			}
 		})
-		return processPromise
+	}
+	
+	let sequenceChangeEvent;
+	function updateSequence(event) {
+		console.log("[Document::updateSequence::event]: ", event)
+		sequenceChangeEvent = event
 	}
 	
 	let sequencePromise;
@@ -90,7 +95,8 @@
 	
 	$: printCurrentUser(currentUserPromise)
 
-	let processPromise = updateProcess();
+	let processPromise;
+	updateProcess();
 
 	let availableCenters = [];
 	getAvailableCenters().then((centers) => {
@@ -197,7 +203,10 @@
 </style>
 
 <!-- <RoutingModal open={true} processPromise={processPromise} sequencePromise={sequencePromise}/> -->
-<RoutingModal open={true} processPromise={processPromise} processExaminationState={processExaminationState}/>
+<RoutingModal open={true} processPromise={processPromise} processExaminationState={processExaminationState}
+	on:processChange={updateProcess}
+	on:sequenceChange={updateSequence}
+/>
 
 <StatusBar bind:currentUserPromise/>
 
@@ -227,7 +236,7 @@
 		</Tile>
 
 		<h2>Sequência de análise</h2>
-		<SequenceTable bind:modRightsPromise bind:sequencePromise processID={processID}/>
+		<SequenceTable bind:modRightsPromise bind:sequencePromise bind:sequenceChangeEvent processID={processID}/>
 
 		<h2>Anexos</h2>
 		<AttachmentsArea bind:modRightsPromise processID={processID}/>

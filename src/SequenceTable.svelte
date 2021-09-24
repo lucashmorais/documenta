@@ -7,7 +7,8 @@
 	
 	export let processID;
 	export let modRightsPromise;
-
+	export let sequenceChangeEvent;
+	
 	export function updateUserSequence() {
 		let promise = new Promise((resolve, reject) => {
 			if (processID != null) {
@@ -44,6 +45,10 @@
 	async function passModificationRightsAlong() {
 		await countCompletion(processID);
 		sequencePromise = updateUserSequence()
+	}
+	
+	$: if (sequenceChangeEvent) {
+		sequencePromise = updateUserSequence();
 	}
 	
 	let modPassingModalOpen = false;
