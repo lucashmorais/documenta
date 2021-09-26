@@ -9,6 +9,7 @@
 	import SimpleConfirmationModal from './SimpleConfirmationModal.svelte';
 	import { onMount } from 'svelte';
 	import { decodeDate, decodeTime } from './utils.js'
+	import { jsPDF } from "jspdf/dist/jspdf.es";
 	
 	export let availableCenters = [];
 	export let modRightsPromise;
@@ -118,6 +119,38 @@
 	let numTextHidingCallbacksAdded = 0;
 
 	updateMinutes();
+	
+	function coreDownloadMinute(textContents) {
+	        var pdf = new jsPDF({
+			format: 'a6',
+			orientation: "landscape",
+		});
+		// console.log("[generateExamplePDF::getFontSize()]: ", pdf.getFontSize())
+		// console.log("[generateExamplePDF::getFontList()]: ", pdf.getFontList())
+		pdf.setFont('Times', 'Roman', 'normal');
+		pdf.setFontSize(13);
+		pdf.text('sjc 15/20', 130, 10, {align: "right"});
+		pdf.text(textContents, 18, 35, {maxWidth: 112});
+		pdf.text(130, 95, 'São Paulo, 26-8-20', {align: "right"});
+		pdf.save('hello_world.pdf');	
+	}
+
+	function generateExamplePDF() {
+		coreDownloadMinute('Informamos que João XX, professor de ZZ, estará em Lisboa e em Madrid de 10 a 15 de maio. ' +
+		'Agradeceríamos saber se poderia residir em alguma residência de professores nestas cidades.');
+	}
+	// generateExamplePDF();
+	
+	function downloadMinute(minute) {
+		getMinuteVersions(minute.ID).then((versions) => {
+			let numVersions = versions.length;
+			if (numVersions > 0) {
+				coreDownloadMinute(versions[numVersions - 1].Content)
+			} else {
+				coreDownloadMinute(minute.Content)
+			}
+		})
+	}
 </script>
 
 <style>
@@ -138,7 +171,13 @@
 	{#await minutesPromise then minutes}
 		{#each minutes as minute}
 			<Tile>
-				<ActionsBlock bind:modRightsPromise city={minute.Center.Name} editAction={setupHidingCallback} on:deletionRequested={() => {deleteeIdentifier = minute.ID; deleteModalOpen = true}}/>
+				<ActionsBlock
+					bind:modRightsPromise
+					city={minute.Center.Name}
+					editAction={setupHidingCallback}
+					on:deletionRequested={() => {deleteeIdentifier = minute.ID; deleteModalOpen = true}}
+					on:downloadRequested={() => {downloadMinute(minute)}}
+				/>
 			</Tile>
 			<Tile>
 				<Accordion>

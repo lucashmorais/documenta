@@ -7,6 +7,7 @@
 	import deleteIcon from '@carbon/icons/es/delete/16';
 	import Edit16 from "carbon-icons-svelte/lib/Edit16";
 	import Delete16 from "carbon-icons-svelte/lib/Delete16";
+	import Download16 from "carbon-icons-svelte/lib/Download16";
 import RefKindTag from './RefKindTag.svelte';
 
 	export let city;
@@ -40,6 +41,10 @@ import RefKindTag from './RefKindTag.svelte';
 	
 	function requestDeletion() {
 		dispatch("deletionRequested")
+	}
+	
+	function requestDownload() {
+		dispatch("downloadRequested")
 	}
 
 	onMount(async () => {
@@ -80,6 +85,7 @@ import RefKindTag from './RefKindTag.svelte';
 	}
 
 	.actionsContainer * {
+		margin-top: 1em;
 		margin-right: 1em;
 	}
 </style>
@@ -92,12 +98,15 @@ import RefKindTag from './RefKindTag.svelte';
 	</div>
 	{#await modRightsPromise then canModify}
 		{#if canModify}
+			<div class="topButton" use:editAction>
+				<Button iconDescription="Editar" icon={Edit16} kind="tertiary"></Button>
+			</div>
 			<div class="actionsContainer">
-				<div use:editAction>
-					<Button iconDescription="Editar" icon={Edit16} kind="tertiary"></Button>
-				</div>
 				<div>
 					<Button iconDescription="Eliminar" icon={Delete16} kind="danger-tertiary" on:click={requestDeletion}></Button>
+				</div>
+				<div class="topButton">
+					<Button iconDescription="Download" icon={Download16} kind="ghost" isSelected={true} on:click={requestDownload}></Button>
 				</div>
 			</div>
 		{/if}
