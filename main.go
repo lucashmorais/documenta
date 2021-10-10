@@ -2,9 +2,12 @@ package main
 
 import (
 	"fmt"
+	"os"
+	"path/filepath"
 	"time"
 
 	"github.com/golang-jwt/jwt"
+	"github.com/joho/godotenv"
 	"github.com/lucashmorais/documenta/controllers"
 	"github.com/lucashmorais/documenta/database"
 
@@ -192,7 +195,25 @@ func addAuthRequestHeader(ctx *fiber.Ctx) error {
 	return nil
 }
 
+func getServerPath() string {
+	env_path, env_path_is_set := os.LookupEnv("DOCUMENTA_ROOT")
+	if env_path_is_set {
+		return env_path
+	} else {
+		ex, err := os.Executable()
+		if err != nil {
+			panic(err)
+		}
+		exPath := filepath.Dir(ex)
+		return exPath
+	}
+}
+
 func main() {
+	server_path := getServerPath()
+	fmt.Printf("Server path: %s\n", server_path)
+	godotenv.Load(server_path + "/config/config.env")
+
 	app := fiber.New(fiber.Config{
 		Prefork:       true,
 		CaseSensitive: true,
@@ -221,7 +242,7 @@ func main() {
 
 	setupRouter(app)
 
-	app.Static("/", "./public")
+	app.Static("/", server_path+"/public")
 
 	app.Listen(":3123")
 }
