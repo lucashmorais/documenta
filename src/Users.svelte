@@ -1,9 +1,9 @@
 <script>
-	import 'carbon-components-svelte/css/all.css';
-	import StatusBar from './StatusBar.svelte'
-	import DataTable from './DataTable/DataTable.svelte'
-	import UserModal from './UserModal.svelte'
-	import SimpleConfirmationModal from './SimpleConfirmationModal.svelte'
+	import "carbon-components-svelte/css/all.css";
+	import StatusBar from "./StatusBar.svelte"
+	import DataTable from "./DataTable/DataTable.svelte"
+	import UserModal from "./UserModal.svelte"
+	import SimpleConfirmationModal from "./SimpleConfirmationModal.svelte"
 	import {
 		Toolbar,
 		Button,
@@ -15,14 +15,15 @@
 	// import Save16 from "carbon-icons-svelte/lib/Save16";
 	import TrashCan16 from "carbon-icons-svelte/lib/TrashCan16";
 	import Edit16 from "carbon-icons-svelte/lib/Edit16";
+	import { getEndpointPrefix } from "./config-helper.js"
 
 	let headers=[
-		{ key: 'email', value: 'E-mail' },
-		{ key: 'firstName', value: 'Primeiro nome' },
-		{ key: 'lastName', value: 'Último nome' },
-		{ key: 'initials', value: 'Iniciais' },
-		// { key: 'passwordHash', value: 'Hash da senha' },
-		{ key: 'roleNames', value: 'Funções' },
+		{ key: "email", value: "E-mail" },
+		{ key: "firstName", value: "Primeiro nome" },
+		{ key: "lastName", value: "Último nome" },
+		{ key: "initials", value: "Iniciais" },
+		// { key: "passwordHash", value: "Hash da senha" },
+		{ key: "roleNames", value: "Funções" },
 	];
 	
 	let rows=[];
@@ -59,7 +60,7 @@
 	var usersPromise;
 	export function updateUsers() {
 		usersPromise = new Promise((resolve, reject) => {
-			fetch("http://localhost:3123/api/v1/users").
+			fetch(getEndpointPrefix() + "/api/v1/users").
 				then((response)=>response.json().
 					then(function (users) {
 						console.log(users)
@@ -92,7 +93,7 @@
 	updateUsers();
 	
 	function goToRegisterPage() {
-		window.open("/register.html", '_blank').focus();
+		window.open("/register.html", "_blank").focus();
 	}
 	
 	async function submitBatchDeletion() {
@@ -106,22 +107,22 @@
 
 			console.log("[submitForm:requestBody]: ", requestBody);
 
-			const response = await fetch('http://localhost:3123/api/v1/users', {
-					method: 'delete',
+			const response = await fetch(getEndpointPrefix() + "/api/v1/users", {
+					method: "delete",
 
 					body: requestBody,
 					headers: {
-						'Content-type': 'application/json; charset=UTF-8'
+						"Content-type": "application/json; charset=UTF-8"
 					}
 				}
 			);
 			
 			if (response.status == 200) {
-				console.log('[Add role]: Successfully deleted users');
+				console.log("[Add role]: Successfully deleted users");
 				selectedRowIds = [];
 				updateUsers();
 			} else {
-				console.log('[Add role]: Got valid response from server but user deletion has failed.')
+				console.log("[Add role]: Got valid response from server but user deletion has failed.")
 				console.log(response)
 				// buildErrorToastFromResponse(response)
 			}
@@ -209,7 +210,7 @@
 				</ToolbarContent>
 		      </Toolbar>
 				<span slot="cell" let:row let:cell>
-					{#if cell.key === 'roleNames'}
+					{#if cell.key === "roleNames"}
 						{#each cell.value as v}
 							  <Tag>
 							    {v}

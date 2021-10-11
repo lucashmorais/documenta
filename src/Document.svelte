@@ -1,20 +1,21 @@
 <script>
-	import { getAvailableCenters, getCurrentUserPermissions, setProcessStatus, hasPermission } from './utils.js'
-	import InfoLine from './InfoLine.svelte'
-	import CommentArea from './CommentArea.svelte'
-	import RoutingModal from './RoutingModal.svelte'
-	import Minutes from './Minutes.svelte'
-	import StatusBar from './StatusBar.svelte'
-	import AttachmentsArea from './AttachmentsArea.svelte'
-	import InterventionForm from './InterventionForm.svelte'
-	import SequenceTable from './SequenceTable.svelte'
+	import { getAvailableCenters, getCurrentUserPermissions, setProcessStatus, hasPermission } from "./utils.js"
+	import InfoLine from "./InfoLine.svelte"
+	import CommentArea from "./CommentArea.svelte"
+	import RoutingModal from "./RoutingModal.svelte"
+	import Minutes from "./Minutes.svelte"
+	import StatusBar from "./StatusBar.svelte"
+	import AttachmentsArea from "./AttachmentsArea.svelte"
+	import InterventionForm from "./InterventionForm.svelte"
+	import SequenceTable from "./SequenceTable.svelte"
+	import { getEndpointPrefix } from "./config-helper.js"
 	import Cookie from "js-cookie";
 	import {
 	Content,
 	Tile,
 	Dropdown
 	} from "carbon-components-svelte";
-	import { constants } from './constants'
+	import { constants } from "./constants"
 
 	let isSideNavOpen = false;
 
@@ -35,14 +36,14 @@
 	}
 
 	let urlParams = new URLSearchParams(window.location.search);
-	let processID = urlParams.get('id')
+	let processID = urlParams.get("id")
 	
 	console.log("processID: ", processID)
 
 	export function updateProcess() {
 		processPromise = new Promise((resolve, reject) => {
 			if (processID != null) {
-				fetch("http://localhost:3123/api/v1/processes?processID=" + processID).
+				fetch(getEndpointPrefix() + "/api/v1/processes?processID=" + processID).
 					then((response)=>response.json().
 						then(function (wrappedProcess) {
 							console.log("[updateProcess]: ", wrappedProcess[0])
@@ -240,7 +241,7 @@
 		<div style="margin-left: 0.5em">
 			<Dropdown
 				selectedIndex={0}
-				items={[{ id: '0', text: 'Rascunho' }, { id: '1', text: 'Ativo' }, { id: '2', text: 'Concluído' }]}
+				items={[{ id: "0", text: "Rascunho" }, { id: "1", text: "Ativo" }, { id: "2", text: "Concluído" }]}
 			/>
 		</div>
 		</h1>

@@ -6,6 +6,7 @@
 	// import DataTable from './DataTable/DataTable.svelte'
 	import TrashCan16 from "carbon-icons-svelte/lib/TrashCan16";
 	import Edit16 from "carbon-icons-svelte/lib/Edit16";
+	import { getEndpointPrefix } from "./config-helper.js"
 	import {
 		DataTable,
 		DataTableSkeleton,
@@ -34,7 +35,7 @@
 		for (let queryParam of set) {
 			promises.push( new Promise((resolve, reject) => {
 					let modifiableString = modifiable ? "true" : "false"
-					fetch("http://localhost:3123/api/v1/processes?statusString=" + queryParam + "&onlyModifiableByUser=" + modifiableString).
+					fetch(getEndpointPrefix() + "/api/v1/processes?statusString=" + queryParam + "&onlyModifiableByUser=" + modifiableString).
 						then((response)=>response.json().
 							then(function (processes) {
 								console.log(processes)

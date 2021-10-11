@@ -4,6 +4,7 @@
 	import Pen16 from "carbon-icons-svelte/lib/Pen16";
 	import { Button } from "carbon-components-svelte";
 	import SimpleConfirmationModal from "./SimpleConfirmationModal.svelte";
+	import { getEndpointPrefix } from "./config-helper.js"
 	
 	export let processID;
 	export let modRightsPromise;
@@ -12,7 +13,7 @@
 	export function updateUserSequence() {
 		let promise = new Promise((resolve, reject) => {
 			if (processID != null) {
-				fetch("http://localhost:3123/api/v1/user_sequence_with_timestamps?processID=" + processID).
+				fetch(getEndpointPrefix() + "/api/v1/user_sequence_with_timestamps?processID=" + processID).
 					then((response)=>response.json().
 						then(function (raw_response) {
 							let seq = raw_response.userSequence

@@ -3,21 +3,22 @@
 		Modal,
 		Tag,
 	} from "carbon-components-svelte"
-	import { translatable } from './translatable.js'
+	import { translatable } from "./translatable.js"
 	import { ContentSwitcher, Switch } from "carbon-components-svelte";
 	
-	import { createEventDispatcher } from 'svelte';
-	import { getAvailableUsers, setProcessStatus } from './utils.js';
-	import { constants } from './constants'
+	import { createEventDispatcher } from "svelte";
+	import { getAvailableUsers, setProcessStatus } from "./utils.js";
+	import { constants } from "./constants"
+	import { getEndpointPrefix } from "./config-helper.js"
 	
 	const dispatch = createEventDispatcher();
 	
 	function signalSequenceModification() {
-		dispatch('sequenceChange');
+		dispatch("sequenceChange");
 	}
 	
 	function signalProcessModification() {
-		dispatch('processChange');
+		dispatch("processChange");
 	}
 	
 	export let open = false;
@@ -32,7 +33,7 @@
 	export let processPromise;
 	
 	export let processExaminationState = "analysis"
-	$: if (processExaminationState == 'analysis') { clearForm() }
+	$: if (processExaminationState == "analysis") { clearForm() }
 
 	console.log("[RoutingModal::_initialization::translatable]: ", translatable)
 	
@@ -97,12 +98,12 @@
 				
 				console.log("[submitForm:analysis:requestBody]: ", requestBody);
 				
-				response = await fetch('http://localhost:3123/api/v1/user_sequence_simple', {
-					method: 'post',
+				response = await fetch(getEndpointPrefix() + "/api/v1/user_sequence_simple", {
+					method: "post",
 					
 					body: requestBody,
 					headers: {
-						'Content-type': 'application/json; charset=UTF-8'
+						"Content-type": "application/json; charset=UTF-8"
 					}
 				});
 				signalSequenceModification();
@@ -127,12 +128,12 @@
 					
 					console.log("[submitForm:analysis:requestBody]: ", requestBody);
 					
-					response = await fetch('http://localhost:3123/api/v1/user_sequence_simple', {
-						method: 'post',
+					response = await fetch(getEndpointPrefix() + "/api/v1/user_sequence_simple", {
+						method: "post",
 						
 						body: requestBody,
 						headers: {
-							'Content-type': 'application/json; charset=UTF-8'
+							"Content-type": "application/json; charset=UTF-8"
 						}
 					});
 					signalSequenceModification();

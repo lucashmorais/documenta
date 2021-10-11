@@ -1,6 +1,8 @@
 <script>
-	import { TextArea, TextInput, ButtonSet, Button, Dropdown } from 'carbon-components-svelte'
-	import { createEventDispatcher } from 'svelte'
+	import { TextArea, TextInput, ButtonSet, Button, Dropdown } from "carbon-components-svelte"
+	import { createEventDispatcher } from "svelte"
+	import { getEndpointPrefix } from "./config-helper.js"
+
 	let commentContent;
 	let selectedIndex = 0;
 	let selectedCenterIndex = 0;
@@ -50,13 +52,13 @@
 						"MinuteID": Number(minuteID)
 					});
 
-			const response = await fetch('http://localhost:3123/api/v1/minute_version', {
-					method: 'post',
+			const response = await fetch(getEndpointPrefix() + "/api/v1/minute_version", {
+					method: "post",
 
 					body: requestBody,
 
 					headers: {
-						'Content-type': 'application/json; charset=UTF-8'
+						"Content-type": "application/json; charset=UTF-8"
 					}
 				}
 			);
@@ -65,7 +67,7 @@
 
 			response.text().then((text) => {
 				console.log(text);
-				console.log('[postNewMinuteVersion]: Completed!');
+				console.log("[postNewMinuteVersion]: Completed!");
 			});
 
 		} catch(err) {
@@ -74,7 +76,7 @@
 		}
 
 		clearText();
-		dispatch('minuteWasPosted');
+		dispatch("minuteWasPosted");
 	}
 	
 	// Function that calls the /api/v1/minute endpoint to create a new Minute
@@ -90,13 +92,13 @@
 						"CenterID": Number(centerDropdownOptions[selectedCenterIndex].id)
 					});
 
-			const response = await fetch('http://localhost:3123/api/v1/minute', {
-					method: 'post',
+			const response = await fetch(getEndpointPrefix() + "/api/v1/minute", {
+					method: "post",
 
 					body: requestBody,
 
 					headers: {
-						'Content-type': 'application/json; charset=UTF-8'
+						"Content-type": "application/json; charset=UTF-8"
 					}
 				}
 			);
@@ -105,7 +107,7 @@
 
 			response.text().then((text) => {
 				console.log(text);
-				console.log('[postNewMinute]: Completed!');
+				console.log("[postNewMinute]: Completed!");
 			});
 
 		} catch(err) {
@@ -114,7 +116,7 @@
 		}
 
 		clearText();
-		dispatch('minuteWasPosted');
+		dispatch("minuteWasPosted");
 	}
 
 	// Function that calls the /api/v1/comment endpoint to create a new Comment
@@ -128,20 +130,20 @@
 			
 			console.log("[postNewComment::requestBody]: ", requestBody);
 
-			const response = await fetch('http://localhost:3123/api/v1/comment', {
-					method: 'post',
+			const response = await fetch(getEndpointPrefix() + "/api/v1/comment", {
+					method: "post",
 
 					body: requestBody,
 
 					headers: {
-						'Content-type': 'application/json; charset=UTF-8'
+						"Content-type": "application/json; charset=UTF-8"
 					}
 				}
 			);
 
 			response.text().then((text) => {
 				console.log(text);
-				console.log('[postNewComment]: Completed!');
+				console.log("[postNewComment]: Completed!");
 			});
 
 		} catch(err) {
@@ -150,7 +152,7 @@
 		}
 
 		clearText();
-		dispatch('commentWasPosted');
+		dispatch("commentWasPosted");
 	}
 
 	function clearText() {
@@ -203,7 +205,7 @@
 				direction="top"
 				titleText="Contact"
 				bind:selectedIndex={selectedIndex}
-				items={[{ id: '0', text: 'Novo comentário' }, { id: '1', text: 'Nova minuta' }]}
+				items={[{ id: "0", text: "Novo comentário" }, { id: "1", text: "Nova minuta" }]}
 			/>
 		</div>
 	{/if}

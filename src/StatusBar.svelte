@@ -43,7 +43,7 @@
 		window.location.href = "/";
 	}
 	
-	// Function that fetches a JSON object describing the currently logged user from the `localhost:3123/api/v1/current_user` endpoint
+	// Function that fetches a JSON object describing the currently logged user from the `/api/v1/current_user` endpoint
 	function getCurrentUser() {
 		return fetch("/api/v1/current_user", {
 			method: "GET",

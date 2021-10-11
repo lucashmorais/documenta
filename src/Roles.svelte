@@ -1,8 +1,8 @@
 <script>
-	import 'carbon-components-svelte/css/all.css';
-	import StatusBar from './StatusBar.svelte'
-	import { purpose } from './stores.js'
-	import DataTable from './DataTable/DataTable.svelte'
+	import "carbon-components-svelte/css/all.css";
+	import StatusBar from "./StatusBar.svelte"
+	import { purpose } from "./stores.js"
+	import DataTable from "./DataTable/DataTable.svelte"
 	import {
 		Toolbar,
 		Button,
@@ -28,14 +28,15 @@
 	import TrashCan16 from "carbon-icons-svelte/lib/TrashCan16";
 	import Edit16 from "carbon-icons-svelte/lib/Edit16";
 	import Launch16 from "carbon-icons-svelte/lib/Launch16";
-	import isEmail from 'validator/es/lib/isEmail';
-	import isStrongPassword from 'validator/es/lib/isStrongPassword';
-	import RoleModal from './RoleModal.svelte'
+	import isEmail from "validator/es/lib/isEmail";
+	import isStrongPassword from "validator/es/lib/isStrongPassword";
+	import RoleModal from "./RoleModal.svelte"
+	import { getEndpointPrefix } from "./config-helper.js"
 
 	let headers=[
-		{ key: 'name', value: 'Nome' },
-		{ key: 'description', value: 'Descrição' },
-		{ key: 'permissions', value: 'Permissões' },
+		{ key: "name", value: "Nome" },
+		{ key: "description", value: "Descrição" },
+		{ key: "permissions", value: "Permissões" },
 	];
 									
 	let open = false;
@@ -86,23 +87,23 @@
 
 			console.log("[submitForm:requestBody]: ", requestBody);
 
-			const response = await fetch('http://localhost:3123/api/v1/roles', {
-					method: 'delete',
+			const response = await fetch(getEndpointPrefix() + "/api/v1/roles", {
+					method: "delete",
 
 					body: requestBody,
 					headers: {
-						'Content-type': 'application/json; charset=UTF-8'
+						"Content-type": "application/json; charset=UTF-8"
 					}
 				}
 			);
 			
 			if (response.status == 200) {
-				console.log('[Add role]: Successfully deleted roles');
+				console.log("[Add role]: Successfully deleted roles");
 				selectedRowIds = [];
 				updateRolesTable();
 				// fireToastNotification("success", {email: formState.userValue});
 			} else {
-				console.log('[Add role]: Got valid response from server but role deletion has failed.')
+				console.log("[Add role]: Got valid response from server but role deletion has failed.")
 				console.log(response)
 				// buildErrorToastFromResponse(response)
 			}
@@ -125,7 +126,7 @@
 	var rolesPromise;
 	export function updateRolesTable() {
 		rolesPromise = new Promise((resolve, reject) => {
-			fetch("http://localhost:3123/api/v1/roles").
+			fetch(getEndpointPrefix() + "/api/v1/roles").
 				then((response)=>response.json().
 					then(function (roles) {
 						rows = []
@@ -150,13 +151,13 @@
 	updateRolesTable();
 	
 	function openRegistrationModal() {
-		// window.open("/register.html", '_blank').focus();
-		$purpose = 'registering'
+		// window.open("/register.html", "_blank").focus();
+		$purpose = "registering"
 		setTimeout(() => open = true, 100)
 	}
 	
 	function openEditModal() {
-		$purpose = 'editing'
+		$purpose = "editing"
 		setTimeout(() => open = true, 100)
 	}
 	
@@ -249,7 +250,7 @@
 				</ToolbarContent>
 		      </Toolbar>
 				<span slot="cell" let:row let:cell>
-					{#if cell.key === 'permissions'}
+					{#if cell.key === "permissions"}
 						{#each cell.value as v}
 							  <Tag>
 							    {v}

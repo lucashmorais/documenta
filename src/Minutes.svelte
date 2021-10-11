@@ -4,12 +4,13 @@
 	Accordion,
 	AccordionItem,
   } from "carbon-components-svelte";
-	import ActionsBlock from './ActionsBlock.svelte';
-	import InterventionForm from './InterventionForm.svelte';
-	import SimpleConfirmationModal from './SimpleConfirmationModal.svelte';
-	import { onMount } from 'svelte';
-	import { decodeDate, decodeTime } from './utils.js'
+	import ActionsBlock from "./ActionsBlock.svelte";
+	import InterventionForm from "./InterventionForm.svelte";
+	import SimpleConfirmationModal from "./SimpleConfirmationModal.svelte";
+	import { onMount } from "svelte";
+	import { decodeDate, decodeTime } from "./utils.js"
 	import { jsPDF } from "jspdf/dist/jspdf.es";
+	import { getEndpointPrefix } from "./config-helper.js"
 	
 	export let availableCenters = [];
 	export let modRightsPromise;
@@ -62,8 +63,8 @@
 		deleteModalOpen = false;
 		console.log("[deleteMinute]: Entering")
 		try {     
-			fetch('http://localhost:3123/api/v1/minute/' + minuteID, {
-					method: 'delete',
+			fetch(getEndpointPrefix() + "/api/v1/minute/" + minuteID, {
+					method: "delete",
 				}
 			).then((response) => updateMinutes())
 		} catch(err) {
@@ -75,11 +76,11 @@
 	let minutesPromise;
 	export function updateMinutes() {
 		minutesPromise = new Promise((resolve, reject) => {
-			// console.log("[Minutes::updateMinutes]: Just entering minutesPromise's inner function")
+			// console.log("[Minutes::updateMinutes]: Just entering minutesPromise"s inner function")
 			if (processID == "" || processID == "0") {
 				resolve([])
 			}
-			fetch("http://localhost:3123/api/v1/minutes?processID=" + processID).
+			fetch(getEndpointPrefix() + "/api/v1/minutes?processID=" + processID).
 				then((response)=>response.json().
 					then(function (minutes) {
 						// console.log("[Minutes::updateMinutes::minutes]: ", minutes)
@@ -100,7 +101,7 @@
 			if (processID == "" || processID == "0") {
 				resolve([])
 			}
-			fetch("http://localhost:3123/api/v1/minute_versions?minuteID=" + minuteID).
+			fetch(getEndpointPrefix() + "/api/v1/minute_versions?minuteID=" + minuteID).
 				then((response)=>response.json().
 					then(function (versions) {
 						console.log("[Minutes::getMinuteVersions::versions]: ", versions)
@@ -122,22 +123,22 @@
 	
 	function coreDownloadMinute(textContents) {
 	        var pdf = new jsPDF({
-			format: 'a6',
+			format: "a6",
 			orientation: "landscape",
 		});
 		// console.log("[generateExamplePDF::getFontSize()]: ", pdf.getFontSize())
 		// console.log("[generateExamplePDF::getFontList()]: ", pdf.getFontList())
-		pdf.setFont('Times', 'Roman', 'normal');
+		pdf.setFont("Times", "Roman", "normal");
 		pdf.setFontSize(13);
-		pdf.text('sjc 15/20', 130, 10, {align: "right"});
+		pdf.text("sjc 15/20", 130, 10, {align: "right"});
 		pdf.text(textContents, 18, 35, {maxWidth: 112});
-		pdf.text(130, 95, 'São Paulo, 26-8-20', {align: "right"});
-		pdf.save('hello_world.pdf');	
+		pdf.text(130, 95, "São Paulo, 26-8-20", {align: "right"});
+		pdf.save("hello_world.pdf");	
 	}
 
 	function generateExamplePDF() {
-		coreDownloadMinute('Informamos que João XX, professor de ZZ, estará em Lisboa e em Madrid de 10 a 15 de maio. ' +
-		'Agradeceríamos saber se poderia residir em alguma residência de professores nestas cidades.');
+		coreDownloadMinute("Informamos que João XX, professor de ZZ, estará em Lisboa e em Madrid de 10 a 15 de maio. " +
+		"Agradeceríamos saber se poderia residir em alguma residência de professores nestas cidades.");
 	}
 	// generateExamplePDF();
 	

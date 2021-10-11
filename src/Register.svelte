@@ -11,6 +11,7 @@
 	import { writable } from 'svelte/store';
 	import isEmail from 'validator/es/lib/isEmail';
 	import isStrongPassword from 'validator/es/lib/isStrongPassword';
+	import { getEndpointPrefix } from "./config-helper.js"
 	
 	let formState = {}
 	
@@ -128,7 +129,7 @@
 		// }
 
 		try {     
-			const response = await fetch('http://localhost:3123/api/v1/user', {
+			const response = await fetch(getEndpointPrefix() + "/api/v1/user", {
 					method: 'post',
 
 					body: JSON.stringify({
@@ -147,11 +148,11 @@
 			);
 			
 			if (response.status == 200) {
-				console.log('[Register]: Successfully registered user');
+				console.log("[Register]: Successfully registered user");
 				failedLastTime = false;
 				fireToastNotification("success", {email: formState.userValue});
 			} else {
-				console.log('[Register]: Got valid response from server but user registering has failed.')
+				console.log("[Register]: Got valid response from server but user registering has failed.")
 				failedLastTime = true;
 				buildErrorToastFromResponse(response)
 			}
@@ -163,8 +164,8 @@
 	}
 	
 	document.addEventListener("keyup", function(event) {
-		if (event.key === 'Enter') {
-			console.log('Enter is pressed!');
+		if (event.key === "Enter") {
+			console.log("Enter is pressed!");
 			submitForm();
 		}
 	})

@@ -4,6 +4,7 @@
 	import { Button } from "carbon-components-svelte";
 	import { FileUploaderButton } from "carbon-components-svelte";
 	import { Carousel } from "svelte-images";
+	import { getEndpointPrefix } from "./config-helper.js"
 
 	const { Modal, open, close } = Carousel;
 	let fileUploader
@@ -25,8 +26,8 @@
 		formData.set("documents", file, file.name);
 		formData.set("processID", processID);
 
-		const response = await fetch('http://localhost:3123/api/v1/files', {
-			method: 'POST',
+		const response = await fetch(`${getEndpointPrefix}/api/v1/files`, {
+			method: "POST",
 			body: formData
 		});
 
@@ -53,7 +54,7 @@
 			return;
 		}
 
-		fetch("http://localhost:3123/api/v1/file/" + fileID, {method: 'DELETE'}).
+		fetch(getEndpointPrefix() + "/api/v1/file/" + fileID, {method: "DELETE"}).
 			then((response)=> {
 				updateAttachments()
 			})
@@ -62,7 +63,7 @@
 	export function updateAttachments() {
 		attachmentsPromise = new Promise((resolve, reject) => {
 			if (processID != "" && processID != "0") {
-				fetch("http://localhost:3123/api/v1/files?processID=" + processID).
+				fetch(getEndpointPrefix() + "/api/v1/files?processID=" + processID).
 					then((response)=>response.json().
 						then(function (attachments) {
 							files = attachments
@@ -71,7 +72,7 @@
 							for (let i = 0; i < attachments.length; i++) {
 								let a = attachments[i]
 								console.log(a)
-								a.src = "http://localhost:3123/api/v1/file/" + a.ID;
+								a.src = getEndpointPrefix() + "/api/v1/file/" + a.ID;
 								console.log(a.src);
 								if (a.ContentType.startsWith("image")) {
 									a.imgID = imgCounter
@@ -102,7 +103,7 @@
 		}
 		
 		function getOnlyImages(fileArray) {
-			return fileArray.filter(f => f.ContentType.startsWith('image'))
+			return fileArray.filter(f => f.ContentType.startsWith("image"))
 		}
 
 		imageFunction = function() {
@@ -115,8 +116,8 @@
 		}
 
 		let pdfFunction = function() {
-			// window.open(files[idx].src, '_blank').focus();
-			window.open('http://localhost:3123/PDFVisualizer.html?id=' + String(files[idx].ID), '_blank').focus();
+			// window.open(files[idx].src, "_blank").focus();
+			window.open(getEndpointPrefix() + "/PDFVisualizer.html?id=" + String(files[idx].ID), "_blank").focus();
 		}
 		
 		if (type.startsWith("image"))

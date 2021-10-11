@@ -2,13 +2,14 @@
 	import { Tile } from 'carbon-components-svelte'
 	import { onMount } from 'svelte'
 	import { decodeDate, decodeTime } from './utils.js'
+	import { getEndpointPrefix } from "./config-helper.js"
 
 	var commentsPromise;
 	export let processID;
 
 	export function updateComments() {
 		commentsPromise = new Promise((resolve, reject) => {
-			fetch("http://localhost:3123/api/v1/comments?processID=" + processID).
+			fetch(getEndpointPrefix() + "/api/v1/comments?processID=" + processID).
 				then((response)=>response.json().
 					then(function (comments) {
 						for (const c of comments) {

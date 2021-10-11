@@ -6,6 +6,7 @@
 	  Button,
 	} from "carbon-components-svelte";
 	import Cookie from "js-cookie";
+	import { getEndpointPrefix } from "./config-helper.js"
 	
 	if (Cookie.get("documentaLoginToken")) {
 		window.location.href = "/home.html";
@@ -19,8 +20,8 @@
 		console.log("Password: " + passwordValue)
 
 		try {     
-			const response = await fetch('http://localhost:3123/api/v1/login', {
-					method: 'post',
+			const response = await fetch(getEndpointPrefix() + "/api/v1/login", {
+					method: "post",
 
 					body: JSON.stringify({
 						Email: userValue,
@@ -28,20 +29,20 @@
 					}),
 
 					headers: {
-						'Content-type': 'application/json; charset=UTF-8'
+						"Content-type": "application/json; charset=UTF-8"
 					}
 				}
 			);
 			
 			if (response.status == 200) {
-				console.log('[Login]: Successfully logged in with valid credentials.');
+				console.log("[Login]: Successfully logged in with valid credentials.");
 
 				response.text().then((text) => {
 					console.log(text);
 					window.location.href = "/home.html"
 				});
 			} else {
-				console.log('[Login]: Got valid response from server but login has failed.')
+				console.log("[Login]: Got valid response from server but login has failed.")
 			}
 
 		} catch(err) {
@@ -51,8 +52,8 @@
 	}
 	
 	document.addEventListener("keyup", function(event) {
-		if (event.key === 'Enter') {
-			console.log('Enter is pressed!');
+		if (event.key === "Enter") {
+			console.log("Enter is pressed!");
 			submitForm();
 		}
 	});

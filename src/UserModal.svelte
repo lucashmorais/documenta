@@ -10,15 +10,16 @@
 		PasswordInput,
 		Checkbox
 	} from "carbon-components-svelte"
-	import isEmail from 'validator/es/lib/isEmail';
-	import isStrongPassword from 'validator/es/lib/isStrongPassword';
+	import isEmail from "validator/es/lib/isEmail";
+	import isStrongPassword from "validator/es/lib/isStrongPassword";
+	import { getEndpointPrefix } from "./config-helper.js"
 
-	import { createEventDispatcher } from 'svelte';
+	import { createEventDispatcher } from "svelte";
 
 	const dispatch = createEventDispatcher();
 
 	function signalBackendModification() {
-		dispatch('backendModification');
+		dispatch("backendModification");
 	}
 
 	export let open = false;
@@ -85,7 +86,7 @@
 	}
 	
 	export let purpose = "editing"
-	$: if (purpose == 'registering') { clearForm() }
+	$: if (purpose == "registering") { clearForm() }
 
 	let purposePromise = null;
 	function updatePurposePromise(ignored) {
@@ -126,7 +127,7 @@
 	
 	export function updateRoles() {
 		return new Promise((resolve, reject) => {
-			fetch("http://localhost:3123/api/v1/roles").
+			fetch(getEndpointPrefix() + "/api/v1/roles").
 				then((response)=>response.json().
 					then(function (roles) {
 						available_roles = []
@@ -230,12 +231,12 @@
 
 				console.log("[submitForm:registering:requestBody]: ", requestBody);
 
-				response = await fetch('http://localhost:3123/api/v1/user', {
-						method: 'post',
+				response = await fetch(getEndpointPrefix() + "/api/v1/user", {
+						method: "post",
 
 						body: requestBody,
 						headers: {
-							'Content-type': 'application/json; charset=UTF-8'
+							"Content-type": "application/json; charset=UTF-8"
 						}
 					}
 				);
@@ -251,12 +252,12 @@
 
 				console.log("[submitForm:editing:requestBody]: ", requestBody);
 
-				response = await fetch('http://localhost:3123/api/v1/user', {
-						method: 'put',
+				response = await fetch(getEndpointPrefix() + "/api/v1/user", {
+						method: "put",
 
 						body: requestBody,
 						headers: {
-							'Content-type': 'application/json; charset=UTF-8'
+							"Content-type": "application/json; charset=UTF-8"
 						}
 					}
 				);
@@ -265,14 +266,14 @@
 			}
 			
 			if (response.status == 200) {
-				console.log('[UserModal::submitForm]: Successfully performed action: ', purpose);
+				console.log("[UserModal::submitForm]: Successfully performed action: ", purpose);
 				open = false;
 				clearForm();
 				// updateRolesTable();
 				signalBackendModification();
 				// fireToastNotification("success", {email: formState.userValue});
 			} else {
-				console.log('[Add role]: Got valid response from server but user registration has failed.')
+				console.log("[Add role]: Got valid response from server but user registration has failed.")
 				console.log(response)
 				// buildErrorToastFromResponse(response)
 			}

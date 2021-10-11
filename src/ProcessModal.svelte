@@ -11,17 +11,18 @@
 		Tag,
 		Checkbox
 	} from "carbon-components-svelte"
-	import isEmail from 'validator/es/lib/isEmail';
-	import isStrongPassword from 'validator/es/lib/isStrongPassword';
+	import isEmail from "validator/es/lib/isEmail";
+	import isStrongPassword from "validator/es/lib/isStrongPassword";
 	
-	import { createEventDispatcher } from 'svelte';
-	import { getAvailableUsers } from './utils.js';
+	import { createEventDispatcher } from "svelte";
+	import { getAvailableUsers } from "./utils.js";
+	import { getEndpointPrefix } from "./config-helper.js"
 import { set } from "js-cookie";
 	
 	const dispatch = createEventDispatcher();
 	
 	function signalBackendModification() {
-		dispatch('backendModification');
+		dispatch("backendModification");
 	}
 	
 	export let open = false;
@@ -44,7 +45,7 @@ import { set } from "js-cookie";
 	$: someInputIsInvalid = coreTitleIsInvalid || coreSummaryIsInvalid
 	
 	export let purpose = "registering"
-	$: if (purpose == 'registering') { clearForm() }
+	$: if (purpose == "registering") { clearForm() }
 	
 	let purposePromise = null;
 	function updatePurposePromise(ignored) {
@@ -85,7 +86,7 @@ import { set } from "js-cookie";
 	
 	function updateProcessTypes() {
 		return new Promise((resolve, reject) => {
-			fetch("http://localhost:3123/api/v1/process_types").
+			fetch(getEndpointPrefix() + "/api/v1/process_types").
 				then((response)=>response.json().
 					then(function (types) {
 						available_types = []
@@ -107,7 +108,7 @@ import { set } from "js-cookie";
 	
 	function updateCenters() {
 		return new Promise((resolve, reject) => {
-			fetch("http://localhost:3123/api/v1/centers").
+			fetch(getEndpointPrefix() + "/api/v1/centers").
 				then((response)=>response.json().
 					then(function (centers) {
 						available_centers = []
@@ -169,12 +170,12 @@ import { set } from "js-cookie";
 				
 				console.log("[submitForm:registering:requestBody]: ", requestBody);
 				
-				response = await fetch('http://localhost:3123/api/v1/process', {
-					method: 'post',
+				response = await fetch(getEndpointPrefix() + "/api/v1/process", {
+					method: "post",
 					
 					body: requestBody,
 					headers: {
-						'Content-type': 'application/json; charset=UTF-8'
+						"Content-type": "application/json; charset=UTF-8"
 					}
 				}
 				);
@@ -189,12 +190,12 @@ import { set } from "js-cookie";
 				
 				console.log("[submitForm:editing:requestBody]: ", requestBody);
 				
-				response = await fetch('http://localhost:3123/api/v1/process', {
-					method: 'put',
+				response = await fetch(getEndpointPrefix() + "/api/v1/process", {
+					method: "put",
 					
 					body: requestBody,
 					headers: {
-						'Content-type': 'application/json; charset=UTF-8'
+						"Content-type": "application/json; charset=UTF-8"
 					}
 				}
 				);
@@ -203,14 +204,14 @@ import { set } from "js-cookie";
 			}
 			
 			if (response.status == 200) {
-				console.log('[ProcessModal::submitForm]: Successfully performed action: ', purpose);
+				console.log("[ProcessModal::submitForm]: Successfully performed action: ", purpose);
 				open = false;
 				clearForm();
 				// updateRolesTable();
 				signalBackendModification();
 				// fireToastNotification("success", {email: formState.userValue});
 			} else {
-				console.log('[Add role]: Got valid response from server but process registration has failed.')
+				console.log("[Add role]: Got valid response from server but process registration has failed.")
 				console.log(response)
 				// buildErrorToastFromResponse(response)
 			}
