@@ -12,6 +12,7 @@ import (
 	"github.com/lucashmorais/documenta/database"
 
 	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/fiber/v2/middleware/compress"
 	"github.com/gofiber/fiber/v2/middleware/cors"
 	"github.com/gofiber/fiber/v2/middleware/logger"
 	jwtware "github.com/gofiber/jwt/v2"
@@ -224,6 +225,7 @@ func main() {
 
 	app.Use(logger.New())
 	app.Use(cors.New())
+	app.Use(compress.New())
 	app.Use(addAuthRequestHeader)
 	// app.Use("document.html", authRequired())
 	// app.Use("index.html", authRequired())
