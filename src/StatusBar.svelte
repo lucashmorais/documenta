@@ -100,9 +100,8 @@
 
 <SideNav bind:isOpen={isSideNavOpen}>
   <SideNavItems>
-    <SideNavLink text="Link 1" />
-    <SideNavLink text="Link 2" />
-    <SideNavLink text="Link 3" />
+    <SideNavLink href="/users.html" text="Usuários" />
+    <SideNavLink href="/roles.html" text="Funções" />
 	<!--
     <SideNavMenu text="Menu">
       <SideNavMenuItem href="/" text="Link 1" />
@@ -110,7 +109,7 @@
       <SideNavMenuItem href="/" text="Link 3" />
     </SideNavMenu>
     <SideNavDivider />
-	-->
     <SideNavLink text="Link 4" />
+	-->
   </SideNavItems>
 </SideNav>
