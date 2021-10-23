@@ -215,12 +215,11 @@
 	}
 </style>
 
-
 <ProcessModal 
 	bind:open={editModalIsOpen}
 	bind:processPromise={processPromise}
+	sequencePromise={sequencePromise}
 />
-
 
 {#await Promise.all([processPromise, userPermissionsPromise]) then [proc, userPermissions]}
 	{#if

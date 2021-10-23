@@ -17,7 +17,7 @@
 	import { createEventDispatcher } from "svelte";
 	import { getAvailableUsers } from "./utils.js";
 	import { getEndpointPrefix } from "./config-helper.js"
-import { set } from "js-cookie";
+	import { set } from "js-cookie";
 	
 	const dispatch = createEventDispatcher();
 	
@@ -26,9 +26,10 @@ import { set } from "js-cookie";
 	}
 	
 	export let open = false;
-	export let processPromise = null;
+	export let processPromise;
+	export let sequencePromise;
 	
-	$: if (processPromise) {
+	$: if (processPromise && available_types && available_centers) {
 		console.log("[ProcessModal::processPromise]: ", processPromise);		
 		processPromise.then((process) => {
 			formState.title = process.Title;
@@ -36,6 +37,24 @@ import { set } from "js-cookie";
 			formState.selectedCenter = available_centers.findIndex((a) => a.id == process.CenterID);
 			formState.selectedType = available_types.findIndex((a) => a.id == process.ProcessTypeID);
 			// formState = formState
+		})
+	} 
+	
+	$: if (sequencePromise) {
+		console.log("[ProcessModal::sequencePromise]: ", sequencePromise);		
+		sequencePromise.then((sequenceWrapper) => {
+			console.log("[ProcessModal::sequenceWrapper.sequence.Users]: ", sequenceWrapper.sequence.Users);
+			
+			usersPromise.then((allUsers) => {
+				let local_negative_priority_counter = 1;
+				for (const user of sequenceWrapper.sequence.Users) {
+					let matchedUserIndex = allUsers.findIndex((u) => u.ID == user.ID);
+					allUsers[matchedUserIndex].negativePriority = local_negative_priority_counter;
+					local_negative_priority_counter++;
+				}
+				console.log("[ProcessModal::_reactiveIfCallback::allUsers]: ", allUsers);
+				selection_sequence_promise = getSelectionSequencePromise(available_users);
+			});
 		})
 	} 
 	
