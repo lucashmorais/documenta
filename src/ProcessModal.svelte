@@ -28,6 +28,7 @@
 	export let open = false;
 	export let processPromise;
 	export let sequencePromise;
+	let sequenceInitializationWasDone = false;
 	
 	$: if (processPromise && available_types && available_centers) {
 		console.log("[ProcessModal::processPromise]: ", processPromise);		
@@ -40,20 +41,23 @@
 		})
 	} 
 	
-	$: if (sequencePromise) {
+	$: if (!sequenceInitializationWasDone && sequencePromise) {
 		console.log("[ProcessModal::sequencePromise]: ", sequencePromise);		
 		sequencePromise.then((sequenceWrapper) => {
 			console.log("[ProcessModal::sequenceWrapper.sequence.Users]: ", sequenceWrapper.sequence.Users);
 			
 			usersPromise.then((allUsers) => {
-				let local_negative_priority_counter = 1;
-				for (const user of sequenceWrapper.sequence.Users) {
-					let matchedUserIndex = allUsers.findIndex((u) => u.ID == user.ID);
-					allUsers[matchedUserIndex].negativePriority = local_negative_priority_counter;
-					local_negative_priority_counter++;
+				if (!sequenceInitializationWasDone) {
+					let local_negative_priority_counter = 1;
+					for (const user of sequenceWrapper.sequence.Users) {
+						let matchedUserIndex = allUsers.findIndex((u) => u.ID == user.ID);
+						allUsers[matchedUserIndex].negativePriority = local_negative_priority_counter;
+						local_negative_priority_counter++;
+					}
+					console.log("[ProcessModal::_reactiveIfCallback::allUsers]: ", allUsers);
+					selection_sequence_promise = getSelectionSequencePromise(available_users);
+					sequenceInitializationWasDone = true;
 				}
-				console.log("[ProcessModal::_reactiveIfCallback::allUsers]: ", allUsers);
-				selection_sequence_promise = getSelectionSequencePromise(available_users);
 			});
 		})
 	} 
@@ -171,6 +175,11 @@
 			}
 		}
 		formState = formState
+		// if (available_users) {
+		// 	for (const user of available_users) {
+		// 		user.negativePriority = 0;
+		// 	}
+		// }
 		disableValidation()
 	}
 	
@@ -335,6 +344,7 @@
 	on:close={() => {
 		disableValidation()
 		clearFormDelayed(800)
+		// sequenceInitializationWasDone = false;
 	}}
 	on:submit={() => {
 		submitForm()
