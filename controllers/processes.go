@@ -170,6 +170,64 @@ func PostProcess(c *fiber.Ctx) error {
 	return c.JSON(dbProcess)
 }
 
+func PutProcess(c *fiber.Ctx) error {
+	db := database.DBConn
+	// var process Process
+
+	process := struct {
+		gorm.Model
+		Title               string `json: "title"`
+		Summary             string `json: "summary"`
+		TypeID              uint   `json: "typeID"`
+		CenterID            uint   `json: "centerID"`
+		UserSequenceUserIDs []uint `json: "userSequenceUserIDs"`
+	}{}
+
+	err := c.BodyParser(&process)
+
+	if err != nil {
+		return c.Status(400).JSON(&fiber.Map{
+			"success": false,
+			"cause":   "form_decode_error",
+		})
+	}
+
+	fmt.Printf("[PutProcess]: Decoded new process: %v\n", process)
+
+	var processType ProcessType
+	db.Where(process.TypeID).Find(&processType)
+
+	var center Center
+	db.Where(process.CenterID).Find(&center)
+
+	// This retrieves a slice of User objects matching a slice of UserIDs
+	var users []User
+	db.Where("id IN (?)", process.UserSequenceUserIDs).Find(&users)
+
+	userSequence := UserSequence{
+		Users:              users,
+		NumUsers:           len(users),
+		NumCompletions:     0,
+		UserSequenceKindID: int(Revision),
+	}
+
+	var dbProcess Process
+	db.Where("id = ?", c.Params("process_id")).Find(&dbProcess)
+
+	dbProcess.Title = process.Title
+	dbProcess.Summary = process.Summary
+	dbProcess.ProcessTypeID = process.TypeID
+	dbProcess.ProcessType = processType
+	dbProcess.Center = center
+	dbProcess.UserSequence = userSequence
+
+	fmt.Printf("[PutProcess::dbProcess]: %v\n", dbProcess)
+
+	db.Save(&dbProcess)
+
+	return c.JSON(dbProcess)
+}
+
 // Function that updates a `Process`'s `ProcessStatus`
 func PatchProcessStatus(c *fiber.Ctx) error {
 	db := database.DBConn

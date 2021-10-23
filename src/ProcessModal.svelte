@@ -29,16 +29,20 @@
 	export let processPromise;
 	export let sequencePromise;
 	let sequenceInitializationWasDone = false;
+	let textFieldsInitializationWasDone = false;
 	
 	$: if (processPromise && available_types && available_centers) {
 		console.log("[ProcessModal::processPromise]: ", processPromise);		
-		processPromise.then((process) => {
-			formState.title = process.Title;
-			formState.summary = process.Summary;
-			formState.selectedCenter = available_centers.findIndex((a) => a.id == process.CenterID);
-			formState.selectedType = available_types.findIndex((a) => a.id == process.ProcessTypeID);
-			// formState = formState
-		})
+		if (textFieldsInitializationWasDone == false) {
+			processPromise.then((process) => {
+					formState.title = process.Title;
+					formState.summary = process.Summary;
+					formState.selectedCenter = available_centers.findIndex((a) => a.id == process.CenterID);
+					formState.selectedType = available_types.findIndex((a) => a.id == process.ProcessTypeID);
+					textFieldsInitializationWasDone = true;
+					// formState = formState
+			})
+		}
 	} 
 	
 	$: if (!sequenceInitializationWasDone && sequencePromise) {
@@ -80,11 +84,15 @@
 	$: someInputIsInvalid = coreTitleIsInvalid || coreSummaryIsInvalid
 	
 	export let purpose = "registering"
+	if (processPromise) {
+		purpose = "editing";
+	}
 	$: if (purpose == "registering") { clearForm() }
 	
 	let purposePromise = null;
 	function updatePurposePromise(ignored) {
 		purposePromise = new Promise((resolve, reject) => {
+			console.log("[purposePromise::_callback::purpose]: ", purpose);
 			resolve(purpose)			
 		})
 	}
@@ -220,25 +228,27 @@
 				}
 				);
 			} else if (purpose == "editing") {
-				requestBody = JSON.stringify({
-					"title": formState.title,
-					"summary": formState.summary,
-					"typeID": available_types[formState.selectedType].id,
-					"centerID": available_centers[formState.selectedCenter].id,
-					"userSequenceUserIDs": (await selection_sequence_promise).map((user) => user.ID)
-				});
-				
-				console.log("[submitForm:editing:requestBody]: ", requestBody);
-				
-				response = await fetch(getEndpointPrefix() + "/api/v1/process", {
-					method: "put",
+				processPromise.then(async function(process) {
+					requestBody = JSON.stringify({
+						"title": formState.title,
+						"summary": formState.summary,
+						"typeID": available_types[formState.selectedType].id,
+						"centerID": available_centers[formState.selectedCenter].id,
+						"userSequenceUserIDs": (await selection_sequence_promise).map((user) => user.ID)
+					});
 					
-					body: requestBody,
-					headers: {
-						"Content-type": "application/json; charset=UTF-8"
+					console.log("[submitForm:editing:requestBody]: ", requestBody);
+					
+					response = await fetch(getEndpointPrefix() + "/api/v1/process/" + process.ID, {
+						method: "put",
+						
+						body: requestBody,
+						headers: {
+							"Content-type": "application/json; charset=UTF-8"
+						}
 					}
-				}
-				);
+					);
+				})
 			} else {
 				return;
 			}
@@ -340,11 +350,14 @@
 		updateProcessTypes()
 		updateCenters()
 		updateFormState(userInfo)
+		sequenceInitializationWasDone = false;
+		textFieldsInitializationWasDone = false;
 	}}
 	on:close={() => {
+		sequenceInitializationWasDone = false;
+		textFieldsInitializationWasDone = false;
 		disableValidation()
 		clearFormDelayed(800)
-		// sequenceInitializationWasDone = false;
 	}}
 	on:submit={() => {
 		submitForm()
