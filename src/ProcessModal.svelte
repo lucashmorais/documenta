@@ -26,6 +26,18 @@ import { set } from "js-cookie";
 	}
 	
 	export let open = false;
+	export let processPromise = null;
+	
+	$: if (processPromise) {
+		console.log("[ProcessModal::processPromise]: ", processPromise);		
+		processPromise.then((process) => {
+			formState.title = process.Title;
+			formState.summary = process.Summary;
+			formState.selectedCenter = available_centers.findIndex((a) => a.id == process.CenterID);
+			formState.selectedType = available_types.findIndex((a) => a.id == process.ProcessTypeID);
+			// formState = formState
+		})
+	} 
 	
 	let formState = {
 		"title": "",

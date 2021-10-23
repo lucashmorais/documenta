@@ -8,9 +8,12 @@
 	import AttachmentsArea from "./AttachmentsArea.svelte"
 	import InterventionForm from "./InterventionForm.svelte"
 	import SequenceTable from "./SequenceTable.svelte"
+	import ProcessModal from './ProcessModal.svelte'
 	import { getEndpointPrefix } from "./config-helper.js"
 	import Cookie from "js-cookie";
+	import Edit32 from "carbon-icons-svelte/lib/Edit32";
 	import {
+	Button,
 	Content,
 	Tile,
 	Dropdown
@@ -18,6 +21,7 @@
 	import { constants } from "./constants"
 
 	let isSideNavOpen = false;
+	var editModalIsOpen = false;
 
 	var coreRefreshComments;
 	var coreRefreshMinutes;
@@ -211,6 +215,13 @@
 	}
 </style>
 
+
+<ProcessModal 
+	bind:open={editModalIsOpen}
+	bind:processPromise={processPromise}
+/>
+
+
 {#await Promise.all([processPromise, userPermissionsPromise]) then [proc, userPermissions]}
 	{#if
 		(
@@ -239,10 +250,16 @@
 			<div>{process.Title}</div>
 		{/await}
 		<div style="margin-left: 0.5em">
+		<!--
+			Replace this with a component that is really capable of setting Process
+			type information based on available types.
+
 			<Dropdown
 				selectedIndex={0}
 				items={[{ id: "0", text: "Rascunho" }, { id: "1", text: "Ativo" }, { id: "2", text: "Concluído" }]}
 			/>
+		-->
+			<Button kind="secondary" iconDescription="Editar processo" icon={Edit32} on:click={() => {editModalIsOpen = true}}/>
 		</div>
 		</h1>
 		<InfoLine processPromise={processPromise}/>
