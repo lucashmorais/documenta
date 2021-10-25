@@ -195,6 +195,17 @@
 		setTimeout(clearForm, delay)
 	}
 	
+	function handleResponse(__response) {
+		if (__response && __response.status == 200) {
+			console.log("[ProcessModal::handleResponse::submitForm]: Successfully performed action: ", purpose);
+			open = false;
+			clearForm();
+			signalBackendModification();
+		} else {
+			console.log(__response)
+		}
+	}
+	
 	async function submitForm() {
 		if (someInputIsInvalid) {
 			console.log("[submitForm:someInputIsInvalid:formState]: ", formState)
@@ -239,7 +250,7 @@
 					
 					console.log("[submitForm:editing:requestBody]: ", requestBody);
 					
-					response = await fetch(getEndpointPrefix() + "/api/v1/process/" + process.ID, {
+					let asyncResponse = await fetch(getEndpointPrefix() + "/api/v1/process/" + process.ID, {
 						method: "put",
 						
 						body: requestBody,
@@ -248,7 +259,10 @@
 						}
 					}
 					);
+					handleResponse(asyncResponse);
+					return;
 				})
+				return;
 			} else {
 				return;
 			}

@@ -219,6 +219,7 @@
 	bind:open={editModalIsOpen}
 	bind:processPromise={processPromise}
 	sequencePromise={sequencePromise}
+	on:backendModification={updateProcess}
 />
 
 {#await Promise.all([processPromise, userPermissionsPromise]) then [proc, userPermissions]}
