@@ -361,6 +361,7 @@
 	}}
 	on:submit={() => {
 		submitForm()
+		open = false;
 	}}
 >
 		{#await purposePromise then p}
