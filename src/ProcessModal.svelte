@@ -52,11 +52,11 @@
 			
 			usersPromise.then((allUsers) => {
 				if (!sequenceInitializationWasDone) {
-					let local_negative_priority_counter = 1;
+					// let local_negative_priority_counter = 1;
 					for (const user of sequenceWrapper.sequence.Users) {
 						let matchedUserIndex = allUsers.findIndex((u) => u.ID == user.ID);
-						allUsers[matchedUserIndex].negativePriority = local_negative_priority_counter;
-						local_negative_priority_counter++;
+						allUsers[matchedUserIndex].negativePriority = negative_priority_counter;
+						negative_priority_counter++;
 					}
 					console.log("[ProcessModal::_reactiveIfCallback::allUsers]: ", allUsers);
 					selection_sequence_promise = getSelectionSequencePromise(available_users);
