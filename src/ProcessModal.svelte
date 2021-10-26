@@ -173,6 +173,9 @@
 	updateCenters();
 	
 	function clearForm() {
+		sequenceInitializationWasDone = false;
+		textFieldsInitializationWasDone = false;
+
 		const keys = Object.keys(formState)
 		for (const key of keys) {
 			if (key == "selectedType" || key == "selectedCenter") {
@@ -180,6 +183,11 @@
 			}
 			else {
 				formState[key] = ""
+			}
+		}
+		if (available_users) {
+			for (const user of available_users) {
+				user.negativePriority = 0;
 			}
 		}
 		formState = formState
@@ -368,8 +376,6 @@
 		textFieldsInitializationWasDone = false;
 	}}
 	on:close={() => {
-		sequenceInitializationWasDone = false;
-		textFieldsInitializationWasDone = false;
 		disableValidation()
 		clearFormDelayed(800)
 	}}
