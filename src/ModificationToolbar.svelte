@@ -3,6 +3,18 @@
 		ButtonSet,
 		Button
 	} from 'carbon-components-svelte'
+
+	import { createEventDispatcher } from "svelte";
+	
+	const dispatch = createEventDispatcher();
+	
+	function signalCommit() {
+		dispatch("commit");
+	}
+	
+	function signalCancellation() {
+		dispatch("cancel");
+	}
 </script>
 <style>
 	.floater {
@@ -16,7 +28,7 @@
 
 <div class=floater>
 	<ButtonSet stacked={true}>
-		<Button size="small" kind="secondary">Cancelar</Button>
-		<Button size="small">Aplicar</Button>
+		<Button on:click={signalCancellation} size="small" kind="secondary">Cancelar</Button>
+		<Button on:click={signalCommit} size="small">Aplicar</Button>
 	</ButtonSet>
 </div>

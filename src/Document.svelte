@@ -188,6 +188,70 @@
 
 		})
 	}
+	
+	function handleResponse(__response) {
+		if (__response && __response.status == 200) {
+			inPageModificationHappened = false;
+			updateProcess();
+		} else {
+			console.log(__response)
+		}
+	}
+	
+	function getNewTitle() {
+		let newTitle = document.getElementById("editableTitle").innerText;
+		console.log("[getNewTitle::newTitle]: ", newTitle);
+		return newTitle;
+	}
+	
+	function getNewSummary() {
+		let newSummary = document.getElementById("editableSummary").innerText;
+		console.log("[getNewSummary::newSummary]: ", newSummary);
+		return newSummary;
+	}
+	
+	async function submitProcess() {
+		// if (someInputIsInvalid) {
+		// 	console.log("[submitForm:someInputIsInvalid:formState]: ", formState)
+		// 	console.log("[submitForm]: [titleIsInvalid, summaryIsInvalid] = ", [titleIsInvalid, summaryIsInvalid])
+		// 	enableValidation()
+		// 	return
+		// }
+		// disableValidation()
+		
+		try {     
+			let requestBody;
+			let response;
+			processPromise.then(async function(process) {
+				requestBody = JSON.stringify({
+					"title": getNewTitle(),
+					"summary": getNewSummary(),
+					"typeID": process.ProcessTypeID,
+					"centerID": process.CenterID,
+					// "typeID": available_types[formState.selectedType].id,
+					// "centerID": available_centers[formState.selectedCenter].id,
+					// "userSequenceUserIDs": (await selection_sequence_promise).map((user) => user.ID)
+				});
+				
+				console.log("[submitProcess:editing:requestBody]: ", requestBody);
+				
+				let asyncResponse = await fetch(getEndpointPrefix() + "/api/v1/process/" + process.ID, {
+					method: "put",
+					
+					body: requestBody,
+					headers: {
+						"Content-type": "application/json; charset=UTF-8"
+					}
+				}
+				);
+				handleResponse(asyncResponse);
+				return;
+			});
+		} catch(err) {
+			console.error(`Error: ${err}`);
+			return;
+		}
+	}
 </script>
 
 <style>
@@ -257,7 +321,7 @@
 	<div class="contents">
 		<h1>
 		{#await processPromise then process}
-			<div on:input={() => {console.log("[titleInputCallback]: Title was modified"); inPageModificationHappened = true}} contenteditable="true">{process.Title}</div>
+			<div id="editableTitle" on:input={() => {console.log("[titleInputCallback]: Title was modified"); inPageModificationHappened = true}} contenteditable="true">{process.Title}</div>
 		{/await}
 		<div style="margin-left: 0.5em">
 		<!--
@@ -269,7 +333,7 @@
 				items={[{ id: "0", text: "Rascunho" }, { id: "1", text: "Ativo" }, { id: "2", text: "Concluído" }]}
 			/>
 		-->
-			<!-- <Button kind="secondary" iconDescription="Editar processo" icon={Edit32} on:click={() => {editModalIsOpen = true}}/> -->
+		<Button kind="secondary" iconDescription="Editar processo" icon={Edit32} on:click={() => {editModalIsOpen = true}}/>
 		</div>
 		</h1>
 		<InfoLine processPromise={processPromise}/>
@@ -277,7 +341,7 @@
 		<Tile class="summary">
 			{#await processPromise then process}
 				{#if process != null}
-					<div contenteditable="true" on:input={() => inPageModificationHappened = true}>
+					<div id="editableSummary" contenteditable="true" on:input={() => {inPageModificationHappened = true; console.log("[summaryInputCallback::process.Summary]: ", process.Summary)} }>
 						{process.Summary}
 					</div>
 				{:else}
@@ -308,5 +372,7 @@
 </Content>
 
 {#if inPageModificationHappened}
-	<ModificationToolbar/>
+	<ModificationToolbar
+		on:commit={submitProcess}
+	/>
 {/if}
