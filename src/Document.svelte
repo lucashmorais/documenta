@@ -9,14 +9,16 @@
 	import InterventionForm from "./InterventionForm.svelte"
 	import SequenceTable from "./SequenceTable.svelte"
 	import ProcessModal from './ProcessModal.svelte'
+	import ModificationToolbar from './ModificationToolbar.svelte'
 	import { getEndpointPrefix } from "./config-helper.js"
 	import Cookie from "js-cookie";
 	import Edit32 from "carbon-icons-svelte/lib/Edit32";
 	import {
 	Button,
 	Content,
+	Toggle,
 	Tile,
-	Dropdown
+	TextInput
 	} from "carbon-components-svelte";
 	import { constants } from "./constants"
 
@@ -108,6 +110,8 @@
 		console.log("[getAvailableCentersCallback::centers]: ", centers)
 		availableCenters = centers
 	})
+	
+	let inPageModificationHappened = false;
 	
 	function currentUserHasModificationRights(seqP, userP) {
 		if (!seqP || !userP){
@@ -213,6 +217,9 @@
 		font-size: 15px;
 		line-height: 150%;
 	}
+
+	:global(.selectable) {
+	}
 </style>
 
 <ProcessModal 
@@ -250,7 +257,7 @@
 	<div class="contents">
 		<h1>
 		{#await processPromise then process}
-			<div>{process.Title}</div>
+			<div on:input={() => {console.log("[titleInputCallback]: Title was modified"); inPageModificationHappened = true}} contenteditable="true">{process.Title}</div>
 		{/await}
 		<div style="margin-left: 0.5em">
 		<!--
@@ -262,7 +269,7 @@
 				items={[{ id: "0", text: "Rascunho" }, { id: "1", text: "Ativo" }, { id: "2", text: "Concluído" }]}
 			/>
 		-->
-			<Button kind="secondary" iconDescription="Editar processo" icon={Edit32} on:click={() => {editModalIsOpen = true}}/>
+			<!-- <Button kind="secondary" iconDescription="Editar processo" icon={Edit32} on:click={() => {editModalIsOpen = true}}/> -->
 		</div>
 		</h1>
 		<InfoLine processPromise={processPromise}/>
@@ -270,7 +277,9 @@
 		<Tile class="summary">
 			{#await processPromise then process}
 				{#if process != null}
-					{process.Summary}
+					<div contenteditable="true" on:input={() => inPageModificationHappened = true}>
+						{process.Summary}
+					</div>
 				{:else}
 					Lorem ipsum dolor sit amet
 				{/if}
@@ -294,6 +303,10 @@
 		{/await}
 
 		<h2>Intervenções</h2>
-		<CommentArea processID={processID} bind:updateComments={coreRefreshComments}/>
+		<CommentArea on:commentModification={() => inPageModificationHappened = true} processID={processID} bind:updateComments={coreRefreshComments}/>
 	</div>
 </Content>
+
+{#if inPageModificationHappened}
+	<ModificationToolbar/>
+{/if}
