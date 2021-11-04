@@ -30,6 +30,16 @@
 	function signalCommentModification() {
 		dispatch("commentModification");
 	}
+	
+	function buildDispatchFunction(referenceToComment) {
+		return function() {
+			referenceToComment.Content = document.getElementById("editableComment").innerText;
+			console.log("[_dynamicDispatchFunction::referenceToComment]: ", referenceToComment)
+			dispatch("commentModification", {
+				payload: referenceToComment
+			})
+		}
+	}
 
 	updateComments();
 </script>
@@ -88,7 +98,7 @@
 {#await commentsPromise then comments}
 	{#each comments as comment}
 		<div class="single-comment">
-		<div on:input={signalCommentModification} class="text" contenteditable="true">
+		<div id="editableComment" on:input={buildDispatchFunction(comment)} class="text" contenteditable="true">
 			<!-- Aenean eros nulla, feugiat vulputate velit ac, mollis scelerisque tortor. Aliquam elementum sollicitudin mauris. Pellentesque mollis consectetur orci, sit amet vulputate arcu finibus pulvinar. Praesent euismod mi sit amet est malesuada, vel consequat est blandit. Duis tincidunt eu ipsum quis suscipit. Donec faucibus massa id augue dictum, at tempor magna auctor. Curabitur suscipit erat velit, vel cursus mi scelerisque a. Duis vestibulum tristique quam, at tempus nisl fringilla et. -->
 			{comment.Content}
 		</div>

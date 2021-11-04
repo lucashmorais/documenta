@@ -191,8 +191,6 @@
 	
 	function handleResponse(__response) {
 		if (__response && __response.status == 200) {
-			inPageModificationHappened = false;
-			updateProcess();
 		} else {
 			console.log(__response)
 		}
@@ -230,8 +228,9 @@
 					"centerID": process.CenterID,
 					// "typeID": available_types[formState.selectedType].id,
 					// "centerID": available_centers[formState.selectedCenter].id,
-					// "userSequenceUserIDs": (await selection_sequence_promise).map((user) => user.ID)
+					// "userSequenceUserIDs": (await sequencePromise).sequence.map((user) => user.ID)
 				});
+
 				
 				console.log("[submitProcess:editing:requestBody]: ", requestBody);
 				
@@ -251,6 +250,44 @@
 			console.error(`Error: ${err}`);
 			return;
 		}
+	}
+	
+	const updatedComments = new Set();
+	
+	// Function that iterates over the updatedComments set and submits the comments to the server using
+	// the '/api/v1/comment' PUT endpoint.
+	async function submitComments() {
+		if (updatedComments.size == 0) {
+			console.log("[submitComments::updatedComments.size]: ", updatedComments.size)
+			return;
+		}
+		
+		for (let comment of updatedComments) {
+			// let requestBody = JSON.stringify({
+			// 	"processID": processID,
+			// 	"comment": comment.comment,
+			// 	"userID": comment.userID,
+			// 	"timestamp": comment.timestamp
+			// });
+			let requestBody = JSON.stringify(comment);
+			console.log("[submitComments::requestBody]: ", requestBody);
+			let asyncResponse = await fetch(getEndpointPrefix() + "/api/v1/comment", {
+				method: "put",
+				
+				body: requestBody,
+				headers: {
+					"Content-type": "application/json; charset=UTF-8"
+				}
+			});
+			handleResponse(asyncResponse);
+		}
+	}
+	
+	async function handleCommentModification(event) {
+		inPageModificationHappened = true;
+
+		console.log("[handleCommentModification::event]: ", event);
+		updatedComments.add(event.detail.payload);
 	}
 </script>
 
@@ -367,12 +404,18 @@
 		{/await}
 
 		<h2>Intervenções</h2>
-		<CommentArea on:commentModification={() => inPageModificationHappened = true} processID={processID} bind:updateComments={coreRefreshComments}/>
+		<CommentArea on:commentModification={handleCommentModification} processID={processID} bind:updateComments={coreRefreshComments}/>
 	</div>
 </Content>
 
 {#if inPageModificationHappened}
 	<ModificationToolbar
-		on:commit={submitProcess}
+		on:commit={() => {
+			submitProcess();
+			submitComments();
+			updatedComments.clear();
+			inPageModificationHappened = false;
+			updateProcess();
+		}}
 	/>
 {/if}
