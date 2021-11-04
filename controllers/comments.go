@@ -47,8 +47,28 @@ func NewComment(c *fiber.Ctx) error {
 	return c.JSON(comment)
 }
 
+// Function that updates all fields of a comment but keeps the current `UnixCreatedAt`
 func UpdateComment(c *fiber.Ctx) error {
-	return nil
+	var comment Comment
+	db := database.DBConn
+
+	err := c.BodyParser(&comment)
+
+	if err != nil {
+		return c.Status(400).JSON(&fiber.Map{
+			"success": false,
+			"cause":   "json_decode_error",
+		})
+	}
+
+	comment.UserID = RetrieveUserID(c)
+	comment.UnixUpdatedAt = time.Now().Unix()
+
+	fmt.Printf("[UpdateComment::comment]: %v", comment)
+
+	// db.Model(&comment).Omit("UnixCreatedAt").Updates(comment)
+	db.Model(&comment).Updates(comment)
+	return c.JSON(comment)
 }
 
 func DeleteComment(c *fiber.Ctx) error {

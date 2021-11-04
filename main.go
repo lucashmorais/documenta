@@ -147,7 +147,8 @@ func setupRouter(app *fiber.App) {
 	protected.Get("centers", controllers.GetCenters)
 
 	protected.Post("comment", controllers.NewComment)
-	protected.Put("comment/:id", controllers.UpdateComment)
+	// protected.Put("comment/:id", controllers.UpdateComment)
+	protected.Put("comment", controllers.UpdateComment)
 	protected.Delete("comment/:id", controllers.DeleteComment)
 	protected.Get("comment/:id", controllers.GetComment)
 	protected.Get("comments", controllers.GetComments)
