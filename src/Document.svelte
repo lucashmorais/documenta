@@ -412,5 +412,9 @@
 			inPageModificationHappened = false;
 			updateProcess();
 		}}
+		on:cancel={() => {
+			updateProcess();
+			refreshComments();
+		}}
 	/>
 {/if}

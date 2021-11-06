@@ -28,7 +28,7 @@
 
 <div class=floater>
 	<ButtonSet stacked={true}>
-		<Button on:click={signalCancellation} size="small" kind="secondary">Cancelar</Button>
+		<Button on:click={signalCancellation} size="small" kind="secondary">Limpar</Button>
 		<Button on:click={signalCommit} size="small">Aplicar</Button>
 	</ButtonSet>
 </div>
