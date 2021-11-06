@@ -64,6 +64,16 @@ func UpdateComment(c *fiber.Ctx) error {
 	comment.UserID = RetrieveUserID(c)
 	comment.UnixUpdatedAt = time.Now().Unix()
 
+	// The following lines return a 403 Forbidden error if the user is not the owner of the comment
+	var oldComment Comment
+	db.First(&oldComment, comment.ID)
+	if oldComment.UserID != comment.UserID {
+		return c.Status(403).JSON(&fiber.Map{
+			"success": false,
+			"cause":   "not_owner",
+		})
+	}
+
 	fmt.Printf("[UpdateComment::comment]: %v", comment)
 
 	// db.Model(&comment).Omit("UnixCreatedAt").Updates(comment)
