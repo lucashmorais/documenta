@@ -262,13 +262,8 @@
 			return;
 		}
 		
+		console.log("[submitComments::updatedComments]: ", updatedComments)
 		for (let comment of updatedComments) {
-			// let requestBody = JSON.stringify({
-			// 	"processID": processID,
-			// 	"comment": comment.comment,
-			// 	"userID": comment.userID,
-			// 	"timestamp": comment.timestamp
-			// });
 			let requestBody = JSON.stringify(comment);
 			console.log("[submitComments::requestBody]: ", requestBody);
 			let asyncResponse = await fetch(getEndpointPrefix() + "/api/v1/comment", {
@@ -404,15 +399,15 @@
 		{/await}
 
 		<h2>Intervenções</h2>
-		<CommentArea on:commentModification={handleCommentModification} processID={processID} bind:updateComments={coreRefreshComments}/>
+		<CommentArea on:commentModification={handleCommentModification} currentUserPromise={currentUserPromise} processID={processID} bind:updateComments={coreRefreshComments}/>
 	</div>
 </Content>
 
 {#if inPageModificationHappened}
 	<ModificationToolbar
-		on:commit={() => {
+		on:commit={async function() {
 			submitProcess();
-			submitComments();
+			await submitComments();
 			updatedComments.clear();
 			inPageModificationHappened = false;
 			updateProcess();
