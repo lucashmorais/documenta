@@ -20,7 +20,7 @@
 	.floater {
 		position: sticky;
 		bottom: 5%;
-		width: fit-content;
+		width: max-content;
 		margin-left: auto;
 		margin-right: 5%;
 	}
