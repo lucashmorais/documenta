@@ -193,6 +193,8 @@ func addAuthRequestHeader(ctx *fiber.Ctx) error {
 	// println(token)
 	// ctx.Context().Request.Header.Add("Authorization", "Bearer "+token)
 	ctx.Context().Request.Header.Add("Authorization", "Bearer "+token)
+	ctx.Context().Request.Header.Add("Cache-Control", "no-cache, must-revalidate")
+	ctx.Context().Request.Header.Add("Pragma", "no-cache")
 	// println(string(ctx.Context().Request.Header.Header()))
 	ctx.Next()
 	return nil
