@@ -40,6 +40,8 @@
 		Cookie.remove("documentaLoginToken")
 		window.location.href = "/";
 	}
+	
+	let refreshInfoLine;
 
 	let urlParams = new URLSearchParams(window.location.search);
 	let processID = urlParams.get("id")
@@ -368,7 +370,7 @@
 		<Button kind="secondary" iconDescription="Editar processo" icon={Edit32} on:click={() => {editModalIsOpen = true}}/>
 		</div>
 		</h1>
-		<InfoLine processPromise={processPromise}/>
+		<InfoLine bind:refreshAndClear={refreshInfoLine} on:change={() => inPageModificationHappened = true} processPromise={processPromise}/>
 		<h2>Resumo</h2>
 		<Tile class="summary">
 			{#await processPromise then process}
@@ -409,12 +411,15 @@
 			submitProcess();
 			await submitComments();
 			updatedComments.clear();
-			inPageModificationHappened = false;
 			updateProcess();
+			refreshInfoLine()
+			inPageModificationHappened = false;
 		}}
 		on:cancel={() => {
 			updateProcess();
 			refreshComments();
+			refreshInfoLine()
+			inPageModificationHappened = false;
 		}}
 	/>
 {/if}
