@@ -21,16 +21,23 @@
 	let current_center_dropdown_index;
 	let backend_center_dropdown_index;
 	
+	export let current_center_id;
+	export let current_type_id;
+	
 	$: if (current_center_dropdown_index >= 0) {
 		if (current_center_dropdown_index != backend_center_dropdown_index) {
 			console.log(`[InfoLine::_reactive1::(current_center_dropdown_index, backend_center_dropdown_index)]: (${current_center_dropdown_index}, ${backend_center_dropdown_index})`)
+			current_center_id = available_centers[current_center_dropdown_index].id;
+			console.log("[InfoLine::_reactive1::(available_centers, current_center_id)]:", available_centers, current_center_id)
 			signalChange();				
 		}
 	}
 	
 	$: if (current_type_dropdown_index >= 0) {
 		if (current_type_dropdown_index != backend_type_dropdown_index) {
-			console.log(`[InfoLine::_reactive1::(current_type_dropdown_index, backend_type_dropdown_index)]: (${current_type_dropdown_index}, ${backend_type_dropdown_index})`)
+			console.log(`[InfoLine::_reactive2::(current_type_dropdown_index, backend_type_dropdown_index)]: (${current_type_dropdown_index}, ${backend_type_dropdown_index})`)
+			current_type_id = available_types[current_type_dropdown_index].id;
+			console.log("[InfoLine::_reactive2::(available_types, current_type_id)]:", available_types, current_type_id)
 			signalChange();				
 		}
 	}

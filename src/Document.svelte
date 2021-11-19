@@ -226,8 +226,8 @@
 				requestBody = JSON.stringify({
 					"title": getNewTitle(),
 					"summary": getNewSummary(),
-					"typeID": process.ProcessTypeID,
-					"centerID": process.CenterID,
+					"typeID": newProcessTypeID ? newProcessTypeID : process.ProcessTypeID,
+					"centerID": newCenterID ? newCenterID : process.CenterID,
 					// "typeID": available_types[formState.selectedType].id,
 					// "centerID": available_centers[formState.selectedCenter].id,
 					// "userSequenceUserIDs": (await sequencePromise).sequence.map((user) => user.ID)
@@ -285,6 +285,13 @@
 
 		console.log("[handleCommentModification::event]: ", event);
 		updatedComments.add(event.detail.payload);
+	}
+	
+	let newCenterID = 0;
+	let newProcessTypeID = 0;
+	
+	function handleInfoLineChange() {
+		inPageModificationHappened = true;
 	}
 </script>
 
@@ -370,7 +377,13 @@
 		<Button kind="secondary" iconDescription="Editar processo" icon={Edit32} on:click={() => {editModalIsOpen = true}}/>
 		</div>
 		</h1>
-		<InfoLine bind:refreshAndClear={refreshInfoLine} on:change={() => inPageModificationHappened = true} processPromise={processPromise}/>
+		<InfoLine
+			bind:current_center_id={newCenterID}
+			bind:current_type_id={newProcessTypeID}
+			bind:refreshAndClear={refreshInfoLine}
+			on:change={handleInfoLineChange}
+			processPromise={processPromise}
+		/>
 		<h2>Resumo</h2>
 		<Tile class="summary">
 			{#await processPromise then process}
