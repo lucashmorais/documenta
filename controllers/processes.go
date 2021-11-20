@@ -170,12 +170,23 @@ func PostProcess(c *fiber.Ctx) error {
 		UserSequenceKindID: int(Revision),
 	}
 
+	db.Create(&userSequence)
+
 	dbProcess := Process{Title: process.Title, Summary: process.Summary, ProcessTypeID: process.TypeID, ProcessType: processType, Center: center, ProcessStatus: status, UserSequence: userSequence}
 
-	fmt.Printf("[PostProcess::dbProcess]: %v\n", dbProcess)
-
 	db.Create(&dbProcess)
-	// db.Model(&ProcessType{}).Association("Process").Append(&dbProcess)
+
+	// Add information about the order at which Users have been included in the UserSequenceUserIDs
+	// to the UserSequenceRanks table
+	for idx, user := range users {
+		userSequenceRank := UserSequenceRank{
+			UserSequenceID: int(userSequence.ID),
+			UserID:         int(user.ID),
+			Rank:           idx,
+		}
+
+		db.Create(&userSequenceRank)
+	}
 
 	return c.JSON(dbProcess)
 }
@@ -252,6 +263,20 @@ func PutProcess(c *fiber.Ctx) error {
 	fmt.Printf("[PutProcess::dbProcess]: %v\n", dbProcess)
 
 	db.Save(&dbProcess)
+
+	if c.Query("keep_user_sequence") != "true" {
+		// Add information about the order at which Users have been included in the UserSequenceUserIDs
+		// to the UserSequenceRanks table
+		for idx, user := range users {
+			userSequenceRank := UserSequenceRank{
+				UserSequenceID: int(dbProcess.UserSequence.ID),
+				UserID:         int(user.ID),
+				Rank:           idx,
+			}
+
+			db.Create(&userSequenceRank)
+		}
+	}
 
 	return c.JSON(dbProcess)
 }

@@ -37,6 +37,13 @@ type UserSequenceKind struct {
 	Name string
 }
 
+type UserSequenceRank struct {
+	gorm.Model
+	UserSequenceID int
+	UserID         int
+	Rank           int
+}
+
 type UserSequenceKindIDValue int
 
 const (
@@ -237,8 +244,23 @@ func GetLastUserSequenceForGivenProcessWithTimestamps(c *fiber.Ctx) error {
 			"cause":   "process_id_not_specified",
 		})
 	} else {
-		db.Preload("Users").Where("process_id = ?", processID).Last(&userSequence)
+		db.Where("process_id = ?", processID).Last(&userSequence)
 		db.Where("user_sequence_id = ?", userSequence.ID).Find(&tokenPassingTimestamps)
+
+		// Get the Users associated with the UserSequence ordered by rank
+		var userSequenceRanks []UserSequenceRank
+		db.Where("user_sequence_id = ?", userSequence.ID).Order("rank").Find(&userSequenceRanks)
+		var users []User
+		for _, userSequenceRank := range userSequenceRanks {
+			var user User
+			db.Where("id = ?", userSequenceRank.UserID).First(&user)
+			users = append(users, user)
+		}
+
+		// fmt.Println("[userSequenceRanks]", userSequenceRanks)
+		// fmt.Println("[users]", users)
+
+		userSequence.Users = users
 	}
 
 	return c.JSON(map[string]interface{}{

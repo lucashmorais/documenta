@@ -226,13 +226,15 @@
 		try {     
 			let requestBody;
 			let response;
+			let userSequenceUserIDs = (await selection_sequence_promise).map((user) => user.ID)
+			console.log("[ProcessModal::submitForm::userSequenceUserIDs]: ", userSequenceUserIDs)
 			if (purpose == "registering") {
 				requestBody = JSON.stringify({
 					"title": formState.title,
 					"summary": formState.summary,
 					"typeID": available_types[formState.selectedType].id,
 					"centerID": available_centers[formState.selectedCenter].id,
-					"userSequenceUserIDs": (await selection_sequence_promise).map((user) => user.ID)
+					"userSequenceUserIDs": userSequenceUserIDs
 				});
 				
 				console.log("[submitForm:registering:requestBody]: ", requestBody);
@@ -253,7 +255,7 @@
 						"summary": formState.summary,
 						"typeID": available_types[formState.selectedType].id,
 						"centerID": available_centers[formState.selectedCenter].id,
-						"userSequenceUserIDs": (await selection_sequence_promise).map((user) => user.ID)
+						"userSequenceUserIDs": userSequenceUserIDs
 					});
 					
 					console.log("[submitForm:editing:requestBody]: ", requestBody);
@@ -309,8 +311,9 @@
 				return;
 			}
 			let sequence = inner_available_users.filter((user) => {return user.negativePriority > 0})
+			console.log("[getSelectionSequencePromise::__before_sorting__::sequence]: ", sequence)
 			sequence.sort((a, b) => {return a.negativePriority - b.negativePriority})
-			console.log("[getSelectionSequencePromise::sequence]: ", sequence)
+			console.log("[getSelectionSequencePromise::__after_sorting__::sequence]: ", sequence)
 			resolve(sequence)
 		})
 	}
