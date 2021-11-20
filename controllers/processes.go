@@ -103,9 +103,11 @@ func GetProcesses(c *fiber.Ctx) error {
 				// between UserSequence and Users
 				db.Model(&userSeq).Association("Users").Find(&users)
 
-				activeUser := users[userSeq.NumCompletions]
-				if userID == int(activeUser.ID) {
-					processesTheCurrentUserCanModify = append(processesTheCurrentUserCanModify, processes[idx])
+				if len(users) > userSeq.NumCompletions {
+					activeUser := users[userSeq.NumCompletions]
+					if userID == int(activeUser.ID) {
+						processesTheCurrentUserCanModify = append(processesTheCurrentUserCanModify, processes[idx])
+					}
 				}
 			}
 		}
