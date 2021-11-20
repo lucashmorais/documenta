@@ -204,11 +204,19 @@ func PutProcess(c *fiber.Ctx) error {
 	var users []User
 	db.Where("id IN (?)", process.UserSequenceUserIDs).Find(&users)
 
-	userSequence := UserSequence{
-		Users:              users,
-		NumUsers:           len(users),
-		NumCompletions:     0,
-		UserSequenceKindID: int(Revision),
+	var userSequence UserSequence
+
+	// Get current user sequence from DB if the `keep_user_sequence` query param is set to true.
+	// Otherwise, create a new user sequence using the `users` slice.
+	if c.Query("keep_user_sequence") == "true" {
+		db.Where("process_id = ?", c.Params("id")).Find(&userSequence)
+	} else {
+		userSequence = UserSequence{
+			Users:              users,
+			NumUsers:           len(users),
+			NumCompletions:     0,
+			UserSequenceKindID: int(Revision),
+		}
 	}
 
 	var dbProcess Process

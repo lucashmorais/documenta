@@ -236,7 +236,7 @@
 				
 				console.log("[submitProcess:editing:requestBody]: ", requestBody);
 				
-				let asyncResponse = await fetch(getEndpointPrefix() + "/api/v1/process/" + process.ID, {
+				let asyncResponse = await fetch(getEndpointPrefix() + "/api/v1/process/" + process.ID + "?keep_user_sequence=true", {
 					method: "put",
 					
 					body: requestBody,
