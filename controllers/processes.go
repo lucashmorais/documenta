@@ -151,7 +151,17 @@ func PostProcess(c *fiber.Ctx) error {
 
 	// This retrieves a slice of User objects matching a slice of UserIDs
 	var users []User
-	db.Where("id IN (?)", process.UserSequenceUserIDs).Find(&users)
+
+	// WARNING: THE FOLLOWING DOES NOT WORK, BECAUSE IT ORDERS USERS BY ID,
+	// DISREGARDING THE ORDER OF THE USERIDS IN THE USERSEQUENCEUSERIDS SLICE
+	//
+	// db.Where("id IN (?)", process.UserSequenceUserIDs).Find(&users)
+
+	for _, userID := range process.UserSequenceUserIDs {
+		var user User
+		db.Where(userID).Find(&user)
+		users = append(users, user)
+	}
 
 	userSequence := UserSequence{
 		Users:              users,
@@ -202,7 +212,17 @@ func PutProcess(c *fiber.Ctx) error {
 
 	// This retrieves a slice of User objects matching a slice of UserIDs
 	var users []User
-	db.Where("id IN (?)", process.UserSequenceUserIDs).Find(&users)
+
+	// WARNING: THE FOLLOWING DOES NOT WORK, BECAUSE IT ORDERS USERS BY ID,
+	// DISREGARDING THE ORDER OF THE USERIDS IN THE USERSEQUENCEUSERIDS SLICE
+	//
+	// db.Where("id IN (?)", process.UserSequenceUserIDs).Find(&users)
+
+	for _, userID := range process.UserSequenceUserIDs {
+		var user User
+		db.Where(userID).Find(&user)
+		users = append(users, user)
+	}
 
 	var userSequence UserSequence
 
