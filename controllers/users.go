@@ -257,9 +257,6 @@ func GetLastUserSequenceForGivenProcessWithTimestamps(c *fiber.Ctx) error {
 			users = append(users, user)
 		}
 
-		// fmt.Println("[userSequenceRanks]", userSequenceRanks)
-		// fmt.Println("[users]", users)
-
 		userSequence.Users = users
 	}
 
@@ -329,6 +326,16 @@ func PostUserSequenceSimple(c *fiber.Ctx) error {
 	}
 
 	db.Create(&userSequence)
+
+	for idx, user := range users {
+		userSequenceRank := UserSequenceRank{
+			UserSequenceID: int(userSequence.ID),
+			UserID:         int(user.ID),
+			Rank:           idx,
+		}
+
+		db.Create(&userSequenceRank)
+	}
 
 	return c.JSON(userSequence)
 }
