@@ -63,6 +63,7 @@
 				resolve (null);
 			}
 		})
+		return processPromise;
 	}
 	
 	let sequenceChangeEvent;
@@ -211,14 +212,6 @@
 	}
 	
 	async function submitProcess() {
-		// if (someInputIsInvalid) {
-		// 	console.log("[submitForm:someInputIsInvalid:formState]: ", formState)
-		// 	console.log("[submitForm]: [titleIsInvalid, summaryIsInvalid] = ", [titleIsInvalid, summaryIsInvalid])
-		// 	enableValidation()
-		// 	return
-		// }
-		// disableValidation()
-		
 		try {     
 			let requestBody;
 			let response;
@@ -421,17 +414,18 @@
 {#if inPageModificationHappened}
 	<ModificationToolbar
 		on:commit={async function() {
-			submitProcess();
+			await submitProcess();
 			await submitComments();
 			updatedComments.clear();
-			updateProcess();
-			refreshInfoLine()
+			//await updateProcess();
+			await updateProcess();
+			// refreshInfoLine()
 			inPageModificationHappened = false;
 		}}
-		on:cancel={() => {
-			updateProcess();
+		on:cancel={async function() {
+			await updateProcess();
 			refreshComments();
-			refreshInfoLine()
+			// refreshInfoLine()
 			inPageModificationHappened = false;
 		}}
 	/>

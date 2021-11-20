@@ -101,6 +101,10 @@
 		})
 	}
 	refreshAndClear();
+	
+	$: if (processPromise) {
+		refreshAndClear()
+	}
 </script>
 
 <style>
