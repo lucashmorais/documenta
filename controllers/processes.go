@@ -204,6 +204,7 @@ func PutProcess(c *fiber.Ctx) error {
 		TypeID              uint   `json: "typeID"`
 		CenterID            uint   `json: "centerID"`
 		UserSequenceUserIDs []uint `json: "userSequenceUserIDs"`
+		UserSequenceKindID  uint   `json: "UserSequenceKindID"`
 	}{}
 
 	err := c.BodyParser(&process)
@@ -248,7 +249,7 @@ func PutProcess(c *fiber.Ctx) error {
 			Users:              users,
 			NumUsers:           len(users),
 			NumCompletions:     0,
-			UserSequenceKindID: int(Revision),
+			UserSequenceKindID: int(process.UserSequenceKindID),
 		}
 	}
 

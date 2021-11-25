@@ -17,6 +17,7 @@
 	import { createEventDispatcher } from "svelte";
 	import { getAvailableUsers } from "./utils.js";
 	import { getEndpointPrefix } from "./config-helper.js"
+	import { ContentSwitcher, Switch } from "carbon-components-svelte";
 	import { set } from "js-cookie";
 	
 	const dispatch = createEventDispatcher();
@@ -30,6 +31,10 @@
 	export let sequencePromise;
 	let sequenceInitializationWasDone = false;
 	let textFieldsInitializationWasDone = false;
+	
+	let ctxSelectedIdx = 0
+	let ctxSwitchOpt1 = "Sequência de análise"
+	let ctxSwitchOpt2 = "Sequência de aprovação"
 	
 	$: if (processPromise && available_types && available_centers) {
 		console.log("[ProcessModal::processPromise]: ", processPromise);		
@@ -255,7 +260,8 @@
 						"summary": formState.summary,
 						"typeID": available_types[formState.selectedType].id,
 						"centerID": available_centers[formState.selectedCenter].id,
-						"userSequenceUserIDs": userSequenceUserIDs
+						"userSequenceUserIDs": userSequenceUserIDs,
+						"userSequenceKindID": ctxSelectedIdx + 1
 					});
 					
 					console.log("[submitForm:editing:requestBody]: ", requestBody);
@@ -362,6 +368,10 @@
 		font-weight: 100;
 		color: darkgray;
 	}
+	
+	.switcher {
+		margin-top: 0.8em;
+	}
 </style>
 
 
@@ -402,7 +412,14 @@
 			/>
 			<TextArea bind:value={formState.summary} invalidText="Descrição demasiado curta" invalid={summaryIsInvalid} labelText="Resumo" required />
 			{#await usersPromise then users}
-				<h4>Sequência de análise</h4>
+				<h4>Tipo de sequência</h4>
+				<div class="switcher">
+					<ContentSwitcher bind:selectedIndex={ctxSelectedIdx}>
+						<Switch text={ctxSwitchOpt1} />
+						<Switch text={ctxSwitchOpt2} />
+					</ContentSwitcher>
+				</div>
+				<h4>Sequência de estudo</h4>
 				<h6>Usuários disponíveis</h6>
 				<div class=userTagsWrapper>
 					{#await selection_sequence_promise then sequence}

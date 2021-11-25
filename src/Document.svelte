@@ -13,6 +13,7 @@
 	import { getEndpointPrefix } from "./config-helper.js"
 	import Cookie from "js-cookie";
 	import Edit32 from "carbon-icons-svelte/lib/Edit32";
+	import Stamp32 from "carbon-icons-svelte/lib/Stamp32";
 	import {
 	Button,
 	Content,
@@ -24,6 +25,7 @@
 
 	let isSideNavOpen = false;
 	var editModalIsOpen = false;
+	var routingModalIsOpen = true;
 
 	var coreRefreshComments;
 	var coreRefreshMinutes;
@@ -301,6 +303,10 @@
 	h2 {
 		font-size: 22px;
 		margin: 3em 0 1em 0;
+		text-align: left;
+		display: flex;
+		align-items: center;
+		justify-content: left;
 	}
 
 	.contents {
@@ -330,6 +336,15 @@
 	}}
 />
 
+
+<StatusBar bind:currentUserPromise/>
+
+<Content>
+	<div class="contents">
+		<h1>
+			{#await processPromise then process}
+				<div id="editableTitle" on:input={() => {console.log("[titleInputCallback]: Title was modified"); inPageModificationHappened = true}} contenteditable="true">{process.Title}</div>
+			{/await}
 {#await Promise.all([processPromise, userPermissionsPromise]) then [proc, userPermissions]}
 	{#if
 		(
@@ -341,34 +356,20 @@
 			proc.ProcessStatusID == constants.db.ProcessStatuses.AWAITING_APPROVAL_CONFIRMATION
 			&& hasPermission(userPermissions, constants.db.Permissions.CONFIRM_PROCESS_APPROVAL)
 		)
+		&&
+		!editModalIsOpen
 	}
-		<RoutingModal open={true} processPromise={processPromise} processExaminationState={processExaminationState}
+		<div style="margin-left: 0.5em">
+			<!-- TODO: Add a dynamic description to this button. -->
+			<Button kind="secondary" iconDescription="Aprovar ou estender processo" icon={Stamp32} on:click={() => routingModalIsOpen = true}/>
+		</div>
+		<RoutingModal bind:open={routingModalIsOpen} processPromise={processPromise} processExaminationState={processExaminationState}
+			on:close={() => console.log("[RoutingModal::__closeCallback:routingModalIsOpen]: ", routingModalIsOpen)}
 			on:processChange={updateProcess}
 			on:sequenceChange={updateSequence}
 		/>
 	{/if}
 {/await}
-
-<StatusBar bind:currentUserPromise/>
-
-<Content>
-	<div class="contents">
-		<h1>
-		{#await processPromise then process}
-			<div id="editableTitle" on:input={() => {console.log("[titleInputCallback]: Title was modified"); inPageModificationHappened = true}} contenteditable="true">{process.Title}</div>
-		{/await}
-		<div style="margin-left: 0.5em">
-		<!--
-			Replace this with a component that is really capable of setting Process
-			type information based on available types.
-
-			<Dropdown
-				selectedIndex={0}
-				items={[{ id: "0", text: "Rascunho" }, { id: "1", text: "Ativo" }, { id: "2", text: "Concluído" }]}
-			/>
-		-->
-		<Button kind="secondary" iconDescription="Editar processo" icon={Edit32} on:click={() => {editModalIsOpen = true}}/>
-		</div>
 		</h1>
 		<InfoLine
 			bind:current_center_id={newCenterID}
@@ -390,7 +391,14 @@
 			{/await}
 		</Tile>
 
-		<h2>Sequência de análise</h2>
+		<h2>
+			<div>
+				Sequência de análise
+			</div>
+			<div style="margin-left: 0.5em">
+				<Button kind="tertiary" iconDescription="Editar processo" icon={Edit32} on:click={() => {editModalIsOpen = true}}/>
+			</div>
+		</h2>
 		<SequenceTable bind:modRightsPromise bind:sequencePromise bind:sequenceChangeEvent processID={processID}/>
 
 		<h2>Anexos</h2>
