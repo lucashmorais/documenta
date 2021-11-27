@@ -17,7 +17,6 @@
 		ToolbarSearch,
 		Tag
 	} from "carbon-components-svelte";
-import { AccumulationRain16 } from 'carbon-icons-svelte';
 
 	let selectedRowIds = [];
 	let editModalIsOpen = false;
@@ -102,10 +101,8 @@ import { AccumulationRain16 } from 'carbon-icons-svelte';
 				})
 				promiseSet.push(approvalConfirmationPendingProcessesPromise)
 
-				pendingProcessesPromise = new Promise((resolve) => {Promise.all(promiseSet).then(results => {
-					resolve(results.reduceRight((accumulator, currentValue) => {
-						accumulator.concat(currentValue)
-					}))
+				pendingProcessesPromise = new Promise((resolve, reject) => {Promise.all(promiseSet).then(results => {
+					resolve(results[0].concat(results[1], results[2]))
 				})})
 			})
 		}
