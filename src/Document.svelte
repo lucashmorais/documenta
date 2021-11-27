@@ -395,9 +395,16 @@
 			<div>
 				Sequência de análise
 			</div>
-			<div style="margin-left: 0.5em">
-				<Button kind="tertiary" iconDescription="Editar processo" icon={Edit32} on:click={() => {editModalIsOpen = true}}/>
-			</div>
+			{#await processPromise then process}
+				{#if
+					process.ProcessStatusID == constants.db.ProcessStatuses.ACTIVE ||
+					process.ProcessStatusID == constants.db.ProcessStatuses.DRAFT
+				}
+					<div style="margin-left: 0.5em">
+						<Button kind="tertiary" iconDescription="Editar processo" icon={Edit32} on:click={() => {editModalIsOpen = true}}/>
+					</div>
+				{/if}
+			{/await}
 		</h2>
 		<SequenceTable bind:modRightsPromise bind:sequencePromise bind:sequenceChangeEvent processID={processID}/>
 
