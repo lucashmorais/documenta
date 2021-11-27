@@ -2,8 +2,8 @@
 	import 'carbon-components-svelte/css/all.css';
 	import StatusBar from './StatusBar.svelte'
 	import ProcessModal from './ProcessModal.svelte'
-	// import DataTable from './DataTable.svelte'
-	// import DataTable from './DataTable/DataTable.svelte'
+	import { getCurrentUserPermissions, hasPermission } from "./utils.js"
+	import { constants } from "./constants"
 	import TrashCan16 from "carbon-icons-svelte/lib/TrashCan16";
 	import Edit16 from "carbon-icons-svelte/lib/Edit16";
 	import { getEndpointPrefix } from "./config-helper.js"
@@ -17,6 +17,7 @@
 		ToolbarSearch,
 		Tag
 	} from "carbon-components-svelte";
+import { AccumulationRain16 } from 'carbon-icons-svelte';
 
 	let selectedRowIds = [];
 	let editModalIsOpen = false;
@@ -66,12 +67,49 @@
 		resolve(rows)
 	}
 
+
 	export function updateProcesses() {
 		let set = []
-		set = ["Ativo", "Rascunho"]
-		pendingProcessesPromise = new Promise((resolve, reject) => {
-			coreProcessUpdater(resolve, reject, set, true)
-		})
+		let userPermissionsPromise = getCurrentUserPermissions()
+		{
+			let promiseSet = []
+			set = ["Ativo", "Rascunho"]
+			let activePendingProcessesPromise = new Promise((resolve, reject) => {
+				coreProcessUpdater(resolve, reject, set, true)
+			})
+			promiseSet.push(activePendingProcessesPromise)
+
+			userPermissionsPromise.then((permissions) => {
+				set = ["Pendente de ratificação de análise"]
+				let reviewConfirmationPendingProcessesPromise;
+				reviewConfirmationPendingProcessesPromise = new Promise((resolve, reject) => {
+					if (hasPermission(permissions, constants.db.Permissions.CONFIRM_PROCESS_REVIEW)) {
+						coreProcessUpdater(resolve, reject, set)
+					} else {
+						resolve([])
+					}
+				})
+				promiseSet.push(reviewConfirmationPendingProcessesPromise)
+
+				set = ["Pendente de ratificação de aprovação"]
+				let approvalConfirmationPendingProcessesPromise;
+				approvalConfirmationPendingProcessesPromise = new Promise((resolve, reject) => {
+					if (hasPermission(permissions, constants.db.Permissions.CONFIRM_PROCESS_APPROVAL)) {
+						coreProcessUpdater(resolve, reject, set)
+					} else {
+						resolve([])
+					}
+				})
+				promiseSet.push(approvalConfirmationPendingProcessesPromise)
+
+				pendingProcessesPromise = new Promise((resolve) => {Promise.all(promiseSet).then(results => {
+					resolve(results.reduceRight((accumulator, currentValue) => {
+						accumulator.concat(currentValue)
+					}))
+				})})
+			})
+		}
+
 		set = ["Rascunho"]
 		draftProcessesPromise = new Promise((resolve, reject) => {
 			coreProcessUpdater(resolve, reject, set)
