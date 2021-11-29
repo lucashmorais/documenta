@@ -8,12 +8,15 @@
 	import AttachmentsArea from "./AttachmentsArea.svelte"
 	import InterventionForm from "./InterventionForm.svelte"
 	import SequenceTable from "./SequenceTable.svelte"
+	import SimpleConfirmationModal from "./SimpleConfirmationModal.svelte"
 	import ProcessModal from './ProcessModal.svelte'
 	import ModificationToolbar from './ModificationToolbar.svelte'
 	import { getEndpointPrefix } from "./config-helper.js"
 	import Cookie from "js-cookie";
 	import Edit32 from "carbon-icons-svelte/lib/Edit32";
 	import Stamp32 from "carbon-icons-svelte/lib/Stamp32";
+	import Restart32 from "carbon-icons-svelte/lib/Restart32";
+	import Send32 from "carbon-icons-svelte/lib/Send32";
 	import {
 	Button,
 	Content,
@@ -26,6 +29,7 @@
 	let isSideNavOpen = false;
 	var editModalIsOpen = false;
 	var routingModalIsOpen = true;
+	var rehabilitationModalIsOpen = false;
 
 	var coreRefreshComments;
 	var coreRefreshMinutes;
@@ -345,31 +349,72 @@
 			{#await processPromise then process}
 				<div id="editableTitle" on:input={() => {console.log("[titleInputCallback]: Title was modified"); inPageModificationHappened = true}} contenteditable="true">{process.Title}</div>
 			{/await}
-{#await Promise.all([processPromise, userPermissionsPromise]) then [proc, userPermissions]}
-	{#if
-		(
-			proc.ProcessStatusID == constants.db.ProcessStatuses.AWAITING_REVIEW_CONFIRMATION
-			&& hasPermission(userPermissions, constants.db.Permissions.CONFIRM_PROCESS_REVIEW)
-		)
-		||
-		(
-			proc.ProcessStatusID == constants.db.ProcessStatuses.AWAITING_APPROVAL_CONFIRMATION
-			&& hasPermission(userPermissions, constants.db.Permissions.CONFIRM_PROCESS_APPROVAL)
-		)
-		&&
-		!editModalIsOpen
-	}
-		<div style="margin-left: 0.5em">
-			<!-- TODO: Add a dynamic description to this button. -->
-			<Button kind="secondary" iconDescription="Aprovar ou estender processo" icon={Stamp32} on:click={() => routingModalIsOpen = true}/>
-		</div>
-		<RoutingModal bind:open={routingModalIsOpen} processPromise={processPromise} processExaminationState={processExaminationState}
-			on:close={() => console.log("[RoutingModal::__closeCallback:routingModalIsOpen]: ", routingModalIsOpen)}
-			on:processChange={updateProcess}
-			on:sequenceChange={updateSequence}
-		/>
-	{/if}
-{/await}
+				{#await Promise.all([processPromise, userPermissionsPromise]) then [proc, userPermissions]}
+					{#if
+						(
+							proc.ProcessStatusID == constants.db.ProcessStatuses.AWAITING_REVIEW_CONFIRMATION
+							&& hasPermission(userPermissions, constants.db.Permissions.CONFIRM_PROCESS_REVIEW)
+						)
+						||
+						(
+							proc.ProcessStatusID == constants.db.ProcessStatuses.AWAITING_APPROVAL_CONFIRMATION
+							&& hasPermission(userPermissions, constants.db.Permissions.CONFIRM_PROCESS_APPROVAL)
+						)
+						&&
+						!editModalIsOpen
+					}
+						<div style="margin-left: 0.5em">
+							<!-- TODO: Add a dynamic description to this button. -->
+							<Button kind="secondary" iconDescription="Aprovar ou estender processo" icon={Stamp32} on:click={() => routingModalIsOpen = true}/>
+						</div>
+						<RoutingModal bind:open={routingModalIsOpen} processPromise={processPromise} processExaminationState={processExaminationState}
+							on:close={() => console.log("[RoutingModal::__closeCallback:routingModalIsOpen]: ", routingModalIsOpen)}
+							on:processChange={updateProcess}
+							on:sequenceChange={updateSequence}
+						/>
+					{:else if
+						proc.ProcessStatusID == constants.db.ProcessStatuses.FINISHED ||
+						proc.ProcessStatusID == constants.db.ProcessStatuses.SUSPENDED
+					}
+						<div style="margin-left: 0.5em">
+							<Button
+								kind="secondary"
+								iconDescription="Reabilitar como rascunho"
+								icon={Restart32}
+								on:click={() => rehabilitationModalIsOpen = true}
+							/>
+						</div>
+						<SimpleConfirmationModal
+							customMessage="Esta ação reabilitará o processo em modo rascunho. Você tem certeza de que gostaria de continuar?"
+							bind:open={rehabilitationModalIsOpen}
+							on:actionConfirmed={async function() {
+								await setProcessStatus(processID, constants.db.ProcessStatuses.DRAFT)
+								updateProcess();
+								rehabilitationModalIsOpen = false
+							}}
+						/>
+					{:else if
+						proc.ProcessStatusID == constants.db.ProcessStatuses.DRAFT 
+					}
+						<div style="margin-left: 0.5em">
+							<Button
+								kind="secondary"
+								iconDescription="Ativar processo"
+								icon={Send32}
+								on:click={() => rehabilitationModalIsOpen = true}
+							/>
+						</div>
+						<SimpleConfirmationModal
+							customMessage="Esta ação reativará o processo. Você tem certeza de que gostaria de continuar?"
+							bind:open={rehabilitationModalIsOpen}
+							on:actionConfirmed={async function() {
+								await setProcessStatus(processID, constants.db.ProcessStatuses.ACTIVE)
+								updateProcess();
+								rehabilitationModalIsOpen = false
+							}}
+						/>
+					{/if}
+				{/await}
 		</h1>
 		<InfoLine
 			bind:current_center_id={newCenterID}
