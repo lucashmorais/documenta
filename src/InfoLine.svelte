@@ -4,7 +4,7 @@
 	import { createEventDispatcher } from "svelte";
 
 	let processAuthor = 'Someone'
-	let headers=[{ key: 'centro', value: 'Centro' }, { key: 'tipo', value: 'Tipo' }, { key: 'autor', value: 'Autor' }, { key: 'pend', value: 'Pendência Atual' }]
+	let headers=[{ key: 'centro', value: 'Centro' }, { key: 'tipo', value: 'Tipo' }, { key: 'autor', value: 'Autor' }]
 	let rows=[{ id: 'a', centro: 'sm', tipo: "Consulta", pend: 'Revisão do defensor', autor: 'Someone' }]
 	
 	export let processPromise;

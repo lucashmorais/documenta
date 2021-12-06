@@ -22,7 +22,8 @@
 	let editModalIsOpen = false;
 	let deleteModalIsOpen;
 
-	let headers=[{ key: 'assunto', value: 'Assunto' }, { key: 'centro', value: 'Centro' }, { key: 'tipo', value: 'Tipo' }, {key: 'estado', value: 'Estado'}, { key: 'pend', value: 'Pendência Atual' }, {key: 'autor', value: 'Autor'}]
+	// let headers=[{ key: 'assunto', value: 'Assunto' }, { key: 'centro', value: 'Centro' }, { key: 'tipo', value: 'Tipo' }, {key: 'estado', value: 'Estado'}, { key: 'pend', value: 'Pendência Atual' }, {key: 'autor', value: 'Autor'}]
+	let headers=[{ key: 'assunto', value: 'Assunto' }, { key: 'centro', value: 'Centro' }, { key: 'tipo', value: 'Tipo' }, {key: 'estado', value: 'Estado'}, {key: 'autor', value: 'Autor'}]
 	
 	var pendingProcessesPromise;
 	var draftProcessesPromise;
