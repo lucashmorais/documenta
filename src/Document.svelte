@@ -334,6 +334,7 @@
 	bind:open={editModalIsOpen}
 	bind:processPromise={processPromise}
 	sequencePromise={sequencePromise}
+	showJustSequenceControls={true}
 	on:backendModification={(event) => {
 		updateProcess();
 		updateSequence(event);

@@ -22,7 +22,7 @@
 	let editModalIsOpen = false;
 	let deleteModalIsOpen;
 
-	let headers=[{ key: 'assunto', value: 'Assunto' }, { key: 'centro', value: 'Centro' }, { key: 'tipo', value: 'Tipo' }, {key: 'estado', value: 'Estado'}, { key: 'pend', value: 'Pendência Atual' }]
+	let headers=[{ key: 'assunto', value: 'Assunto' }, { key: 'centro', value: 'Centro' }, { key: 'tipo', value: 'Tipo' }, {key: 'estado', value: 'Estado'}, { key: 'pend', value: 'Pendência Atual' }, {key: 'autor', value: 'Autor'}]
 	
 	var pendingProcessesPromise;
 	var draftProcessesPromise;
@@ -51,6 +51,7 @@
 
 									//TODO: GET THE FOLLOWING FROM THE DB!
 									processObj.pend = "Encaminhamento final"
+									processObj.autor = `${p.User.FirstName} ${p.User.LastName}`
 
 									console.log("[updateProcesses]: Process just built: ", processObj)
 									rows.push(processObj)

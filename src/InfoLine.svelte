@@ -3,8 +3,9 @@
 	import { getEndpointPrefix } from "./config-helper.js"
 	import { createEventDispatcher } from "svelte";
 
-	let headers=[{ key: 'centro', value: 'Centro' }, { key: 'tipo', value: 'Tipo' }, { key: 'pend', value: 'Pendência Atual' }]
-	let rows=[{ id: 'a', centro: 'sm', tipo: "Consulta", pend: 'Revisão do defensor' }]
+	let processAuthor = 'Someone'
+	let headers=[{ key: 'centro', value: 'Centro' }, { key: 'tipo', value: 'Tipo' }, { key: 'autor', value: 'Autor' }, { key: 'pend', value: 'Pendência Atual' }]
+	let rows=[{ id: 'a', centro: 'sm', tipo: "Consulta", pend: 'Revisão do defensor', autor: 'Someone' }]
 	
 	export let processPromise;
 	
@@ -86,6 +87,10 @@
 	}
 	
 	export function refreshAndClear() {
+		processPromise.then((process) => {
+			processAuthor = `${process.User.FirstName} ${process.User.LastName}`
+		})
+
 		updateProcessTypes().then(() => {
 			processPromise.then((process) => {
 				backend_type_dropdown_index = available_types.findIndex((a) => a.id == process.ProcessTypeID);
@@ -155,6 +160,8 @@
 					items={available_types}
 				/>
 			</div>
+		{:else if cell.key === 'autor'}
+			{processAuthor}
 		{:else}
 			{cell.value}
 		{/if}

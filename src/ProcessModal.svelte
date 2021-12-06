@@ -29,6 +29,8 @@
 	export let open = false;
 	export let processPromise;
 	export let sequencePromise;
+	export let showJustSequenceControls = false;
+
 	let sequenceInitializationWasDone = false;
 	let textFieldsInitializationWasDone = false;
 	
@@ -398,19 +400,21 @@
 	}}
 >
 		{#await purposePromise then p}
-			<TextInput bind:value={formState.title} invalidText="Título pequeno demais" invalid={titleIsInvalid} labelText="Título" required />
-			<!-- TODO: Ensure race conditions involving `available_types` do not cause any trouble -->
-			<Dropdown
-				titleText="Tipo de processo"
-				bind:selectedIndex={formState.selectedType}
-				items={available_types}
-			/>
-			<Dropdown
-				titleText="Centro"
-				bind:selectedIndex={formState.selectedCenter}
-				items={available_centers}
-			/>
-			<TextArea bind:value={formState.summary} invalidText="Descrição demasiado curta" invalid={summaryIsInvalid} labelText="Resumo" required />
+			{#if !showJustSequenceControls}
+				<TextInput bind:value={formState.title} invalidText="Título pequeno demais" invalid={titleIsInvalid} labelText="Título" required />
+				<!-- TODO: Ensure race conditions involving `available_types` do not cause any trouble -->
+				<Dropdown
+					titleText="Tipo de processo"
+					bind:selectedIndex={formState.selectedType}
+					items={available_types}
+				/>
+				<Dropdown
+					titleText="Centro"
+					bind:selectedIndex={formState.selectedCenter}
+					items={available_centers}
+				/>
+				<TextArea bind:value={formState.summary} invalidText="Descrição demasiado curta" invalid={summaryIsInvalid} labelText="Resumo" required />
+			{/if}
 			{#await usersPromise then users}
 				<h4>Tipo de sequência</h4>
 				<div class="switcher">

@@ -50,6 +50,7 @@ func GetProcesses(c *fiber.Ctx) error {
 		Preload("Center").
 		Preload("ProcessStatus").
 		Preload("ProcessType").
+		Preload("User").
 		Table("processes").
 		Joins("join process_statuses on process_statuses.id = processes.process_status_id").
 		Joins("join process_types on process_types.id = processes.process_type_id")
@@ -174,7 +175,9 @@ func PostProcess(c *fiber.Ctx) error {
 
 	db.Create(&userSequence)
 
-	dbProcess := Process{Title: process.Title, Summary: process.Summary, ProcessTypeID: process.TypeID, ProcessType: processType, Center: center, ProcessStatus: status, UserSequence: userSequence}
+	userID := RetrieveUserID(c)
+
+	dbProcess := Process{Title: process.Title, Summary: process.Summary, ProcessTypeID: process.TypeID, ProcessType: processType, Center: center, ProcessStatus: status, UserSequence: userSequence, UserID: uint(userID)}
 
 	db.Create(&dbProcess)
 
