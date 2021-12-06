@@ -2,9 +2,9 @@
 	import { DataTable, Dropdown } from "carbon-components-svelte";
 	import { getEndpointPrefix } from "./config-helper.js"
 	import { createEventDispatcher } from "svelte";
+import { getNameFromUser } from "./utils.js";
 
-	let processAuthor = 'Someone'
-	let headers=[{ key: 'centro', value: 'Centro' }, { key: 'tipo', value: 'Tipo' }, { key: 'autor', value: 'Autor' }]
+	let headers=[{ key: 'centro', value: 'Centro' }, { key: 'tipo', value: 'Tipo' }, { key: 'autor', value: 'Autor' }, { key: 'estado', value: 'Estado' }]
 	let rows=[{ id: 'a', centro: 'sm', tipo: "Consulta", pend: 'Revisão do defensor', autor: 'Someone' }]
 	
 	export let processPromise;
@@ -87,10 +87,6 @@
 	}
 	
 	export function refreshAndClear() {
-		processPromise.then((process) => {
-			processAuthor = `${process.User.FirstName} ${process.User.LastName}`
-		})
-
 		updateProcessTypes().then(() => {
 			processPromise.then((process) => {
 				backend_type_dropdown_index = available_types.findIndex((a) => a.id == process.ProcessTypeID);
@@ -161,7 +157,17 @@
 				/>
 			</div>
 		{:else if cell.key === 'autor'}
-			{processAuthor}
+			{#if processPromise}
+				{#await processPromise then p}
+					{getNameFromUser(p.User)}
+				{/await}
+			{/if}
+		{:else if cell.key === 'estado'}
+			{#if processPromise}
+				{#await processPromise then p}
+					{p.ProcessStatus.Name}
+				{/await}
+			{/if}
 		{:else}
 			{cell.value}
 		{/if}

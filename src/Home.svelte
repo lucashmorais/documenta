@@ -2,7 +2,7 @@
 	import 'carbon-components-svelte/css/all.css';
 	import StatusBar from './StatusBar.svelte'
 	import ProcessModal from './ProcessModal.svelte'
-	import { getCurrentUserPermissions, hasPermission } from "./utils.js"
+	import { getCurrentUserPermissions, getNameFromUser, hasPermission } from "./utils.js"
 	import { constants } from "./constants"
 	import TrashCan16 from "carbon-icons-svelte/lib/TrashCan16";
 	import Edit16 from "carbon-icons-svelte/lib/Edit16";
@@ -52,7 +52,7 @@
 
 									//TODO: GET THE FOLLOWING FROM THE DB!
 									processObj.pend = "Encaminhamento final"
-									processObj.autor = `${p.User.FirstName} ${p.User.LastName}`
+									processObj.autor = getNameFromUser(p.User)
 
 									console.log("[updateProcesses]: Process just built: ", processObj)
 									rows.push(processObj)
