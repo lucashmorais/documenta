@@ -20,6 +20,9 @@ type Minute struct {
 	Process     Process
 	Center      Center
 	CenterID    int
+	UserFileID  int
+	UserFile    UserFile
+	IsIncoming  bool
 
 	//TODO: ENSURE THAT BOTH OF THESE ARE UNIQUE!
 	InboundProtocol  string
