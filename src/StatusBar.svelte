@@ -102,6 +102,7 @@
   <SideNavItems>
     <SideNavLink href="/users.html" text="Usuários" />
     <SideNavLink href="/roles.html" text="Funções" />
+    <SideNavLink href="/incomingMinutes.html" text="Minutas de Entrada" />
 	<!--
     <SideNavMenu text="Menu">
       <SideNavMenuItem href="/" text="Link 1" />
