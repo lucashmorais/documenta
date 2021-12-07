@@ -9,7 +9,7 @@
 
 	export function getMinutes() {
 		return new Promise((resolve, reject) => {
-			fetch(getEndpointPrefix() + "/api/v1/minutes").
+			fetch(getEndpointPrefix() + "/api/v1/minutes?unassigned=true&incoming=true").
 				then((response)=>response.json().
 					then(function (minutes) {
 						// console.log("[Minutes::updateMinutes::minutes]: ", minutes)
@@ -78,7 +78,6 @@
 	<h2>Minutas não alocadas</h2>
 		<div class="content2">
 			{#await minutesPromise then minutes}
-				<!-- {#each [...Array(30).keys()] as i} -->
 				{#each minutes as minute}
 					<div class="element">
 						<Tile>

@@ -18,8 +18,8 @@ type Minute struct {
 	User        User
 	ProcessID   int
 	Process     Process
-	Center      Center
 	CenterID    int
+	Center      Center
 	UserFileID  int
 	UserFile    UserFile
 	IsIncoming  bool
@@ -58,11 +58,15 @@ func GetMinutes(c *fiber.Ctx) error {
 
 	driver := db.Preload("User").Preload("Process").Preload("Center")
 
+	unassigned := c.Query("unassigned")
 	processID := c.Query("processID")
 	centerID := c.Query("centerID")
 	userID := c.Query("userID")
+	incoming := c.Query("incoming")
 
-	if processID != "" {
+	if unassigned != "" {
+		driver = driver.Where("process_id = 0")
+	} else if processID != "" {
 		i, err := strconv.Atoi(processID)
 		if err == nil {
 			driver = driver.Where("process_id = ?", i)
@@ -81,6 +85,10 @@ func GetMinutes(c *fiber.Ctx) error {
 		if err == nil {
 			driver = driver.Where("user_id = ?", i)
 		}
+	}
+
+	if incoming != "" {
+		driver = driver.Where("is_incoming = true")
 	}
 
 	driver.Find(&minutes)
