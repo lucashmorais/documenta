@@ -119,3 +119,54 @@ export function hasPermission(permissions, targetID) {
   });
   return _filteredVec.length > 0;
 }
+
+export async function coreProcessUpdater(
+  resolve,
+  reject,
+  set,
+  modifiable = false
+) {
+  let rows = [];
+  let promises = [];
+  for (let queryParam of set) {
+    promises.push(
+      new Promise((resolve, reject) => {
+        let modifiableString = modifiable ? "true" : "false";
+        fetch(
+          getEndpointPrefix() +
+            "/api/v1/processes?statusString=" +
+            queryParam +
+            "&onlyModifiableByUser=" +
+            modifiableString
+        ).then((response) =>
+          response.json().then(function (processes) {
+            console.log(processes);
+            let processObj = {};
+            console.log("[updateProcesses::processes]:", processes);
+            for (const p of processes) {
+              processObj = {};
+              processObj.id = p.ID;
+              processObj.assunto = p.Title;
+              processObj.centro = p.Center.Name;
+              processObj.tipo = p.ProcessType.Name;
+              processObj.estado = p.ProcessStatus.Name;
+
+              //TODO: GET THE FOLLOWING FROM THE DB!
+              // processObj.pend = "Encaminhamento final"
+              processObj.autor = getNameFromUser(p.User);
+
+              console.log(
+                "[updateProcesses]: Process just built: ",
+                processObj
+              );
+              rows.push(processObj);
+            }
+            resolve();
+          })
+        );
+      })
+    );
+  }
+  await Promise.all(promises);
+  resolve(rows);
+}

@@ -248,3 +248,45 @@ func DeleteMinuteVersion(c *fiber.Ctx) error {
 		"success": true,
 	})
 }
+
+// Function that patches a Minutes' process_id based on the ID provided in the PATCH request URL path
+func PatchMinute(c *fiber.Ctx) error {
+	db := database.DBConn
+
+	minuteID, err := strconv.Atoi(c.Params("id"))
+
+	if err != nil {
+		return c.Status(400).JSON(&fiber.Map{
+			"success": false,
+			"cause":   "invalid_id",
+		})
+	}
+
+	minute := Minute{}
+
+	db.First(&minute, minuteID)
+
+	if minute.ID == 0 {
+		return c.Status(404).JSON(&fiber.Map{
+			"success": false,
+			"cause":   "not_found",
+		})
+	}
+
+	// fmt.Printf("[PatchMinute]: Decoded patch request: %v\n", minute)
+
+	processID, err := strconv.Atoi(c.Query("processID"))
+	if err != nil {
+		return c.Status(400).JSON(&fiber.Map{
+			"success": false,
+			"cause":   "invalid_process_id",
+		})
+	}
+	minute.ProcessID = processID
+
+	db.Save(&minute)
+
+	// fmt.Printf("[PatchMinute]: Patched minute: %v\n", minute)
+
+	return c.JSON(minute)
+}

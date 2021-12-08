@@ -2,7 +2,7 @@
 	import 'carbon-components-svelte/css/all.css';
 	import StatusBar from './StatusBar.svelte'
 	import ProcessModal from './ProcessModal.svelte'
-	import { getCurrentUserPermissions, getNameFromUser, hasPermission } from "./utils.js"
+	import { getCurrentUserPermissions, getNameFromUser, hasPermission, coreProcessUpdater } from "./utils.js"
 	import { constants } from "./constants"
 	import TrashCan16 from "carbon-icons-svelte/lib/TrashCan16";
 	import Edit16 from "carbon-icons-svelte/lib/Edit16";
@@ -12,62 +12,19 @@
 		DataTableSkeleton,
 		Toolbar,
 		Button,
-		ToolbarBatchActions,
-		ToolbarContent,
-		ToolbarSearch,
-		Tag
+		ToolbarContent
 	} from "carbon-components-svelte";
 
 	let selectedRowIds = [];
 	let editModalIsOpen = false;
 	let deleteModalIsOpen;
 
-	// let headers=[{ key: 'assunto', value: 'Assunto' }, { key: 'centro', value: 'Centro' }, { key: 'tipo', value: 'Tipo' }, {key: 'estado', value: 'Estado'}, { key: 'pend', value: 'Pendência Atual' }, {key: 'autor', value: 'Autor'}]
 	let headers=[{ key: 'assunto', value: 'Assunto' }, { key: 'centro', value: 'Centro' }, { key: 'tipo', value: 'Tipo' }, {key: 'estado', value: 'Estado'}, {key: 'autor', value: 'Autor'}]
 	
 	var pendingProcessesPromise;
 	var draftProcessesPromise;
 	var activeProcessesPromise;
 	var finishedOrBlockedProcessesPromise;
-	
-	async function coreProcessUpdater(resolve, reject, set, modifiable = false) {
-		let rows = []
-		let promises = []
-		for (let queryParam of set) {
-			promises.push( new Promise((resolve, reject) => {
-					let modifiableString = modifiable ? "true" : "false"
-					fetch(getEndpointPrefix() + "/api/v1/processes?statusString=" + queryParam + "&onlyModifiableByUser=" + modifiableString).
-						then((response)=>response.json().
-							then(function (processes) {
-								console.log(processes)
-								let processObj = {}
-								console.log("[updateProcesses::processes]:", processes)
-								for (const p of processes) {
-									processObj = {}
-									processObj.id = p.ID
-									processObj.assunto = p.Title
-									processObj.centro = p.Center.Name
-									processObj.tipo = p.ProcessType.Name
-									processObj.estado = p.ProcessStatus.Name
-
-									//TODO: GET THE FOLLOWING FROM THE DB!
-									processObj.pend = "Encaminhamento final"
-									processObj.autor = getNameFromUser(p.User)
-
-									console.log("[updateProcesses]: Process just built: ", processObj)
-									rows.push(processObj)
-								}
-								resolve()
-							}
-						)
-					)
-				}
-			))
-		}
-		await Promise.all(promises)
-		resolve(rows)
-	}
-
 
 	export function updateProcesses() {
 		let set = []

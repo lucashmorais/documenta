@@ -100,7 +100,7 @@
 
 <SideNav bind:isOpen={isSideNavOpen}>
   <SideNavItems>
-    <SideNavLink href="/home.html" text="Página inicial" />
+    <SideNavLink href="/home.html" text="Página Inicial" />
     <SideNavLink href="/users.html" text="Usuários" />
     <SideNavLink href="/roles.html" text="Funções" />
     <SideNavLink href="/incomingMinutes.html" text="Minutas de Entrada" />

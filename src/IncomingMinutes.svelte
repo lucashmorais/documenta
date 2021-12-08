@@ -1,14 +1,20 @@
 <script>
 	import "carbon-components-svelte/css/all.css";
 	import StatusBar from "./StatusBar.svelte"
-	import { getNameFromUser } from "./utils.js"
+	import { getNameFromUser, coreProcessUpdater } from "./utils.js"
 	import {
-		Tile
+		Tile,
+		Modal,
+		DataTable,
+		DataTableSkeleton,
+		Button
 	} from "carbon-components-svelte";
+	import DocumentAdd16 from "carbon-icons-svelte/lib/DocumentAdd16";
+	import WatsonHealth3DCurveAutoColon16 from "carbon-icons-svelte/lib/WatsonHealth3DCurveAutoColon16";
 	import { getEndpointPrefix } from "./config-helper.js"
 
 	export function getMinutes() {
-		return new Promise((resolve, reject) => {
+		return new Promise((resolve) => {
 			fetch(getEndpointPrefix() + "/api/v1/minutes?unassigned=true&incoming=true").
 				then((response)=>response.json().
 					then(function (minutes) {
@@ -24,6 +30,45 @@
 		})
 	}
 	let minutesPromise = getMinutes()
+	
+	let assignmentModalIsOpen = false;
+	let processesPromise;
+	let selectedRowIds;
+	let selectedMinuteID;
+
+	let headers=[{ key: 'assunto', value: 'Assunto' }, { key: 'centro', value: 'Centro' }, { key: 'tipo', value: 'Tipo' }, {key: 'estado', value: 'Estado'}, {key: 'autor', value: 'Autor'}]
+	
+	export function updateProcesses() {
+		let set = ["Ativo", "Rascunho"]
+		processesPromise = new Promise((resolve, reject) => {
+			coreProcessUpdater(resolve, reject, set, true)
+		})
+	}
+	updateProcesses();
+	
+	$: if(selectedRowIds) {
+		console.log("selectedRowIds: ", selectedRowIds)
+	}
+	
+	function createMinuteAssignmentModalOpeningHandler(newMinuteID) {
+		return () => {
+			selectedMinuteID = newMinuteID;
+			assignmentModalIsOpen = true;
+		}
+	}
+	
+	function handleMinuteAssignment() {
+		return new Promise((resolve) => {
+			fetch(getEndpointPrefix() + `/api/v1/minute/${selectedMinuteID}?processID=${selectedRowIds[0]}`, {method: 'PATCH'}).
+				then((response)=>response.json().
+					then((resp) => {
+						console.log("[handleMinuteAssignment::response]: ", resp)
+						assignmentModalIsOpen = false;
+						resolve(resp)
+					})
+				)
+		})
+	}
 </script>
 
 <style>
@@ -68,8 +113,37 @@
 	.element {
 		/* max-width: 200px; */
 	}
-
+								
+	.actionSet {
+		margin-top: 1em;
+	}
+	
+	.actionSet * {
+		margin-right: 3em
+	}
 </style>
+
+<Modal
+  bind:open={assignmentModalIsOpen}
+  modalHeading="Atribuir minuta a um processo"
+  primaryButtonText="Confirmar"
+  secondaryButtonText="Cancelar"
+  on:click:button--secondary={() => (assignmentModalIsOpen = false)}
+  on:open
+  on:close
+  on:submit={handleMinuteAssignment}
+>
+	{#await processesPromise}
+		<DataTableSkeleton />
+	{:then processes}
+		<DataTable
+			headers={headers}
+			rows={processes}
+			radio
+			bind:selectedRowIds
+		/>
+	{/await}
+</Modal>
 
 <StatusBar />
 <h1>Documenta</h1>
@@ -99,6 +173,11 @@
 							<p>
 								{minute.Content}
 							</p>
+							
+							<div class="actionSet">
+								<Button kind="secondary" icon={WatsonHealth3DCurveAutoColon16} iconDescription="Atribuir" on:click={createMinuteAssignmentModalOpeningHandler(minute.ID)} />
+								<Button kind="tertiary" icon={DocumentAdd16} iconDescription="Gerar processo" />
+							</div>
 						</Tile>
 					</div>
 				{/each}
