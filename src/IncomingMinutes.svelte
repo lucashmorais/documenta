@@ -1,6 +1,7 @@
 <script>
 	import "carbon-components-svelte/css/all.css";
 	import StatusBar from "./StatusBar.svelte"
+	import SimpleConfirmationModal from "./SimpleConfirmationModal.svelte"
 	import { getNameFromUser, coreProcessUpdater } from "./utils.js"
 	import {
 		Tile,
@@ -32,6 +33,7 @@
 	let minutesPromise = getMinutes()
 	
 	let assignmentModalIsOpen = false;
+	let processCreationModalIsOpen = false;
 	let processesPromise;
 	let selectedRowIds;
 	let selectedMinuteID;
@@ -57,16 +59,54 @@
 		}
 	}
 	
-	function handleMinuteAssignment() {
+	function createProcessCreationModalOpeningHandler(newMinuteID) {
+		return () => {
+			selectedMinuteID = newMinuteID;
+			processCreationModalIsOpen = true;
+		}
+	}
+	
+	function coreHandleMinuteAssignment(targetProcessID) {
 		return new Promise((resolve) => {
-			fetch(getEndpointPrefix() + `/api/v1/minute/${selectedMinuteID}?processID=${selectedRowIds[0]}`, {method: 'PATCH'}).
+			fetch(getEndpointPrefix() + `/api/v1/minute/${selectedMinuteID}?processID=${targetProcessID}`, {method: 'PATCH'}).
 				then((response)=>response.json().
 					then((resp) => {
 						console.log("[handleMinuteAssignment::response]: ", resp)
 						assignmentModalIsOpen = false;
+						minutesPromise = getMinutes()
 						resolve(resp)
 					})
 				)
+		})
+	}
+	
+	function handleMinuteAssignment() {
+		coreHandleMinuteAssignment(selectedRowIds[0])
+	}
+	
+	function createProcess() {
+		let requestBody = JSON.stringify({
+			"title": "processo_minuta",
+			"summary": "Processo criado a partir de uma minuta.",
+			"typeID": 1,
+			"centerID": 2,
+		});
+		
+		console.log("[submitForm:registering:requestBody]: ", requestBody);
+
+		return new Promise((resolve) => {
+			fetch(getEndpointPrefix() + "/api/v1/process", {
+				method: "post",
+				
+				body: requestBody,
+				headers: {
+					"Content-type": "application/json; charset=UTF-8"
+				}
+			}).then((response)=>response.json().
+				then(function (createdProcess) {
+					resolve(createdProcess)
+				})
+			)
 		})
 	}
 </script>
@@ -145,6 +185,17 @@
 	{/await}
 </Modal>
 
+<SimpleConfirmationModal
+	customMessage="Tem certeza de que gostaria de criar um processo incluindo esta minuta?"
+	bind:open={processCreationModalIsOpen}
+	on:actionConfirmed={async function() {
+		let createdProcess = await createProcess()
+		console.log("[SimpleConfirmationModal::__submitCallback::createdProcess]: ", createdProcess)
+		processCreationModalIsOpen = false;
+		coreHandleMinuteAssignment(createdProcess.ID)
+	}}
+/>
+
 <StatusBar />
 <h1>Documenta</h1>
 
@@ -176,7 +227,7 @@
 							
 							<div class="actionSet">
 								<Button kind="secondary" icon={WatsonHealth3DCurveAutoColon16} iconDescription="Atribuir" on:click={createMinuteAssignmentModalOpeningHandler(minute.ID)} />
-								<Button kind="tertiary" icon={DocumentAdd16} iconDescription="Gerar processo" />
+								<Button kind="tertiary" icon={DocumentAdd16} iconDescription="Gerar processo" on:click={createProcessCreationModalOpeningHandler(minute.ID)} />
 							</div>
 						</Tile>
 					</div>
