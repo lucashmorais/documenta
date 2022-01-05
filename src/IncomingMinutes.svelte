@@ -145,7 +145,7 @@
 					fileID,
 					true,
 					formState.protocol,
-					() => fireToastNotification("errẅr")
+					() => fireToastNotification("error")
 				)
 				creationModalIsOpen = false;
 			}
