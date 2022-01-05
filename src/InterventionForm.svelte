@@ -2,6 +2,7 @@
 	import { TextArea, TextInput, ButtonSet, Button, Dropdown } from "carbon-components-svelte"
 	import { createEventDispatcher } from "svelte"
 	import { getEndpointPrefix } from "./config-helper.js"
+	import { postNewMinute } from "./utils.js"
 
 	let commentContent;
 	let selectedIndex = 0;
@@ -34,7 +35,7 @@
 			switch(selectedIndex) {
 				case 0:	postNewComment()
 				break;
-				case 1:	postNewMinute()
+				case 1:	postNewMinuteWrapper()
 				break;
 			}
 		}
@@ -78,45 +79,20 @@
 		clearText();
 		dispatch("minuteWasPosted");
 	}
-	
-	// Function that calls the /api/v1/minute endpoint to create a new Minute
-	async function postNewMinute() {
-		console.log("[postNewMinute]: Entering")
-		try {     
-			// Here we use the Number function to prevent `processID` from being converted to a string
-			// TODO: Let the description be provided by the user
-			let requestBody = JSON.stringify({
-						"Content": commentContent,
-						"Description": shortTitle,
-						"ProcessID": Number(processID),
-						"CenterID": Number(centerDropdownOptions[selectedCenterIndex].id)
-					});
 
-			const response = await fetch(getEndpointPrefix() + "/api/v1/minute", {
-					method: "post",
-
-					body: requestBody,
-
-					headers: {
-						"Content-type": "application/json; charset=UTF-8"
-					}
-				}
-			);
-			
-			console.log("[postNewMinute::requestBody]: ", requestBody);
-
-			response.text().then((text) => {
-				console.log(text);
-				console.log("[postNewMinute]: Completed!");
-			});
-
-		} catch(err) {
-			console.error(`Error: ${err}`);
-			return;
-		}
-
-		clearText();
-		dispatch("minuteWasPosted");
+	function postNewMinuteWrapper() {
+		postNewMinute(
+			commentContent,
+			shortTitle,
+			Number(processID),
+			Number(centerDropdownOptions[selectedCenterIndex].id),
+			0,
+			false,
+			"",
+			null,
+			dispatch,
+			clearText
+		)
 	}
 
 	// Function that calls the /api/v1/comment endpoint to create a new Comment
