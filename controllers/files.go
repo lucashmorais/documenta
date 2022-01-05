@@ -50,6 +50,7 @@ func NewFile(c *fiber.Ctx) error {
 func NewFormFiles(c *fiber.Ctx) error {
 	db := database.DBConn
 	var dbFile UserFile
+	var fileIDs []int
 
 	form, err := c.MultipartForm()
 	if err != nil {
@@ -78,8 +79,12 @@ func NewFormFiles(c *fiber.Ctx) error {
 		dbFile.UserID = RetrieveUserID(c)
 		dbFile.ProcessID = processID
 		db.Create(&dbFile)
+		fileIDs = append(fileIDs, int(dbFile.ID))
 	}
-	return c.JSON(map[string]string{"status": "success"})
+
+	fmt.Println(fileIDs)
+	return c.JSON(fileIDs)
+	// return c.JSON(map[string]string{"status": "success"})
 }
 
 func GetFilesWithoutBlob(c *fiber.Ctx) error {

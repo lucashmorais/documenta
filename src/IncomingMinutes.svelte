@@ -1,19 +1,31 @@
 <script>
 	import "carbon-components-svelte/css/all.css";
 	import StatusBar from "./StatusBar.svelte"
+	import AttachmentsArea from "./AttachmentsArea.svelte"
 	import SimpleConfirmationModal from "./SimpleConfirmationModal.svelte"
-	import { getNameFromUser, coreProcessUpdater } from "./utils.js"
 	import {
+		getNameFromUser,
+		coreProcessUpdater,
+		postNewMinute,
+		coreUploadFile
+	} from "./utils.js"
+	import {
+		TextArea,
+		Dropdown,
+		TextInput,
 		Tile,
+		ClickableTile,
 		Modal,
 		DataTable,
 		DataTableSkeleton,
+		FileUploader,
 		Button
 	} from "carbon-components-svelte";
 	import DocumentAdd16 from "carbon-icons-svelte/lib/DocumentAdd16";
+	import Add32 from "carbon-icons-svelte/lib/Add32";
 	import WatsonHealth3DCurveAutoColon16 from "carbon-icons-svelte/lib/WatsonHealth3DCurveAutoColon16";
 	import { getEndpointPrefix } from "./config-helper.js"
-
+	
 	export function getMinutes() {
 		return new Promise((resolve) => {
 			fetch(getEndpointPrefix() + "/api/v1/minutes?unassigned=true&incoming=true").
@@ -33,12 +45,20 @@
 	let minutesPromise = getMinutes()
 	
 	let assignmentModalIsOpen = false;
+	let creationModalIsOpen = false;
 	let processCreationModalIsOpen = false;
 	let processesPromise;
 	let selectedRowIds;
 	let selectedMinuteID;
+	let currentAttachment;
 
 	let headers=[{ key: 'assunto', value: 'Assunto' }, { key: 'centro', value: 'Centro' }, { key: 'tipo', value: 'Tipo' }, {key: 'estado', value: 'Estado'}, {key: 'autor', value: 'Autor'}]
+	
+	let formState = {
+		"selectedCenter": 0,
+		"protocol": "",
+		"description": ""
+	}
 	
 	export function updateProcesses() {
 		let set = ["Ativo", "Rascunho"]
@@ -109,6 +129,49 @@
 			)
 		})
 	}
+	
+	function handleMinuteCreation() {
+		let fileID = 0;
+		coreUploadFile(currentAttachment, 0).then((response) => response.json().then(
+			function (fileIDs) {
+				console.log(fileIDs)
+				fileID = fileIDs[0];
+				postNewMinute(
+					"",
+					formState.description,
+					0,
+					available_centers[formState.selectedCenter].id,
+					fileID,
+					true,
+					formState.protocol
+				)
+			}
+		))
+	}
+	
+	let available_centers = []
+	function updateCenters() {
+		return new Promise((resolve, reject) => {
+			fetch(getEndpointPrefix() + "/api/v1/centers").
+				then((response)=>response.json().
+					then(function (centers) {
+						available_centers = []
+						console.log("[updateCenters::centers]: ", centers)
+						for (const u of centers) {
+							let centerObj = {}
+							centerObj.id = u.ID
+							centerObj.text= u.Name
+							centerObj.shortName= u.ShortName
+							centerObj.description = u.Description
+							console.log(centerObj)
+							available_centers.push(centerObj)
+						}
+						resolve(centers)
+					})
+				)
+		})
+	}
+	updateCenters();
 </script>
 
 <style>
@@ -185,6 +248,37 @@
 	{/await}
 </Modal>
 
+<Modal
+  bind:open={creationModalIsOpen}
+  modalHeading="Adicionar minuta"
+  primaryButtonText="Confirmar"
+  secondaryButtonText="Cancelar"
+  on:click:button--secondary={() => (creationModalIsOpen = false)}
+  on:open
+  on:close
+  on:submit={handleMinuteCreation}
+>
+	<TextInput labelText="Protocolo de entrada" bind:value={formState.protocol} />
+	<TextInput labelText="Descrição breve" bind:value={formState.description} />
+	<Dropdown
+		titleText="Centro"
+		bind:selectedIndex={formState.selectedCenter}
+		items={available_centers}
+	/>
+	<div class="actionSet">
+		<FileUploader
+		  on:change={function (event) { 
+			  currentAttachment = event.target.files[0]
+			  console.log(currentAttachment)
+		}}
+		  labelTitle="Conteúdo da minuta"
+		  buttonLabel="Adicionar arquivo"
+		  accept={['.jpg', '.jpeg', '.png', '.pdf', '.PDF']}
+		  status="complete"
+		/>
+	</div>
+</Modal>
+
 <SimpleConfirmationModal
 	customMessage="Tem certeza de que gostaria de criar um processo incluindo esta minuta?"
 	bind:open={processCreationModalIsOpen}
@@ -202,6 +296,15 @@
 <div class="content1">
 	<h2>Minutas não alocadas</h2>
 		<div class="content2">
+			<div class="element">
+				<ClickableTile
+					style="height: 100%; display: flex; align-items: center; justify-content: center; flex-direction: column"
+					on:click={() => creationModalIsOpen = true}
+				>
+					<Add32 />
+					<p>Adicionar minuta</p>
+				</ClickableTile>
+			</div>
 			{#await minutesPromise then minutes}
 				{#each minutes as minute}
 					<div class="element">

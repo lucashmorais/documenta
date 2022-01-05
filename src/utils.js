@@ -170,3 +170,72 @@ export async function coreProcessUpdater(
   await Promise.all(promises);
   resolve(rows);
 }
+
+export async function coreUploadFile(file, processID) {
+  // https://javascript.info/formdata
+  let formData = new FormData();
+  formData.set("documents", file, file.name);
+  formData.set("processID", processID);
+
+  const response = fetch(`${getEndpointPrefix()}/api/v1/files`, {
+    method: "POST",
+    body: formData,
+  });
+
+  return response;
+}
+
+// Function that calls the /api/v1/minute endpoint to create a new Minute
+export async function postNewMinute(
+  content,
+  description,
+  processID,
+  centerID,
+  attachmentID,
+  isIncoming = false,
+  inboundProtocol,
+  dispatchMethod,
+  callback
+) {
+  console.log("[postNewMinute]: Entering");
+  try {
+    // Here we use the Number function to prevent `processID` from being converted to a string
+    // TODO: Let the description be provided by the user
+    let requestBody = JSON.stringify({
+      Content: content,
+      Description: description,
+      ProcessID: processID,
+      UserFileID: attachmentID,
+      IsIncoming: isIncoming,
+      InboundProtocol: inboundProtocol,
+      CenterID: centerID,
+    });
+
+    const response = await fetch(getEndpointPrefix() + "/api/v1/minute", {
+      method: "post",
+
+      body: requestBody,
+
+      headers: {
+        "Content-type": "application/json; charset=UTF-8",
+      },
+    });
+
+    console.log("[postNewMinute::requestBody]: ", requestBody);
+
+    response.text().then((text) => {
+      console.log(text);
+      console.log("[postNewMinute]: Completed!");
+    });
+  } catch (err) {
+    console.error(`Error: ${err}`);
+    return;
+  }
+
+  if (callback) {
+    callback();
+  }
+  if (dispatchMethod) {
+    dispatchMethod("minuteWasPosted");
+  }
+}

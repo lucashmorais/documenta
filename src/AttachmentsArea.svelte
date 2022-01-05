@@ -5,6 +5,7 @@
 	import { FileUploaderButton } from "carbon-components-svelte";
 	import { Carousel } from "svelte-images";
 	import { getEndpointPrefix } from "./config-helper.js"
+	import { coreUploadFile } from "./utils.js"
 
 	const { Modal, open, close } = Carousel;
 	let fileUploader
@@ -16,25 +17,6 @@
 	export let modRightsPromise;
 	let modRights = false;
 
-	async function coreSubmit(file) {
-		if (!modRights) {
-			return;
-		}
-
-		// https://javascript.info/formdata
-		let formData = new FormData();
-		formData.set("documents", file, file.name);
-		formData.set("processID", processID);
-
-		const response = await fetch(`${getEndpointPrefix}/api/v1/files`, {
-			method: "POST",
-			body: formData
-		});
-
-		let result = await response.json();
-		return result.status != "success"
-	}
-
 	async function uploadFile() {
 		if (!modRights) {
 			return;
@@ -43,7 +25,7 @@
 		console.log(fileUploader)
 		console.log(fileUploader.files)
 		for (const file of fileUploader.files) {
-			await coreSubmit(file)
+			await coreUploadFile(file, processID)
 		}
 		//TODO: ENSURE THIS ONLY RUNS AFTER THE UPLOAD ACTIONS HAVE BEEN COMPLETED
 		updateAttachments()
