@@ -1,7 +1,7 @@
 <script>
 	import "carbon-components-svelte/css/all.css";
 	import StatusBar from "./StatusBar.svelte"
-	import AttachmentsArea from "./AttachmentsArea.svelte"
+	import { writable } from 'svelte/store';
 	import SimpleConfirmationModal from "./SimpleConfirmationModal.svelte"
 	import {
 		getNameFromUser,
@@ -10,7 +10,6 @@
 		coreUploadFile
 	} from "./utils.js"
 	import {
-		TextArea,
 		Dropdown,
 		TextInput,
 		Tile,
@@ -19,6 +18,7 @@
 		DataTable,
 		DataTableSkeleton,
 		FileUploader,
+		ToastNotification,
 		Button
 	} from "carbon-components-svelte";
 	import DocumentAdd16 from "carbon-icons-svelte/lib/DocumentAdd16";
@@ -51,6 +51,7 @@
 	let selectedRowIds;
 	let selectedMinuteID;
 	let currentAttachment;
+	let minuteCreationErrorPendingAcknowledgment = false;
 
 	let headers=[{ key: 'assunto', value: 'Assunto' }, { key: 'centro', value: 'Centro' }, { key: 'tipo', value: 'Tipo' }, {key: 'estado', value: 'Estado'}, {key: 'autor', value: 'Autor'}]
 	
@@ -143,8 +144,10 @@
 					available_centers[formState.selectedCenter].id,
 					fileID,
 					true,
-					formState.protocol
+					formState.protocol,
+					() => fireToastNotification("errẅr")
 				)
+				creationModalIsOpen = false;
 			}
 		))
 	}
@@ -172,6 +175,39 @@
 		})
 	}
 	updateCenters();
+	
+	let notifications = writable({});
+	$notifications = [];
+	
+	function fireToastNotification(kind, extras = null) {
+		const s = new Date().toLocaleString()
+		const l = $notifications.length;	// get our current items list count
+
+		switch(kind) {
+			case "success":
+				$notifications[l] = {
+					kind: "success",
+					title: "Sucesso",
+					subtitle: "A minuta foi criada com sucesso",
+					caption: s,
+					iconDescription: "Fechar notificação"
+				}
+				clearForm();
+			break;
+			default:
+				$notifications[l] = {
+					kind: "error",
+					title: "Erro",
+					subtitle: "A minuta não pôde ser criada. Revise os dados de entrada ou contate o administrador do sistema.",
+					caption: s,
+					iconDescription: "Fechar notificação"
+				}
+		}
+	}
+	
+	// setInterval(() => {
+	// 	fireToastNotification("error")
+	// }, 2000);
 </script>
 
 <style>
@@ -223,6 +259,16 @@
 	
 	.actionSet * {
 		margin-right: 3em
+	}
+
+	.absoluteToastWrapper {
+		position: absolute;
+		bottom: 1em;	
+		right: 1em;
+	}
+
+	.stickyToast {
+		position: sticky;
 	}
 </style>
 
@@ -294,6 +340,13 @@
 <h1>Documenta</h1>
 
 <div class="content1">
+	<div class="absoluteToastWrapper">
+		<div class="stickyToast">
+		      {#each $notifications as toast}
+				<svelte:component this={ToastNotification} {...toast}/>
+		      {/each}
+		</div>
+	</div>
 	<h2>Minutas não alocadas</h2>
 		<div class="content2">
 			<div class="element">

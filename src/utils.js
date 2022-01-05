@@ -193,7 +193,8 @@ export async function postNewMinute(
   centerID,
   attachmentID,
   isIncoming = false,
-  inboundProtocol,
+  inboundProtocol = "",
+  errorCallback,
   dispatchMethod,
   callback
 ) {
@@ -229,6 +230,9 @@ export async function postNewMinute(
     });
   } catch (err) {
     console.error(`Error: ${err}`);
+    if (errorCallback) {
+      errorCallback();
+    }
     return;
   }
 
