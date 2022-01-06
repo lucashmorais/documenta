@@ -51,7 +51,6 @@
 	let selectedRowIds;
 	let selectedMinuteID;
 	let currentAttachment;
-	let minuteCreationErrorPendingAcknowledgment = false;
 
 	let headers=[{ key: 'assunto', value: 'Assunto' }, { key: 'centro', value: 'Centro' }, { key: 'tipo', value: 'Tipo' }, {key: 'estado', value: 'Estado'}, {key: 'autor', value: 'Autor'}]
 	
@@ -132,6 +131,10 @@
 	}
 	
 	function handleMinuteCreation() {
+		if (!currentAttachment) {
+			fireToastNotification("missing_attachment");			
+			return;
+		}
 		let fileID = 0;
 		coreUploadFile(currentAttachment, 0).then((response) => response.json().then(
 			function (fileIDs) {
@@ -192,7 +195,15 @@
 					caption: s,
 					iconDescription: "Fechar notificação"
 				}
-				clearForm();
+			break;
+			case "missing_attachment":
+				$notifications[l] = {
+					kind: "warning",
+					title: "Anexo faltante",
+					subtitle: "A minuta não pôde ser criada porque nenhum anexo foi indicado.",
+					caption: s,
+					iconDescription: "Fechar notificação"
+				}
 			break;
 			default:
 				$notifications[l] = {
@@ -269,6 +280,7 @@
 
 	.stickyToast {
 		position: sticky;
+		z-index: 1000;
 	}
 </style>
 
