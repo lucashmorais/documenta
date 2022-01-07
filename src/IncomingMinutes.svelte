@@ -113,6 +113,7 @@
 						console.log("[handleMinuteAssignment::response]: ", resp)
 						assignmentModalIsOpen = false;
 						unassignedMinutesPromise = getUnassignedMinutes()
+						assignedMinutesPromise = getAssignedMinutes()
 						resolve(resp)
 					})
 				)
