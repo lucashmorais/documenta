@@ -130,10 +130,11 @@
 					fileID,
 					true,
 					formState.protocol,
-					() => fireToastNotification("error")
+					() => fireToastNotification("error"),
+					null,
+					() => unassignedMinutesPromise = getUnassignedMinutes()
 				)
 				creationModalIsOpen = false;
-				unassignedMinutesPromise = getUnassignedMinutes()
 			}
 		))
 	}
