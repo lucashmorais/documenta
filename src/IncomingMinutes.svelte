@@ -151,6 +151,7 @@
 					() => fireToastNotification("error")
 				)
 				creationModalIsOpen = false;
+				minutesPromise = getMinutes()
 			}
 		))
 	}
