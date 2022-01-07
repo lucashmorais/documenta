@@ -107,6 +107,9 @@
 									<Button kind="tertiary" icon={DocumentAdd16} iconDescription="Gerar processo" on:click={createProcessCreationModalOpeningHandler(minute.ID)} />
 								{/if}
 							</div>
+							<Button style="margin-top: 0.5em;" kind="tertiary" iconDescription="Visualizar anexo" on:click={() => window.open('api/v1/file/' + minute.UserFileID, '_blank').focus()}>
+								Visualizar anexo
+							</Button>
 						</div>
 					</Tile>
 				</div>
