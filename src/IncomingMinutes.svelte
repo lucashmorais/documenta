@@ -3,6 +3,7 @@
 	import StatusBar from "./StatusBar.svelte"
 	import { writable } from 'svelte/store';
 	import SimpleConfirmationModal from "./SimpleConfirmationModal.svelte"
+	import MinuteBlock from "./MinuteBlock.svelte"
 	import {
 		getNameFromUser,
 		coreProcessUpdater,
@@ -26,7 +27,7 @@
 	import WatsonHealth3DCurveAutoColon16 from "carbon-icons-svelte/lib/WatsonHealth3DCurveAutoColon16";
 	import { getEndpointPrefix } from "./config-helper.js"
 	
-	export function getMinutes() {
+	export function getUnassignedMinutes() {
 		return new Promise((resolve) => {
 			fetch(getEndpointPrefix() + "/api/v1/minutes?unassigned=true&incoming=true").
 				then((response)=>response.json().
@@ -42,7 +43,25 @@
 			)
 		})
 	}
-	let minutesPromise = getMinutes()
+	let unassignedMinutesPromise = getUnassignedMinutes()
+	
+	export function getAssignedMinutes() {
+		return new Promise((resolve) => {
+			fetch(getEndpointPrefix() + "/api/v1/minutes?incoming=true").
+				then((response)=>response.json().
+					then(function (minutes) {
+						// console.log("[Minutes::updateMinutes::minutes]: ", minutes)
+						for (let i = 0; i < minutes.length; i++) {
+							let a = minutes[i]
+							console.log(a)
+						}
+						resolve(minutes)
+					}
+				)
+			)
+		})
+	}
+	let assignedMinutesPromise = getAssignedMinutes()
 	
 	let assignmentModalIsOpen = false;
 	let creationModalIsOpen = false;
@@ -93,7 +112,7 @@
 					then((resp) => {
 						console.log("[handleMinuteAssignment::response]: ", resp)
 						assignmentModalIsOpen = false;
-						minutesPromise = getMinutes()
+						unassignedMinutesPromise = getUnassignedMinutes()
 						resolve(resp)
 					})
 				)
@@ -151,7 +170,7 @@
 					() => fireToastNotification("error")
 				)
 				creationModalIsOpen = false;
-				minutesPromise = getMinutes()
+				unassignedMinutesPromise = getUnassignedMinutes()
 			}
 		))
 	}
@@ -232,37 +251,8 @@
 		outline-style: none;
 	}
 
-	
-	h2:not(.realh2) {
-		font-size: 20px;
-	}
-	
-	h3 {
-		font-size: 16px;
-		font-weight: bold;
-		margin-top: 1em;
-	}
-	
-	h3:first-child {
-		margin-top: 0;
-	}
-
 	.content1 {
 		margin: 0 5vw;
-	}
-	
-	.content2 {
-		display: grid;
-		grid-template-columns: 1fr 1fr 1fr 1fr;
-		grid-template-rows: 1fr 1fr 1fr;
-		gap: 2em 2em;
-		grid-auto-flow: row;
-		grid-template-areas: ". . . ." ". . . ." ". . . .";
-		margin-top: 2em;
-	}
-	
-	.element {
-		/* max-width: 200px; */
 	}
 								
 	.actionSet {
@@ -360,47 +350,19 @@
 		      {/each}
 		</div>
 	</div>
-	<h2>Minutas não alocadas</h2>
-		<div class="content2">
-			<div class="element">
-				<ClickableTile
-					style="height: 100%; display: flex; align-items: center; justify-content: center; flex-direction: column"
-					on:click={() => creationModalIsOpen = true}
-				>
-					<Add32 />
-					<p>Adicionar minuta</p>
-				</ClickableTile>
-			</div>
-			{#await minutesPromise then minutes}
-				{#each minutes as minute}
-					<div class="element">
-						<Tile>
-							<h3>
-								Autor
-							</h3>
-							<p>
-								{getNameFromUser(minute.User)}
-							</p>
-							<h3>
-								Centro
-							</h3>
-							<p>
-								{minute.Center.Name}
-							</p>
-							<h3>
-								Resumo breve
-							</h3>
-							<p>
-								{minute.Content}
-							</p>
-							
-							<div class="actionSet">
-								<Button kind="secondary" icon={WatsonHealth3DCurveAutoColon16} iconDescription="Atribuir" on:click={createMinuteAssignmentModalOpeningHandler(minute.ID)} />
-								<Button kind="tertiary" icon={DocumentAdd16} iconDescription="Gerar processo" on:click={createProcessCreationModalOpeningHandler(minute.ID)} />
-							</div>
-						</Tile>
-					</div>
-				{/each}
-			{/await}
-		</div>
+	<MinuteBlock
+		createMinuteAssignmentModalOpeningHandler={createMinuteAssignmentModalOpeningHandler}
+		createProcessCreationModalOpeningHandler={createProcessCreationModalOpeningHandler}
+		creationModalHandler={() => creationModalIsOpen = true}
+		minutesPromise={unassignedMinutesPromise}
+		blockTitle="Minutas esperando atribuição"
+	/>
+	<MinuteBlock
+		createMinuteAssignmentModalOpeningHandler={createMinuteAssignmentModalOpeningHandler}
+		createProcessCreationModalOpeningHandler={createProcessCreationModalOpeningHandler}
+		minutesPromise={assignedMinutesPromise}
+		blockTitle="Minutas atribuídas"
+		disableEditing={true}
+		enableProcessView={true}
+	/>
 </div>

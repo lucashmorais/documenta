@@ -64,13 +64,15 @@ func GetMinutes(c *fiber.Ctx) error {
 	userID := c.Query("userID")
 	incoming := c.Query("incoming")
 
-	if unassigned != "" {
+	if unassigned == "true" {
 		driver = driver.Where("process_id = 0")
 	} else if processID != "" {
 		i, err := strconv.Atoi(processID)
 		if err == nil {
 			driver = driver.Where("process_id = ?", i)
 		}
+	} else {
+		driver = driver.Where("process_id != 0")
 	}
 
 	if centerID != "" {
