@@ -5,62 +5,24 @@
 	import SimpleConfirmationModal from "./SimpleConfirmationModal.svelte"
 	import MinuteBlock from "./MinuteBlock.svelte"
 	import {
-		getNameFromUser,
 		coreProcessUpdater,
 		postNewMinute,
-		coreUploadFile
+		coreUploadFile,
+		getUnassignedMinutes,
+		getAssignedMinutes
 	} from "./utils.js"
 	import {
 		Dropdown,
 		TextInput,
-		Tile,
-		ClickableTile,
 		Modal,
 		DataTable,
 		DataTableSkeleton,
 		FileUploader,
-		ToastNotification,
-		Button
+		ToastNotification
 	} from "carbon-components-svelte";
-	import DocumentAdd16 from "carbon-icons-svelte/lib/DocumentAdd16";
-	import Add32 from "carbon-icons-svelte/lib/Add32";
-	import WatsonHealth3DCurveAutoColon16 from "carbon-icons-svelte/lib/WatsonHealth3DCurveAutoColon16";
 	import { getEndpointPrefix } from "./config-helper.js"
-	
-	export function getUnassignedMinutes() {
-		return new Promise((resolve) => {
-			fetch(getEndpointPrefix() + "/api/v1/minutes?unassigned=true&incoming=true").
-				then((response)=>response.json().
-					then(function (minutes) {
-						// console.log("[Minutes::updateMinutes::minutes]: ", minutes)
-						for (let i = 0; i < minutes.length; i++) {
-							let a = minutes[i]
-							console.log(a)
-						}
-						resolve(minutes)
-					}
-				)
-			)
-		})
-	}
+
 	let unassignedMinutesPromise = getUnassignedMinutes()
-	
-	export function getAssignedMinutes() {
-		return new Promise((resolve) => {
-			fetch(getEndpointPrefix() + "/api/v1/minutes?incoming=true").
-				then((response)=>response.json().
-					then(function (minutes) {
-						// console.log("[Minutes::updateMinutes::minutes]: ", minutes)
-						for (let i = 0; i < minutes.length; i++) {
-							let a = minutes[i]
-							console.log(a)
-						}
-						resolve(minutes)
-					}
-				)
-			)
-		})
-	}
 	let assignedMinutesPromise = getAssignedMinutes()
 	
 	let assignmentModalIsOpen = false;
@@ -357,10 +319,9 @@
 		creationModalHandler={() => creationModalIsOpen = true}
 		minutesPromise={unassignedMinutesPromise}
 		blockTitle="Minutas esperando atribuição"
+		enableMinutePlaceholder={false}
 	/>
 	<MinuteBlock
-		createMinuteAssignmentModalOpeningHandler={createMinuteAssignmentModalOpeningHandler}
-		createProcessCreationModalOpeningHandler={createProcessCreationModalOpeningHandler}
 		minutesPromise={assignedMinutesPromise}
 		blockTitle="Minutas atribuídas"
 		disableEditing={true}

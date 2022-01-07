@@ -17,7 +17,9 @@
 	export let creationModalHandler;
 	export let minutesPromise;
 	export let disableEditing = false;
+	export let disableTitleWrapper = false;
 	export let enableProcessView = false;
+	export let enableMinutePlaceholder = true;
 	export let blockTitle = "Minutas";
 </script>
 
@@ -42,7 +44,7 @@
 		grid-template-rows: 1fr;
 		gap: 2em 2em;
 		grid-auto-flow: row;
-		grid-template-areas: ". . . ." ". . . ." ". . . .";
+		grid-template-areas: ". . . .";
 		margin-top: 2em;
 	}
 								
@@ -51,7 +53,9 @@
 	}
 </style>
 
+{#if !disableTitleWrapper}
 <h2>{blockTitle}</h2>
+{/if}
 	<div class="content2">
 		{#if !disableEditing}
 			<div class="element">
@@ -65,6 +69,13 @@
 			</div>
 		{/if}
 		{#await minutesPromise then minutes}
+			{#if enableMinutePlaceholder && minutes.length == 0}
+				<div class="element">
+					<Tile>
+						Nenhuma minuta foi encontrada
+					</Tile>
+				</div>
+			{/if}
 			{#each minutes as minute}
 				<div class="element">
 					<Tile>
@@ -102,7 +113,7 @@
 									<Button kind="tertiary" iconDescription="Visualizar processo" on:click={() => window.open('document.html?id=' + minute.ProcessID, '_blank').focus()}>
 										Visualizar processo
 									</Button>
-								{:else}
+								{:else if !disableEditing}
 									<Button kind="secondary" icon={WatsonHealth3DCurveAutoColon16} iconDescription="Atribuir" on:click={createMinuteAssignmentModalOpeningHandler(minute.ID)} />
 									<Button kind="tertiary" icon={DocumentAdd16} iconDescription="Gerar processo" on:click={createProcessCreationModalOpeningHandler(minute.ID)} />
 								{/if}

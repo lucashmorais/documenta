@@ -243,3 +243,58 @@ export async function postNewMinute(
     dispatchMethod("minuteWasPosted");
   }
 }
+
+export function getUnassignedMinutes() {
+  return new Promise((resolve) => {
+    fetch(
+      getEndpointPrefix() + "/api/v1/minutes?unassigned=true&incoming=true"
+    ).then((response) =>
+      response.json().then(function (minutes) {
+        // console.log("[Minutes::updateMinutes::minutes]: ", minutes)
+        for (let i = 0; i < minutes.length; i++) {
+          let a = minutes[i];
+          console.log(a);
+        }
+        resolve(minutes);
+      })
+    );
+  });
+}
+
+export function getAssignedMinutes() {
+  return new Promise((resolve) => {
+    fetch(getEndpointPrefix() + "/api/v1/minutes?incoming=true").then(
+      (response) =>
+        response.json().then(function (minutes) {
+          // console.log("[Minutes::updateMinutes::minutes]: ", minutes)
+          for (let i = 0; i < minutes.length; i++) {
+            let a = minutes[i];
+            console.log(a);
+          }
+          resolve(minutes);
+        })
+    );
+  });
+}
+
+export function getIncomingMinutesOfProcess(processID) {
+  return new Promise((resolve) => {
+    fetch(
+      getEndpointPrefix() +
+        "/api/v1/minutes?incoming=true&processID=" +
+        processID
+    ).then((response) =>
+      response.json().then(function (minutes) {
+        console.log(
+          "[Minutes::getIncomingMinutesOfProcess::minutes]: ",
+          minutes
+        );
+        for (let i = 0; i < minutes.length; i++) {
+          let a = minutes[i];
+          console.log(a);
+        }
+        resolve(minutes);
+      })
+    );
+  });
+}

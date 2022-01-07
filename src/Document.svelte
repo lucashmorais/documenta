@@ -1,5 +1,5 @@
 <script>
-	import { getAvailableCenters, getCurrentUserPermissions, setProcessStatus, hasPermission } from "./utils.js"
+	import { getAvailableCenters, getCurrentUserPermissions, setProcessStatus, hasPermission, getIncomingMinutesOfProcess } from "./utils.js"
 	import InfoLine from "./InfoLine.svelte"
 	import CommentArea from "./CommentArea.svelte"
 	import RoutingModal from "./RoutingModal.svelte"
@@ -17,6 +17,7 @@
 	import Stamp32 from "carbon-icons-svelte/lib/Stamp32";
 	import Restart32 from "carbon-icons-svelte/lib/Restart32";
 	import Send32 from "carbon-icons-svelte/lib/Send32";
+	import MinuteBlock from "./MinuteBlock.svelte";
 	import {
 	Button,
 	Content,
@@ -437,6 +438,13 @@
 			{/await}
 		</Tile>
 
+		<h2>Minutas de entrada</h2>
+		<MinuteBlock
+			minutesPromise={getIncomingMinutesOfProcess(processID)}
+			disableTitleWrapper={true}
+			disableEditing={true}
+		/>
+
 		<h2>
 			<div>
 				Sequência de análise
@@ -457,7 +465,7 @@
 		<h2>Anexos</h2>
 		<AttachmentsArea bind:modRightsPromise processID={processID}/>
 
-		<h2>Minutas</h2>
+		<h2>Minutas de saída</h2>
 		<Minutes bind:modRightsPromise={modRightsPromise} processID={processID} bind:updateMinutes={coreRefreshMinutes} on:minuteWasPosted={refreshMinutes} availableCenters={availableCenters}/>
 
 		{#await modRightsPromise then modRights}
