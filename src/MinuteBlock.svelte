@@ -98,15 +98,20 @@
 							<p>
 								{minute.Description ? minute.Description : "Sem título"}
 							</p>
-								
-							{#if true}
+							{#if minute.InboundProtocol == ""}
 								<h3>
-									ID
+									Identificador interno
 								</h3>
 								<p>
 									{minute.ID}
 								</p>
-								
+							{:else}
+								<h3>
+									Protocolo
+								</h3>
+								<p>
+									{minute.InboundProtocol}
+								</p>
 							{/if}
 							<div class="actionSet">
 								{#if enableProcessView}

@@ -21,6 +21,20 @@
 		ToastNotification
 	} from "carbon-components-svelte";
 	import { getEndpointPrefix } from "./config-helper.js"
+	// import 'bytemd/dist/index.min.css'
+
+	// import { Editor, Viewer } from 'bytemd';
+	// import gfm from '@bytemd/plugin-gfm';
+
+	// let value;
+	// const plugins = [
+	// 	gfm(),
+	// 	// Add more plugins here
+	// ];
+
+	// function handleChange(e) {
+	// 	value = e.detail.value;
+	// }
 
 	let unassignedMinutesPromise = getUnassignedMinutes()
 	let assignedMinutesPromise = getAssignedMinutes()
@@ -329,3 +343,7 @@
 		enableProcessView={true}
 	/>
 </div>
+
+<!-- <template>
+	<Editor {value} {plugins} on:change={handleChange} />
+</template> -->
