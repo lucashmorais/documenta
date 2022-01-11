@@ -121,19 +121,56 @@
 
 	updateMinutes();
 	
-	function coreDownloadMinute(textContents) {
-	        var pdf = new jsPDF({
-			format: "a6",
-			orientation: "landscape",
-		});
+	function coreDownloadMinute(textContents, minute) {
+		let size = textContents.length;
+		let centerInitials = minute.Center.ShortName
+		let protocolCode = `${centerInitials} ${minute.ProtocolPrefix}${minute.OutboundProtocolNumber}/22`
+		let date = new Date()
+		let timeAndPlaceSignature = `São Paulo, ${date.getDate()}-${date.getMonth() + 1}-${date.getFullYear().toString().slice(2)}`
+
+		console.log("[coreDownloadMinute::size]: ", size)
+		if (size <= 512) {
+			var pdf = new jsPDF({
+				format: "a6",
+				orientation: "landscape",
+			});
+
+			pdf.setFont("Times", "Roman", "normal");
+			pdf.setFontSize(13);
+			pdf.text(protocolCode, 130, 10, {align: "right"});
+			pdf.text(textContents, 18, 35, {maxWidth: 112});
+			pdf.text(130, 95, timeAndPlaceSignature, {align: "right"});
+			pdf.save("minuta.pdf");	
+
+		} else if (size <= 1024) {
+			var pdf = new jsPDF({
+				format: "a6",
+				orientation: "landscape",
+			});
+
+			pdf.setFont("Times", "Roman", "normal");
+			pdf.setFontSize(10);
+			pdf.text(protocolCode, 130, 10, {align: "right"});
+			pdf.text(textContents, 18, 27, {maxWidth: 112});
+			pdf.text(130, 95, timeAndPlaceSignature, {align: "right"});
+			pdf.save("minuta.pdf");	
+
+		} else if (size <= 2048) {
+			var pdf = new jsPDF({
+				format: "a6",
+				orientation: "landscape",
+			});
+
+			pdf.setFont("Times", "Roman", "normal");
+			pdf.setFontSize(7);
+			pdf.text(protocolCode, 130, 10, {align: "right"});
+			pdf.text(textContents, 18, 25, {maxWidth: 112});
+			pdf.text(130, 95, timeAndPlaceSignature, {align: "right"});
+			pdf.save("minuta.pdf");	
+		}
+
 		// console.log("[generateExamplePDF::getFontSize()]: ", pdf.getFontSize())
 		// console.log("[generateExamplePDF::getFontList()]: ", pdf.getFontList())
-		pdf.setFont("Times", "Roman", "normal");
-		pdf.setFontSize(13);
-		pdf.text("sjc 15/20", 130, 10, {align: "right"});
-		pdf.text(textContents, 18, 35, {maxWidth: 112});
-		pdf.text(130, 95, "São Paulo, 26-8-20", {align: "right"});
-		pdf.save("hello_world.pdf");	
 	}
 
 	function generateExamplePDF() {
@@ -146,9 +183,9 @@
 		getMinuteVersions(minute.ID).then((versions) => {
 			let numVersions = versions.length;
 			if (numVersions > 0) {
-				coreDownloadMinute(versions[numVersions - 1].Content)
+				coreDownloadMinute(versions[numVersions - 1].Content, minute)
 			} else {
-				coreDownloadMinute(minute.Content)
+				coreDownloadMinute(minute.Content, minute)
 			}
 		})
 	}

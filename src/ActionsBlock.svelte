@@ -109,7 +109,7 @@
 <div class="flexPlacer">
 	<div class="cityName">
 		<div>{city}</div>
-		[Prot] <span class=protocolNumber on:click={() => protocolSelectionModalIsOpen = true}>{minuteOutboundProtocol}</span>
+		[Prot] <span class=protocolNumber on:click={() => protocolSelectionModalIsOpen = true}>{minuteOutboundProtocol}/22</span>
 		<!-- <div>[Ref] {referenceNumber} <RefKindTag /></div> -->
 	</div>
 	{#await modRightsPromise then canModify}

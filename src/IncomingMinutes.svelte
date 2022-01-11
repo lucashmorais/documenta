@@ -21,20 +21,46 @@
 		ToastNotification
 	} from "carbon-components-svelte";
 	import { getEndpointPrefix } from "./config-helper.js"
-	// import 'bytemd/dist/index.min.css'
+	
+// 	import { marked } from 'marked';
+// 	import { jsPDF } from "jspdf";
+// 	let source = `
+// # H1 heading
 
-	// import { Editor, Viewer } from 'bytemd';
-	// import gfm from '@bytemd/plugin-gfm';
+// ## H2 heading
 
-	// let value;
-	// const plugins = [
-	// 	gfm(),
-	// 	// Add more plugins here
-	// ];
+// ### H3 heading
 
-	// function handleChange(e) {
-	// 	value = e.detail.value;
-	// }
+// --------
+
+// **bold text**
+
+// *italicized text*
+
+// --------
+
+// 1. First item
+// 2. Second item
+// 3. Third item
+
+// - First item
+// - Second item
+// - Third item
+
+// [Svelte](https://svelte.dev/)
+// `;
+	// let htmlSource = marked(source);
+
+	// var doc = new jsPDF();
+	// doc.setFontSize(5);
+	
+	// doc.html(
+	// 	htmlSource,
+	// 	{
+	// 	callback: function (doc) {
+	// 		doc.save('a4.pdf');
+	// 	}
+	// });
 
 	let unassignedMinutesPromise = getUnassignedMinutes()
 	let assignedMinutesPromise = getAssignedMinutes()
@@ -251,6 +277,50 @@
 		position: sticky;
 		z-index: 1000;
 	}
+
+	.container{
+		background: #ff3e00d6;
+		padding:10px 30px;
+	}
+	.header {
+		height: 10vh;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+	}
+	.header-title {
+		margin: 0;
+		color:#fff;
+	}
+	.markdown-editor {
+		width: 100%;
+		display: flex;
+		align-items:flex-start;
+		justify-content: space-evenly;
+	}
+	.left-panel, .right-panel {
+		width: 50%;
+		border: solid 1px black;
+		height: 85vh;
+		background: #ffffff;
+	}
+	.right-panel {
+		overflow: auto;
+	}
+	.source {
+		border: none;
+		width: 100%;
+		height: 100%;
+		background: #001628;
+		color: #83ba52;
+	}
+	.source:focus {
+		outline: none;
+	}
+	.output {
+		width: 100%;
+		padding: 0 2em;
+	}
 </style>
 
 <Modal
@@ -344,6 +414,18 @@
 	/>
 </div>
 
-<!-- <template>
-	<Editor {value} {plugins} on:change={handleChange} />
-</template> -->
+<!-- <main class="container">
+	<header class="header">
+	    <h1 class="header-title">Svelte markdown editor</h1>
+	</header>
+	
+	<div class="markdown-editor">
+	    <div class="left-panel">
+		<textarea bind:value={source} class="source"></textarea>
+	    </div>
+	
+	    <div class="right-panel">
+		<div class="output">{@html htmlSource}</div>
+	    </div>
+	</div>
+</main> -->

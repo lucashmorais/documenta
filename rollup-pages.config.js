@@ -5,6 +5,7 @@ import json from "@rollup/plugin-json";
 import livereload from "rollup-plugin-livereload";
 import { terser } from "rollup-plugin-terser";
 import css from "rollup-plugin-css-only";
+import replace from "@rollup/plugin-replace";
 
 const inputs = [
   {
@@ -58,6 +59,8 @@ const inputs = [
     output: {
       file: "public/build/incomingMinutes.js",
       name: "incomingMinutes",
+      //       format: "iife",
+      inlineDynamicImports: true,
     },
     css: "incomingMinutes.css",
   },
@@ -143,6 +146,11 @@ function createPageRollupExport(inp) {
       }),
       commonjs(),
       json(),
+      //       replace({
+      //         "process.env.NODE_ENV": JSON.stringify(
+      //           production ? "production" : "development"
+      //         ),
+      //       }),
 
       // In dev mode, call `npm run start` once
       // the bundle has been generated
@@ -168,6 +176,7 @@ function createPageRollupExport(inp) {
 }
 
 //#region utilities
+// test
 
 function createPageInputByString(inp) {
   return `src/${inp}.js`;

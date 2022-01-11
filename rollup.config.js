@@ -5,6 +5,7 @@ import json from "@rollup/plugin-json";
 import livereload from "rollup-plugin-livereload";
 import { terser } from "rollup-plugin-terser";
 import css from "rollup-plugin-css-only";
+import replace from "@rollup/plugin-replace";
 
 // import cssbundle from 'rollup-plugin-css-bundle';
 // import postcss from 'postcss';
@@ -56,6 +57,11 @@ export default {
       css: (css) => {
         css.write("public/build/bundle.css");
       },
+    }),
+    replace({
+      "process.env.NODE_ENV": JSON.stringify(
+        production ? "production" : "development"
+      ),
     }),
 
     // If you have external dependencies installed from
