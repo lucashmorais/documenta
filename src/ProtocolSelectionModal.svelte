@@ -1,9 +1,12 @@
 <script>
 	import { Modal, ContentSwitcher, Switch, NumberInput } from "carbon-components-svelte";	
 	import { getEndpointPrefix } from "./config-helper.js";
+	import { createEventDispatcher } from 'svelte'
 	
 	export let open = false;
 	export let minuteID;
+
+	const dispatch = createEventDispatcher();
 	
 	function getClassTitle(pClass) {
 		return (pClass.prefix != '' ? pClass.prefix + ' ' : '') + `${pClass.base}`
@@ -98,8 +101,13 @@
 
 		open = false;
 		
-		return fetch(url, {
-			method: 'PATCH'
+		return new Promise((resolve) => {
+			fetch(url, {
+				method: 'PATCH'
+			}).then((response) => {
+				dispatch("protocolChange")			
+				resolve(response)
+			})
 		})
 	}
 </script>

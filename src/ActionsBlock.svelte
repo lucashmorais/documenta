@@ -103,6 +103,7 @@
 <ProtocolSelectionModal
 	minuteID={minuteID}
 	bind:open={protocolSelectionModalIsOpen}
+	on:protocolChange
 />
 
 <div class="flexPlacer">

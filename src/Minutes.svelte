@@ -180,6 +180,7 @@
 					minuteOutboundProtocol={`${minute.ProtocolPrefix}${minute.OutboundProtocolNumber}`}
 					on:deletionRequested={() => {deleteeIdentifier = minute.ID; deleteModalOpen = true}}
 					on:downloadRequested={() => {downloadMinute(minute)}}
+					on:protocolChange={updateMinutes}
 				/>
 			</Tile>
 			<Tile>
