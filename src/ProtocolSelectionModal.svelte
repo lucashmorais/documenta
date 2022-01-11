@@ -20,6 +20,7 @@
 	let coreNextProtocolNumber = 0;
 	let selectedProtocolNumber = 0;
 	let lastSelectedProtocolNumber = -1;
+	let mutex = false;
 
 	$: nextProtocolNumber = coreNextProtocolNumber > 0 ? coreNextProtocolNumber : protocolClasses[selectedIndex].base
 	$: if (nextProtocolNumber) {
@@ -66,6 +67,11 @@
 	}
 	
 	async function handleNumberChange() {
+		if (mutex) {
+			return
+		}
+		mutex = true;
+
 		let inverseSearch = lastSelectedProtocolNumber > selectedProtocolNumber
 		let nextAvailableProtocolNumber = await getNextOutboundProtocolNumber(selectedProtocolNumber, inverseSearch);
 
@@ -75,6 +81,8 @@
 		}
 
 		lastSelectedProtocolNumber = selectedProtocolNumber
+
+		mutex = false;
 	}
 </script>
 
