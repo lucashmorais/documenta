@@ -176,6 +176,8 @@
 					bind:modRightsPromise
 					city={minute.Center.Name}
 					editAction={setupHidingCallback}
+					minuteID={minute.ID}
+					minuteOutboundProtocol={`${minute.ProtocolPrefix}${minute.OutboundProtocolNumber}`}
 					on:deletionRequested={() => {deleteeIdentifier = minute.ID; deleteModalOpen = true}}
 					on:downloadRequested={() => {downloadMinute(minute)}}
 				/>

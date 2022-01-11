@@ -15,10 +15,11 @@
 
 	export let city;
 	export let referenceNumber = 111;
-	export let protocolNumber = "Por definir";
 	export let isOutReference = false;
 	export let editAction = () => {};
 	export let modRightsPromise;
+	export let minuteID;
+	export let minuteOutboundProtocol;
 
 	const dispatch = createEventDispatcher();
 
@@ -100,13 +101,14 @@
 </style>
 
 <ProtocolSelectionModal
+	minuteID={minuteID}
 	bind:open={protocolSelectionModalIsOpen}
 />
 
 <div class="flexPlacer">
 	<div class="cityName">
 		<div>{city}</div>
-		[Prot] <span class=protocolNumber on:click={() => protocolSelectionModalIsOpen = true}>{protocolNumber}</span>
+		[Prot] <span class=protocolNumber on:click={() => protocolSelectionModalIsOpen = true}>{minuteOutboundProtocol}</span>
 		<!-- <div>[Ref] {referenceNumber} <RefKindTag /></div> -->
 	</div>
 	{#await modRightsPromise then canModify}

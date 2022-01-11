@@ -3,6 +3,7 @@
 	import { getEndpointPrefix } from "./config-helper.js";
 	
 	export let open = false;
+	export let minuteID;
 	
 	function getClassTitle(pClass) {
 		return (pClass.prefix != '' ? pClass.prefix + ' ' : '') + `${pClass.base}`
@@ -35,7 +36,7 @@
 		let baseNumber = c.base
 		let maxElements = c.maxNumElements
 
-		let url = getEndpointPrefix() + `/api/v1/next_protocol_number?baseNumber=${baseNumber}&maxValues=${maxElements}` 
+		let url = getEndpointPrefix() + `/api/v1/next_outbound_protocol_number?baseNumber=${baseNumber}&maxValues=${maxElements}` 
 
 		if (prefix != '') {
 			url = url + `&prefix=${prefix}`
@@ -84,6 +85,23 @@
 
 		mutex = false;
 	}
+	
+	function handleSubmission() {
+		let c = protocolClasses[selectedIndex]
+		let url = getEndpointPrefix() + `/api/v1/minute_protocol_numbers/${minuteID}?outboundProtocolNumber=${selectedProtocolNumber}` 
+		
+		if (c.prefix != '') {
+			url = url + `&protocolPrefix=${c.prefix}`
+		}		
+
+		console.log("[ProtocolSelectionModal::handleSubmission::url]: ", url)
+
+		open = false;
+		
+		return fetch(url, {
+			method: 'PATCH'
+		})
+	}
 </script>
 
 <style>
@@ -99,7 +117,7 @@
   on:click:button--secondary
   on:open
   on:close
-  on:submit
+  on:submit={handleSubmission}
 >
 	<ContentSwitcher on:change={handleClassChange} bind:selectedIndex size="sm">
 		{#each protocolClasses as pClass}

@@ -25,10 +25,11 @@ type Minute struct {
 	IsIncoming  bool
 
 	//TODO: ENSURE THAT BOTH OF THESE ARE UNIQUE!
-	ProtocolPrefix        string
-	InboundProtocolNumber int64
-	InboundProtocol       string
-	OutboundProtocol      string
+	ProtocolPrefix         string
+	InboundProtocolNumber  int64
+	OutboundProtocolNumber int64
+	InboundProtocol        string
+	OutboundProtocol       string
 
 	UnixCreatedAt int64
 	UnixUpdatedAt int64
@@ -333,4 +334,114 @@ func GetNextInboundProtocolNumber(c *fiber.Ctx) error {
 	}
 
 	return c.JSON(firstAvailableValue)
+}
+
+func GetNextOutboundProtocolNumber(c *fiber.Ctx) error {
+	db := database.DBConn
+
+	prefix := c.Query("prefix")
+	inverseSearch := c.Query("inverseSearch")
+	baseNumber, _ := strconv.Atoi(c.Query("baseNumber"))
+	maxValues, _ := strconv.Atoi(c.Query("maxValues"))
+	startNumber := baseNumber
+
+	startNumberStr := c.Query("startNumber")
+
+	if startNumberStr != "" {
+		startNumber, _ = strconv.Atoi(startNumberStr)
+	}
+
+	step := 1
+	if inverseSearch != "" {
+		step = -1
+	}
+
+	firstAvailableValue := -1
+
+	for i := startNumber; i < baseNumber+maxValues && i >= baseNumber; i += step {
+		var minute Minute
+
+		if prefix != "" {
+			db.Where("protocol_prefix = ?", prefix).Where("outbound_protocol_number = ?", i).First(&minute)
+		} else {
+			db.Where("outbound_protocol_number = ?", i).First(&minute)
+		}
+
+		if minute.ID == 0 {
+			firstAvailableValue = i
+			break
+		}
+	}
+
+	return c.JSON(firstAvailableValue)
+}
+
+// Function that patches a Minute's protocol_prefix and outbound_protocol_number based on the ID provided in the PATCH request URL path
+func PatchMinuteProtocol(c *fiber.Ctx) error {
+	db := database.DBConn
+
+	minuteID, err := strconv.Atoi(c.Params("id"))
+
+	if err != nil {
+		return c.Status(400).JSON(&fiber.Map{
+			"success": false,
+			"cause":   "invalid_id",
+		})
+	}
+
+	minute := Minute{}
+
+	db.First(&minute, minuteID)
+
+	if minute.ID == 0 {
+		return c.Status(404).JSON(&fiber.Map{
+			"success": false,
+			"cause":   "not_found",
+		})
+	}
+
+	// fmt.Printf("[PatchMinuteProtocol]: Decoded patch request: %v\n", minute)
+
+	protocolPrefix := c.Query("protocolPrefix")
+
+	iCode := c.Query("inboundProtocolNumber")
+	oCode := c.Query("outboundProtocolNumber")
+
+	var inboundProtocolNumber int
+	var outboundProtocolNumber int
+
+	if iCode != "" {
+		inboundProtocolNumber, err = strconv.Atoi(c.Query("inboundProtocolNumber"))
+		if err != nil {
+			return c.Status(400).JSON(&fiber.Map{
+				"success": false,
+				"cause":   "invalid_inbound_protocol_number",
+			})
+		}
+	}
+
+	if oCode != "" {
+		outboundProtocolNumber, err = strconv.Atoi(c.Query("outboundProtocolNumber"))
+		if err != nil {
+			return c.Status(400).JSON(&fiber.Map{
+				"success": false,
+				"cause":   "invalid_outbound_protocol_number",
+			})
+		}
+	}
+
+	if iCode != "" {
+		minute.InboundProtocolNumber = int64(inboundProtocolNumber)
+	}
+	if oCode != "" {
+		minute.OutboundProtocolNumber = int64(outboundProtocolNumber)
+	}
+
+	minute.ProtocolPrefix = protocolPrefix
+
+	db.Save(&minute)
+
+	// fmt.Printf("[PatchMinuteProtocol]: Patched minute: %v\n", minute)
+
+	return c.JSON(minute)
 }
