@@ -26,6 +26,8 @@
 	let lastSelectedProtocolNumber = -1;
 	let mutex = false;
 
+	getNextOutboundProtocolNumber().then((n) => coreNextProtocolNumber = n)
+
 	$: nextProtocolNumber = coreNextProtocolNumber > 0 ? coreNextProtocolNumber : protocolClasses[selectedIndex].base
 	$: if (nextProtocolNumber) {
 		selectedProtocolNumber = nextProtocolNumber
