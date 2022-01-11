@@ -187,6 +187,8 @@ func setupRouter(app *fiber.App) {
 	protected.Delete("roles", controllers.DeleteRoles)
 
 	protected.Get("permissions", controllers.GetPermissions)
+
+	protected.Get("next_protocol_number", controllers.GetNextInboundProtocolNumber)
 }
 
 func addAuthRequestHeader(ctx *fiber.Ctx) error {

@@ -25,8 +25,10 @@ type Minute struct {
 	IsIncoming  bool
 
 	//TODO: ENSURE THAT BOTH OF THESE ARE UNIQUE!
-	InboundProtocol  string
-	OutboundProtocol string
+	ProtocolPrefix        string
+	InboundProtocolNumber int64
+	InboundProtocol       string
+	OutboundProtocol      string
 
 	UnixCreatedAt int64
 	UnixUpdatedAt int64
@@ -291,4 +293,44 @@ func PatchMinute(c *fiber.Ctx) error {
 	// fmt.Printf("[PatchMinute]: Patched minute: %v\n", minute)
 
 	return c.JSON(minute)
+}
+
+func GetNextInboundProtocolNumber(c *fiber.Ctx) error {
+	db := database.DBConn
+
+	prefix := c.Query("prefix")
+	inverseSearch := c.Query("inverseSearch")
+	baseNumber, _ := strconv.Atoi(c.Query("baseNumber"))
+	maxValues, _ := strconv.Atoi(c.Query("maxValues"))
+	startNumber := baseNumber
+
+	startNumberStr := c.Query("startNumber")
+
+	if startNumberStr != "" {
+		startNumber, _ = strconv.Atoi(startNumberStr)
+	}
+
+	step := 1
+	if inverseSearch != "" {
+		step = -1
+	}
+
+	firstAvailableValue := -1
+
+	for i := startNumber; i < baseNumber+maxValues && i >= baseNumber; i += step {
+		var minute Minute
+
+		if prefix != "" {
+			db.Where("protocol_prefix = ?", prefix).Where("inbound_protocol_number = ?", i).First(&minute)
+		} else {
+			db.Where("inbound_protocol_number = ?", i).First(&minute)
+		}
+
+		if minute.ID == 0 {
+			firstAvailableValue = i
+			break
+		}
+	}
+
+	return c.JSON(firstAvailableValue)
 }

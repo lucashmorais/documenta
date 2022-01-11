@@ -1,6 +1,7 @@
 <script>
 	import { getAttributes, toSVG } from '@carbon/icon-helpers';
 	import { Button, Tag } from "carbon-components-svelte";
+	import { Modal } from "carbon-components-svelte";	
 	import { onMount, createEventDispatcher } from 'svelte'
 
 	import editIcon from '@carbon/icons/es/edit/16';
@@ -8,11 +9,13 @@
 	import Edit16 from "carbon-icons-svelte/lib/Edit16";
 	import Delete16 from "carbon-icons-svelte/lib/Delete16";
 	import Download16 from "carbon-icons-svelte/lib/Download16";
-import RefKindTag from './RefKindTag.svelte';
+
+	// import RefKindTag from './RefKindTag.svelte';
+	import ProtocolSelectionModal from './ProtocolSelectionModal.svelte';
 
 	export let city;
 	export let referenceNumber = 111;
-	export let protocolNumber = 222;
+	export let protocolNumber = "Por definir";
 	export let isOutReference = false;
 	export let editAction = () => {};
 	export let modRightsPromise;
@@ -21,6 +24,7 @@ import RefKindTag from './RefKindTag.svelte';
 
 	let editIconNode;
 	let deleteIconNode;
+	let protocolSelectionModalIsOpen = false;
 
 	const editIconSVG = toSVG({
 		...editIcon,
@@ -88,13 +92,22 @@ import RefKindTag from './RefKindTag.svelte';
 		margin-top: 1em;
 		margin-right: 1em;
 	}
+	
+	.protocolNumber:hover {
+		cursor: pointer;
+		color: gray
+	}
 </style>
+
+<ProtocolSelectionModal
+	bind:open={protocolSelectionModalIsOpen}
+/>
 
 <div class="flexPlacer">
 	<div class="cityName">
 		<div>{city}</div>
-		<div>[Prot] {protocolNumber}</div>
-		<div>[Ref] {referenceNumber} <RefKindTag /></div>
+		[Prot] <span class=protocolNumber on:click={() => protocolSelectionModalIsOpen = true}>{protocolNumber}</span>
+		<!-- <div>[Ref] {referenceNumber} <RefKindTag /></div> -->
 	</div>
 	{#await modRightsPromise then canModify}
 		{#if canModify}
