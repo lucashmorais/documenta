@@ -104,7 +104,8 @@ func helloWorld(c *fiber.Ctx) error {
 
 func initDatabase() {
 	var err error
-	database.DBConn, err = gorm.Open("sqlite3", "info.db")
+	server_path := getServerPath()
+	database.DBConn, err = gorm.Open("sqlite3", server_path+"/info.db")
 	if err != nil {
 		panic("Failed to connect to the Database")
 	}
