@@ -9,6 +9,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/jinzhu/gorm"
 	"github.com/lucashmorais/documenta/database"
+	"github.com/lucashmorais/documenta/utils"
 )
 
 type FileBlob struct {
@@ -67,7 +68,8 @@ func NewFormFiles(c *fiber.Ctx) error {
 		uuid := uuid.New().String()
 		fmt.Println("[NewFormFiles]: ", file.Filename, file.Size, file.Header["Content-Type"][0])
 
-		err := c.SaveFile(file, fmt.Sprintf("./user_data/.%s", uuid))
+		base_path := utils.GetServerPath()
+		err := c.SaveFile(file, fmt.Sprintf(base_path + "/user_data/.%s", uuid))
 
 		if err != nil {
 			return err
@@ -111,8 +113,10 @@ func GetFile(c *fiber.Ctx) error {
 	id := c.Params("id")
 	db.Find(&file, id)
 
+	base_path := utils.GetServerPath()
+
 	// return c.Download("./user_data/."+file.UUID, file.Name)
-	return c.SendFile("./user_data/." + file.UUID)
+	return c.SendFile(base_path + "/user_data/." + file.UUID)
 }
 
 func DeleteFile(c *fiber.Ctx) error {
@@ -121,6 +125,8 @@ func DeleteFile(c *fiber.Ctx) error {
 	var file UserFile
 	db.First(&file, id)
 
+	base_path := utils.GetServerPath()
+
 	uuid := file.UUID
 	name := file.Name
 
@@ -128,7 +134,7 @@ func DeleteFile(c *fiber.Ctx) error {
 		return c.Status(500).SendString("File was not found")
 	}
 
-	os.Remove("./user_data/." + uuid)
+	os.Remove(base_path + "/user_data/." + uuid)
 	db.Delete(&file)
 
 	return c.SendString("The file " + name + " was successfully deleted")

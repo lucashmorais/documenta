@@ -2,14 +2,13 @@ package main
 
 import (
 	"fmt"
-	"os"
-	"path/filepath"
 	"time"
 
 	"github.com/golang-jwt/jwt"
 	"github.com/joho/godotenv"
 	"github.com/lucashmorais/documenta/controllers"
 	"github.com/lucashmorais/documenta/database"
+	"github.com/lucashmorais/documenta/utils"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/compress"
@@ -104,7 +103,7 @@ func helloWorld(c *fiber.Ctx) error {
 
 func initDatabase() {
 	var err error
-	server_path := getServerPath()
+	server_path := utils.GetServerPath()
 	database.DBConn, err = gorm.Open("sqlite3", server_path+"/info.db")
 	if err != nil {
 		panic("Failed to connect to the Database")
@@ -207,22 +206,8 @@ func addAuthRequestHeader(ctx *fiber.Ctx) error {
 	return nil
 }
 
-func getServerPath() string {
-	env_path, env_path_is_set := os.LookupEnv("DOCUMENTA_ROOT")
-	if env_path_is_set {
-		return env_path
-	} else {
-		ex, err := os.Executable()
-		if err != nil {
-			panic(err)
-		}
-		exPath := filepath.Dir(ex)
-		return exPath
-	}
-}
-
 func main() {
-	server_path := getServerPath()
+	server_path := utils.GetServerPath()
 	fmt.Printf("Server path: %s\n", server_path)
 	godotenv.Load(server_path + "/config/config.env")
 
